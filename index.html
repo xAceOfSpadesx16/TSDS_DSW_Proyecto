@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thrive Randomizer</title>
+  <meta name="description" content="Suite de herramientas de aleatorizacion: equipos, sorteos, ruleta y dados.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body class="app-shell">
+  <header class="app-header" role="banner">
+    <a href="index.html" class="app-header__title">Thrive Randomizer</a>
+    <nav class="app-nav" aria-label="Navegacion principal">
+      <a href="index.html" class="nav-link nav-link--active">Inicio</a>
+      <a href="teams.html" class="nav-link">Equipos</a>
+      <a href="weighted.html" class="nav-link">Sorteo</a>
+      <a href="roulette.html" class="nav-link">Ruleta</a>
+      <a href="dice.html" class="nav-link">Dados</a>
+    </nav>
+  </header>
+
+  <main class="app-body" role="main">
+    <section class="hero">
+      <h1 class="hero__title">Thrive Randomizer</h1>
+      <p class="hero__subtitle">
+        Suite de herramientas de aleatorizacion para equipos, sorteos ponderados,
+        ruletas interactivas y tiradas de dados. Selecciona un modulo para comenzar.
+      </p>
+    </section>
+
+    <section class="module-cards" aria-label="Modulos disponibles">
+      <a href="teams.html" class="module-card">
+        <i class="module-card__icon" aria-hidden="true">&#9878;</i>
+        <h2 class="module-card__title">Generador de Equipos</h2>
+        <p class="module-card__desc">
+          Ingresa participantes y divide automaticamente en equipos equilibrados.
+          Configura cantidad de grupos o tamano deseado.
+        </p>
+        <i class="module-card__arrow" aria-hidden="true">Abrir &rarr;</i>
+      </a>
+
+      <a href="weighted.html" class="module-card">
+        <i class="module-card__icon" aria-hidden="true">&#9879;</i>
+        <h2 class="module-card__title">Sorteo con Pesos</h2>
+        <p class="module-card__desc">
+          Realiza sorteos donde cada participante tiene una probabilidad proporcional
+          a su peso asignado.
+        </p>
+        <i class="module-card__arrow" aria-hidden="true">Abrir &rarr;</i>
+      </a>
+
+      <a href="roulette.html" class="module-card">
+        <i class="module-card__icon" aria-hidden="true">&#9881;</i>
+        <h2 class="module-card__title">Ruleta de Decisiones</h2>
+        <p class="module-card__desc">
+          Agrega opciones personalizadas y gira la ruleta para tomar decisiones
+          al azar de forma visual.
+        </p>
+        <i class="module-card__arrow" aria-hidden="true">Abrir &rarr;</i>
+      </a>
+
+      <a href="dice.html" class="module-card">
+        <i class="module-card__icon" aria-hidden="true">&#9854;</i>
+        <h2 class="module-card__title">Dados y Numeros</h2>
+        <p class="module-card__desc">
+          Tiradas de dados RPG con modificador y generador de numeros aleatorios
+          con opciones de rango y unicidad.
+        </p>
+        <i class="module-card__arrow" aria-hidden="true">Abrir &rarr;</i>
+      </a>
+    </section>
+  </main>
+</body>
+</html>

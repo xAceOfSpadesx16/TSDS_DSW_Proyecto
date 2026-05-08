@@ -1,0 +1,163 @@
+/* ============================================
+   Thrive Randomizer — Layout
+   ============================================ */
+
+/* App Shell — applied to <body> */
+.app-shell {
+  display: grid;
+  grid-template-rows: var(--header-height) 1fr;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-md);
+  background-color: var(--color-bg-alt);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.app-header__title {
+  font-size: var(--font-size-lg);
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
+}
+
+.app-header__title:visited {
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Navigation */
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.nav-link:hover {
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  text-decoration: none;
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+.nav-link--active {
+  color: var(--color-text-inverse);
+  background-color: var(--color-primary);
+}
+
+.nav-link--active:hover {
+  color: var(--color-text-inverse);
+  background-color: var(--color-primary-dark);
+}
+
+/* Main Content — base padding on all pages */
+.app-body {
+  padding: var(--space-lg);
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Page layout: applied to <main> on module pages (grid with sidebar) */
+.page-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+  max-width: var(--max-content);
+  margin: 0 auto;
+}
+
+/* Module Section — visible by default on dedicated pages */
+.module-section {
+  animation: fadeIn var(--transition-base);
+  min-width: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* History Aside — hidden on mobile by default */
+.app-aside {
+  display: none;
+}
+
+/* Desktop layout */
+@media (min-width: 1024px) {
+  .page-layout {
+    grid-template-columns: 1fr 280px;
+  }
+
+  .app-body {
+    padding: var(--space-xl);
+  }
+
+  .app-aside {
+    display: block;
+    background-color: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    overflow-y: auto;
+    max-height: calc(100vh - var(--header-height) - var(--space-xl) * 2);
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-xl));
+    align-self: start;
+  }
+}
+
+/* Mobile history toggle */
+@media (max-width: 1023px) {
+  .app-aside--mobile-open {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 60vh;
+    background-color: var(--color-bg-alt);
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-md);
+    overflow-y: auto;
+    z-index: 90;
+    animation: slideUp var(--transition-base);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+}

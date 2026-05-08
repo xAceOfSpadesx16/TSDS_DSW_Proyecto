@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thrive Randomizer — Dados y Numeros</title>
+  <meta name="description" content="Tiradas de dados RPG y generador de numeros aleatorios.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/modules.css">
+</head>
+<body class="app-shell">
+  <header class="app-header" role="banner">
+    <a href="index.html" class="app-header__title">Thrive Randomizer</a>
+    <nav class="app-nav" aria-label="Navegacion principal">
+      <a href="index.html" class="nav-link">Inicio</a>
+      <a href="teams.html" class="nav-link">Equipos</a>
+      <a href="weighted.html" class="nav-link">Sorteo</a>
+      <a href="roulette.html" class="nav-link">Ruleta</a>
+      <a href="dice.html" class="nav-link nav-link--active">Dados</a>
+    </nav>
+  </header>
+
+  <main class="app-body page-layout" role="main">
+    <section class="module-section" id="section-dice" aria-label="Dados y numeros">
+      <header class="module-header">
+        <h1 class="module-header__title">Dados y Numeros</h1>
+        <p class="module-header__desc">Tiradas de dados RPG y generador de numeros aleatorios.</p>
+      </header>
+
+      <menu class="tab-group" role="tablist" aria-label="Tipos de generador">
+        <button class="tab-group__btn" role="tab" aria-selected="true" id="subtab-rpg" aria-controls="panel-rpg">Dados RPG</button>
+        <button class="tab-group__btn" role="tab" aria-selected="false" id="subtab-numbers" aria-controls="panel-numbers">Generador de Numeros</button>
+      </menu>
+
+      <section id="panel-rpg" role="tabpanel" aria-labelledby="subtab-rpg" aria-hidden="false">
+        <fieldset>
+          <legend class="sr-only">Seleccion de dado</legend>
+          <menu class="dice-buttons" role="group" aria-label="Tipos de dado">
+            <button type="button" class="dice-btn" data-sides="4" aria-label="Dado de 4 caras">d4</button>
+            <button type="button" class="dice-btn" data-sides="6" aria-label="Dado de 6 caras">d6</button>
+            <button type="button" class="dice-btn" data-sides="8" aria-label="Dado de 8 caras">d8</button>
+            <button type="button" class="dice-btn" data-sides="12" aria-label="Dado de 12 caras">d12</button>
+            <button type="button" class="dice-btn" data-sides="20" aria-label="Dado de 20 caras">d20</button>
+          </menu>
+        </fieldset>
+
+        <p class="dice-modifier dice-modifier--spaced">
+          <label class="form-group__label" for="dice-modifier">Modificador</label>
+          <input class="form-input dice-modifier__input" type="number" id="dice-modifier" value="0" aria-label="Modificador numerico">
+        </p>
+
+        <output id="dice-result" class="dice-grid" aria-live="polite" aria-label="Resultado de la tirada"></output>
+        <output id="dice-total" class="dice-total-output" aria-live="polite"></output>
+      </section>
+
+      <section id="panel-numbers" role="tabpanel" aria-labelledby="subtab-numbers" aria-hidden="true">
+        <form class="number-gen-form" id="number-gen-form" aria-label="Generador de numeros">
+          <p class="form-group">
+            <label class="form-group__label" for="num-count">Cantidad</label>
+            <input class="form-input" type="number" id="num-count" min="1" value="5">
+          </p>
+          <p class="form-group">
+            <label class="form-group__label" for="num-min">Minimo</label>
+            <input class="form-input" type="number" id="num-min" value="1">
+          </p>
+          <p class="form-group">
+            <label class="form-group__label" for="num-max">Maximo</label>
+            <input class="form-input" type="number" id="num-max" value="50">
+          </p>
+          <p class="form-group">
+            <label class="toggle form-group--bottom-aligned">
+              <input type="checkbox" class="toggle__input" id="num-unique" checked>
+              <small>Sin repeticion</small>
+            </label>
+          </p>
+          <button type="submit" class="btn btn--primary form-group--bottom-aligned">Generar</button>
+        </form>
+
+        <output id="number-gen-result" class="number-grid number-gen-result--spaced" aria-live="polite" aria-label="Numeros generados"></output>
+      </section>
+    </section>
+
+    <aside class="app-aside" id="history-aside" aria-label="Historial de operaciones">
+      <header class="app-aside__header">
+        <h2 class="app-aside__title">Historial</h2>
+        <button type="button" class="btn btn--danger btn--sm" id="clear-history-btn" aria-label="Limpiar historial">Limpiar</button>
+      </header>
+      <ul id="history-list" aria-live="polite"></ul>
+    </aside>
+  </main>
+
+  <button type="button" class="history-toggle-btn" id="history-toggle-btn" aria-label="Abrir historial">&#9201;</button>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
