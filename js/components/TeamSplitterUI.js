@@ -37,8 +37,17 @@ export class TeamSplitterUI {
 
   _setMode(mode) {
     this.mode = mode;
-    this.modeCountBtn.className = `btn ${mode === 'count' ? 'btn--primary' : 'btn--secondary'} btn--sm`;
-    this.modeSizeBtn.className = `btn ${mode === 'size' ? 'btn--primary' : 'btn--secondary'} btn--sm`;
+    
+    const baseBtn = 'inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 disabled:opacity-50 px-2 py-1 text-xs'.split(' ');
+    const activeBtn = 'bg-primary text-white hover:bg-primary-dark hover:-translate-y-[1px] hover:shadow-md'.split(' ');
+    const inactiveBtn = 'bg-dark-surface text-light-text border border-dark-border hover:bg-dark-surface-hover hover:border-primary'.split(' ');
+
+    this.modeCountBtn.className = '';
+    this.modeCountBtn.classList.add(...baseBtn, ...(mode === 'count' ? activeBtn : inactiveBtn));
+    
+    this.modeSizeBtn.className = '';
+    this.modeSizeBtn.classList.add(...baseBtn, ...(mode === 'size' ? activeBtn : inactiveBtn));
+    
     this.modeCountBtn.setAttribute('aria-pressed', String(mode === 'count'));
     this.modeSizeBtn.setAttribute('aria-pressed', String(mode === 'size'));
     this.valueLabel.textContent = mode === 'count' ? 'Cantidad de grupos' : 'Tamaño de grupo';
@@ -53,10 +62,10 @@ export class TeamSplitterUI {
 
     this.exclusions.push([a, b]);
 
-    const chip = createElement('li', { className: 'chip' }, [
+    const chip = createElement('li', { className: 'inline-flex items-center gap-1 px-2 py-1 bg-dark-surface border border-dark-border rounded-full text-sm' }, [
       `${a} ≠ ${b}`,
       createElement('button', {
-        className: 'chip__remove',
+        className: 'w-4 h-4 flex items-center justify-center rounded-full text-xs text-light-muted hover:bg-danger hover:text-white',
         ariaLabel: `Eliminar exclusión ${a} y ${b}`,
         onClick: () => {
           this.exclusions = this.exclusions.filter(([x, y]) => !(x === a && y === b));
@@ -88,13 +97,13 @@ export class TeamSplitterUI {
 
     result.teams.forEach((team, i) => {
       const card = createElement('article', {
-        className: 'team-card team-card--colored animate-pulse',
-        cssVars: { '--team-color': result.colors[i] }
+        className: 'rounded-lg p-6 bg-dark-surface border-l-4 animate-fade-in',
+        style: `border-left-color: ${result.colors[i]}`
       }, [
         createElement('h3', {
-          className: 'team-card__title team-card__title--colored'
+          className: 'text-sm font-bold uppercase tracking-wider mb-2'
         }, [`Equipo ${i + 1}`]),
-        createElement('p', { className: 'team-card__members' }, [
+        createElement('p', { className: 'text-sm leading-relaxed' }, [
           team.join(', ')
         ])
       ]);
