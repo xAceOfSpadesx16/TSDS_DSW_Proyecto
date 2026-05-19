@@ -1,99 +1,150 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thrive Randomizer — Dados y Numeros</title>
   <meta name="description" content="Tiradas de dados RPG y generador de numeros aleatorios.">
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/modules.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/tailwind-config.js"></script>
+  <link rel="stylesheet" href="css/globals.css">
 </head>
-<body class="app-shell">
-  <header class="app-header" role="banner">
-    <a href="index.html" class="app-header__title">Thrive Randomizer</a>
-    <nav class="app-nav" aria-label="Navegacion principal">
-      <a href="index.html" class="nav-link">Inicio</a>
-      <a href="teams.html" class="nav-link">Equipos</a>
-      <a href="weighted.html" class="nav-link">Sorteo</a>
-      <a href="roulette.html" class="nav-link">Ruleta</a>
-      <a href="dice.html" class="nav-link nav-link--active">Dados</a>
+
+<body
+  class="min-h-screen grid grid-rows-[3.5rem_1fr] bg-dark-bg text-light-text font-sans antialiased selection:bg-primary selection:text-light-text">
+  <header class="flex items-center justify-between px-4 bg-dark-bg-alt border-b border-dark-border sticky top-0 z-50"
+    role="banner">
+    <a href="index.html"
+      class="text-lg font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent hover:no-underline">Thrive
+      Randomizer</a>
+    <nav class="flex items-center gap-1 overflow-x-auto" aria-label="Navegacion principal">
+      <a href="index.html"
+        class="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light text-light-muted hover:text-light-text hover:bg-dark-surface hover:no-underline">Inicio</a>
+      <a href="teams.html"
+        class="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light text-light-muted hover:text-light-text hover:bg-dark-surface hover:no-underline">Equipos</a>
+      <a href="weighted.html"
+        class="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light text-light-muted hover:text-light-text hover:bg-dark-surface hover:no-underline">Sorteo</a>
+      <a href="roulette.html"
+        class="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light text-light-muted hover:text-light-text hover:bg-dark-surface hover:no-underline">Ruleta</a>
+      <a href="dice.html"
+        class="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light text-light-inverse bg-primary hover:text-light-inverse hover:bg-primary-dark">Dados</a>
     </nav>
   </header>
 
-  <main class="app-body page-layout" role="main">
-    <section class="module-section" id="section-dice" aria-label="Dados y numeros">
-      <header class="module-header">
-        <h1 class="module-header__title">Dados y Numeros</h1>
-        <p class="module-header__desc">Tiradas de dados RPG y generador de numeros aleatorios.</p>
+  <main class="p-6 w-full mx-auto grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 max-w-[1200px]" role="main">
+    <section class="min-w-0 animate-fade-in" id="section-dice" aria-label="Dados y numeros">
+      <header class="mb-8">
+        <h1 class="text-2xl font-bold mb-2">Dados y Numeros</h1>
+        <p class="text-sm text-light-muted">Tiradas de dados RPG y generador de numeros aleatorios.</p>
       </header>
 
-      <menu class="tab-group" role="tablist" aria-label="Tipos de generador">
-        <button class="tab-group__btn" role="tab" aria-selected="true" id="subtab-rpg" aria-controls="panel-rpg">Dados RPG</button>
-        <button class="tab-group__btn" role="tab" aria-selected="false" id="subtab-numbers" aria-controls="panel-numbers">Generador de Numeros</button>
+      <menu class="flex gap-1 mb-6 bg-dark-surface p-1 rounded-md" role="tablist" aria-label="Tipos de generador">
+        <button
+          class="flex-1 p-2 text-center text-sm font-semibold rounded-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-light data-[state=active]:bg-primary data-[state=active]:text-white text-light-muted aria-[selected=true]:bg-primary aria-[selected=true]:text-white"
+          role="tab" aria-selected="true" id="subtab-rpg" aria-controls="panel-rpg">Dados RPG</button>
+        <button
+          class="flex-1 p-2 text-center text-sm font-semibold rounded-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-light text-light-muted aria-[selected=true]:bg-primary aria-[selected=true]:text-white"
+          role="tab" aria-selected="false" id="subtab-numbers" aria-controls="panel-numbers">Generador de
+          Numeros</button>
       </menu>
 
       <section id="panel-rpg" role="tabpanel" aria-labelledby="subtab-rpg" aria-hidden="false">
         <fieldset>
           <legend class="sr-only">Seleccion de dado</legend>
-          <menu class="dice-buttons" role="group" aria-label="Tipos de dado">
-            <button type="button" class="dice-btn" data-sides="4" aria-label="Dado de 4 caras">d4</button>
-            <button type="button" class="dice-btn" data-sides="6" aria-label="Dado de 6 caras">d6</button>
-            <button type="button" class="dice-btn" data-sides="8" aria-label="Dado de 8 caras">d8</button>
-            <button type="button" class="dice-btn" data-sides="12" aria-label="Dado de 12 caras">d12</button>
-            <button type="button" class="dice-btn" data-sides="20" aria-label="Dado de 20 caras">d20</button>
+          <menu class="flex flex-wrap gap-4 justify-center mb-8" role="group" aria-label="Tipos de dado">
+            <button type="button"
+              class="w-16 h-16 bg-dark-surface border-2 border-dark-border rounded-xl font-mono text-xl font-bold hover:border-primary hover:text-primary-light transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-light dice-btn"
+              data-sides="4" aria-label="Dado de 4 caras">d4</button>
+            <button type="button"
+              class="w-16 h-16 bg-dark-surface border-2 border-dark-border rounded-xl font-mono text-xl font-bold hover:border-primary hover:text-primary-light transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-light dice-btn"
+              data-sides="6" aria-label="Dado de 6 caras">d6</button>
+            <button type="button"
+              class="w-16 h-16 bg-dark-surface border-2 border-dark-border rounded-xl font-mono text-xl font-bold hover:border-primary hover:text-primary-light transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-light dice-btn"
+              data-sides="8" aria-label="Dado de 8 caras">d8</button>
+            <button type="button"
+              class="w-16 h-16 bg-dark-surface border-2 border-dark-border rounded-xl font-mono text-xl font-bold hover:border-primary hover:text-primary-light transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-light dice-btn"
+              data-sides="12" aria-label="Dado de 12 caras">d12</button>
+            <button type="button"
+              class="w-16 h-16 bg-dark-surface border-2 border-dark-border rounded-xl font-mono text-xl font-bold hover:border-primary hover:text-primary-light transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-light dice-btn"
+              data-sides="20" aria-label="Dado de 20 caras">d20</button>
           </menu>
         </fieldset>
 
-        <p class="dice-modifier dice-modifier--spaced">
-          <label class="form-group__label" for="dice-modifier">Modificador</label>
-          <input class="form-input dice-modifier__input" type="number" id="dice-modifier" value="0" aria-label="Modificador numerico">
+        <p class="flex items-center gap-4 justify-center mb-8">
+          <label class="text-sm font-semibold text-light-muted" for="dice-modifier">Modificador</label>
+          <input
+            class="w-[80px] px-4 py-2 bg-dark-surface border border-dark-border rounded-md text-light-text text-center transition-colors focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25"
+            type="number" id="dice-modifier" value="0" aria-label="Modificador numerico">
         </p>
 
-        <output id="dice-result" class="dice-grid" aria-live="polite" aria-label="Resultado de la tirada"></output>
-        <output id="dice-total" class="dice-total-output" aria-live="polite"></output>
+        <output id="dice-result" class="flex flex-wrap gap-4 justify-center" aria-live="polite"
+          aria-label="Resultado de la tirada"></output>
+        <output id="dice-total"
+          class="block text-center text-3xl font-extrabold mt-8 bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent"
+          aria-live="polite"></output>
       </section>
 
       <section id="panel-numbers" role="tabpanel" aria-labelledby="subtab-numbers" aria-hidden="true">
-        <form class="number-gen-form" id="number-gen-form" aria-label="Generador de numeros">
-          <p class="form-group">
-            <label class="form-group__label" for="num-count">Cantidad</label>
-            <input class="form-input" type="number" id="num-count" min="1" value="5">
+        <form class="flex flex-wrap gap-4 items-end mb-8 bg-dark-surface p-6 rounded-xl border border-dark-border"
+          id="number-gen-form" aria-label="Generador de numeros">
+          <p class="flex flex-col gap-1 flex-1 min-w-[100px]">
+            <label class="text-sm font-semibold text-light-muted" for="num-count">Cantidad</label>
+            <input
+              class="px-4 py-2 bg-dark-bg border border-dark-border rounded-md text-light-text transition-colors focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25"
+              type="number" id="num-count" min="1" value="5">
           </p>
-          <p class="form-group">
-            <label class="form-group__label" for="num-min">Minimo</label>
-            <input class="form-input" type="number" id="num-min" value="1">
+          <p class="flex flex-col gap-1 flex-1 min-w-[100px]">
+            <label class="text-sm font-semibold text-light-muted" for="num-min">Minimo</label>
+            <input
+              class="px-4 py-2 bg-dark-bg border border-dark-border rounded-md text-light-text transition-colors focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25"
+              type="number" id="num-min" value="1">
           </p>
-          <p class="form-group">
-            <label class="form-group__label" for="num-max">Maximo</label>
-            <input class="form-input" type="number" id="num-max" value="50">
+          <p class="flex flex-col gap-1 flex-1 min-w-[100px]">
+            <label class="text-sm font-semibold text-light-muted" for="num-max">Maximo</label>
+            <input
+              class="px-4 py-2 bg-dark-bg border border-dark-border rounded-md text-light-text transition-colors focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25"
+              type="number" id="num-max" value="50">
           </p>
-          <p class="form-group">
-            <label class="toggle form-group--bottom-aligned">
-              <input type="checkbox" class="toggle__input" id="num-unique" checked>
-              <small>Sin repeticion</small>
+          <p class="flex flex-col gap-1 pb-[0.6rem]">
+            <label class="inline-flex items-center gap-2 cursor-pointer text-sm h-[38px]">
+              <div class="relative">
+                <input type="checkbox" class="sr-only peer" id="num-unique" checked>
+                <div class="w-10 h-5 bg-dark-border rounded-full peer peer-checked:bg-primary transition-colors"></div>
+                <div
+                  class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5">
+                </div>
+              </div>
+              <small class="text-sm font-semibold">Sin repeticion</small>
             </label>
           </p>
-          <button type="submit" class="btn btn--primary form-group--bottom-aligned">Generar</button>
+          <button type="submit"
+            class="inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 disabled:opacity-50 px-6 py-2 h-[42px] bg-primary text-white hover:bg-primary-dark hover:-translate-y-[1px] hover:shadow-md whitespace-nowrap">Generar</button>
         </form>
 
-        <output id="number-gen-result" class="number-grid number-gen-result--spaced" aria-live="polite" aria-label="Numeros generados"></output>
+        <output id="number-gen-result" class="flex flex-wrap gap-3 justify-center mt-8" aria-live="polite"
+          aria-label="Numeros generados"></output>
       </section>
     </section>
 
-    <aside class="app-aside" id="history-aside" aria-label="Historial de operaciones">
-      <header class="app-aside__header">
-        <h2 class="app-aside__title">Historial</h2>
-        <button type="button" class="btn btn--danger btn--sm" id="clear-history-btn" aria-label="Limpiar historial">Limpiar</button>
+    <aside
+      class="hidden lg:block bg-dark-bg-alt border border-dark-border rounded-lg p-6 overflow-y-auto max-h-[calc(100vh-3.5rem-3rem)] sticky top-[calc(3.5rem+1.5rem)] self-start"
+      id="history-aside" aria-label="Historial de operaciones">
+      <header class="flex justify-between items-center mb-4">
+        <h2 class="font-bold">Historial</h2>
+        <button type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 disabled:opacity-50 px-2 py-1 text-xs bg-danger text-white hover:bg-danger-dark"
+          id="clear-history-btn" aria-label="Limpiar historial">Limpiar</button>
       </header>
-      <ul id="history-list" aria-live="polite"></ul>
+      <ul id="history-list" aria-live="polite" class="divide-y divide-dark-border"></ul>
     </aside>
   </main>
 
-  <button type="button" class="history-toggle-btn" id="history-toggle-btn" aria-label="Abrir historial">&#9201;</button>
+  <button type="button"
+    class="fixed bottom-4 right-4 w-12 h-12 bg-primary rounded-full text-white text-xl z-[100] lg:hidden flex items-center justify-center shadow-lg hover:bg-primary-dark hover:-translate-y-1 transition-all"
+    id="history-toggle-btn" aria-label="Abrir historial">&#9201;</button>
 
   <script type="module" src="js/app.js"></script>
 </body>
+
 </html>

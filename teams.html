@@ -1,94 +1,136 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thrive Randomizer — Generador de Equipos</title>
   <meta name="description" content="Divide participantes en equipos equilibrados de forma aleatoria.">
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/modules.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/tailwind-config.js"></script>
+  <link rel="stylesheet" href="css/globals.css">
 </head>
-<body class="app-shell">
-  <header class="app-header" role="banner">
-    <a href="index.html" class="app-header__title">Thrive Randomizer</a>
-    <nav class="app-nav" aria-label="Navegacion principal">
-      <a href="index.html" class="nav-link">Inicio</a>
-      <a href="teams.html" class="nav-link nav-link--active">Equipos</a>
-      <a href="weighted.html" class="nav-link">Sorteo</a>
-      <a href="roulette.html" class="nav-link">Ruleta</a>
-      <a href="dice.html" class="nav-link">Dados</a>
+
+<body
+  class="min-h-screen grid grid-rows-[3.5rem_1fr] bg-dark-bg text-light-text font-sans antialiased selection:bg-primary selection:text-light-text">
+  <header class="flex items-center justify-between px-4 bg-dark-bg-alt border-b border-dark-border sticky top-0 z-50"
+    role="banner">
+    <a href="index.html"
+      class="text-lg font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent hover:no-underline">Thrive
+      Randomizer</a>
+    <nav class="flex items-center gap-1 overflow-x-auto" aria-label="Navegacion principal">
+      <a href="index.html"
+        class="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light text-light-muted hover:text-light-text hover:bg-dark-surface hover:no-underline">Inicio</a>
+      <a href="teams.html"
+        class="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light text-light-inverse bg-primary hover:text-light-inverse hover:bg-primary-dark">Equipos</a>
+      <a href="weighted.html"
+        class="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light text-light-muted hover:text-light-text hover:bg-dark-surface hover:no-underline">Sorteo</a>
+      <a href="roulette.html"
+        class="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light text-light-muted hover:text-light-text hover:bg-dark-surface hover:no-underline">Ruleta</a>
+      <a href="dice.html"
+        class="inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light text-light-muted hover:text-light-text hover:bg-dark-surface hover:no-underline">Dados</a>
     </nav>
   </header>
 
-  <main class="app-body page-layout" role="main">
-    <section class="module-section" id="section-teams" aria-label="Generador de equipos">
-      <header class="module-header">
-        <h1 class="module-header__title">Generador de Equipos</h1>
-        <p class="module-header__desc">Ingresa participantes y define como agruparlos.</p>
+  <main class="p-6 w-full mx-auto grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 max-w-[1200px]" role="main">
+    <section class="min-w-0 animate-fade-in" id="section-teams" aria-label="Generador de equipos">
+      <header class="mb-8">
+        <h1 class="text-2xl font-bold mb-2">Generador de Equipos</h1>
+        <p class="text-sm text-light-muted">Ingresa participantes y define como agruparlos.</p>
       </header>
 
-      <form class="team-splitter__form" id="team-form" aria-label="Formulario de generacion de equipos">
-        <p class="form-group">
-          <label class="form-group__label" for="team-participants">Participantes (uno por linea)</label>
-          <textarea class="form-textarea" id="team-participants" rows="6" placeholder="Ana&#10;Carlos&#10;Maria&#10;..." aria-required="true"></textarea>
+      <form class="space-y-6" id="team-form" aria-label="Formulario de generacion de equipos">
+        <p class="flex flex-col gap-1">
+          <label class="text-sm font-semibold text-light-muted" for="team-participants">Participantes (uno por
+            linea)</label>
+          <textarea
+            class="px-4 py-2 bg-dark-surface border border-dark-border rounded-md text-light-text transition-colors focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 resize-y min-h-[120px]"
+            id="team-participants" rows="6" placeholder="Ana&#10;Carlos&#10;Maria&#10;..."
+            aria-required="true"></textarea>
         </p>
 
-        <fieldset class="team-splitter__options">
+        <fieldset class="space-y-4">
           <legend class="sr-only">Modo de agrupacion</legend>
 
-          <p class="form-group">
-            <label class="form-group__label">Agrupar por</label>
-            <menu class="team-splitter__mode-toggle">
-              <li><button type="button" class="btn btn--primary btn--sm" id="mode-group-count" aria-pressed="true">
+          <p class="flex flex-col gap-1">
+            <label class="text-sm font-semibold text-light-muted">Agrupar por</label>
+          <menu class="flex gap-2">
+            <li><button type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 disabled:opacity-50 px-2 py-1 text-xs bg-primary text-white hover:bg-primary-dark hover:-translate-y-[1px] hover:shadow-md is-active-mode"
+                id="mode-group-count" aria-pressed="true">
                 Cantidad de grupos
               </button></li>
-              <li><button type="button" class="btn btn--secondary btn--sm" id="mode-group-size" aria-pressed="false">
+            <li><button type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 disabled:opacity-50 px-2 py-1 text-xs bg-dark-surface text-light-text border border-dark-border hover:bg-dark-surface-hover hover:border-primary"
+                id="mode-group-size" aria-pressed="false">
                 Tamano de grupo
               </button></li>
-            </menu>
+          </menu>
           </p>
 
-          <p class="form-group">
-            <label class="form-group__label" for="team-value" id="team-value-label">Cantidad de grupos</label>
-            <input class="form-input" type="number" id="team-value" min="2" value="2" aria-labelledby="team-value-label">
+          <p class="flex flex-col gap-1">
+            <label class="text-sm font-semibold text-light-muted" for="team-value" id="team-value-label">Cantidad de
+              grupos</label>
+            <input
+              class="px-4 py-2 bg-dark-surface border border-dark-border rounded-md text-light-text transition-colors focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 max-w-[120px]"
+              type="number" id="team-value" min="2" value="2" aria-labelledby="team-value-label">
           </p>
         </fieldset>
 
-        <details class="collapsible">
-          <summary class="collapsible__trigger">Reglas avanzadas</summary>
-          <p class="team-splitter__exclusion-desc">
-            Agrega pares de participantes que <strong>no</strong> deben estar en el mismo equipo.
-          </p>
-          <p class="add-item-form" id="exclusion-form">
-            <input class="form-input add-item-form__input" type="text" id="exclusion-a" placeholder="Participante A" aria-label="Participante A de la exclusion">
-            <input class="form-input add-item-form__input" type="text" id="exclusion-b" placeholder="Participante B" aria-label="Participante B de la exclusion">
-            <button type="button" class="btn btn--secondary btn--sm" id="add-exclusion-btn" aria-label="Agregar regla de exclusion">+ Agregar</button>
-          </p>
-          <ul class="chip-list" id="exclusion-list" aria-label="Reglas de exclusion activas"></ul>
+        <details class="border border-dark-border rounded-md overflow-hidden group">
+          <summary
+            class="w-full p-4 text-left font-semibold text-sm bg-dark-surface flex justify-between items-center cursor-pointer">
+            Reglas avanzadas
+            <span class="transition-transform group-open:rotate-90">▸</span>
+          </summary>
+          <div class="p-4 space-y-4">
+            <p class="text-sm">
+              Agrega pares de participantes que <strong>no</strong> deben estar en el mismo equipo.
+            </p>
+            <p class="flex flex-wrap gap-2 items-center" id="exclusion-form">
+              <input
+                class="flex-1 min-w-[120px] px-4 py-2 bg-dark-surface border border-dark-border rounded-md text-light-text transition-colors focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25"
+                type="text" id="exclusion-a" placeholder="Participante A" aria-label="Participante A de la exclusion">
+              <input
+                class="flex-1 min-w-[120px] px-4 py-2 bg-dark-surface border border-dark-border rounded-md text-light-text transition-colors focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25"
+                type="text" id="exclusion-b" placeholder="Participante B" aria-label="Participante B de la exclusion">
+              <button type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 disabled:opacity-50 px-2 py-1 text-xs bg-dark-surface text-light-text border border-dark-border hover:bg-dark-surface-hover hover:border-primary"
+                id="add-exclusion-btn" aria-label="Agregar regla de exclusion">+ Agregar</button>
+            </p>
+            <ul class="flex flex-wrap gap-2" id="exclusion-list" aria-label="Reglas de exclusion activas"></ul>
+          </div>
         </details>
 
         <p>
-          <button type="submit" class="btn btn--primary btn--lg btn--block">Generar Equipos</button>
+          <button type="submit"
+            class="inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 disabled:opacity-50 px-8 py-4 text-lg w-full bg-primary text-white hover:bg-primary-dark hover:-translate-y-[1px] hover:shadow-md">Generar
+            Equipos</button>
         </p>
       </form>
 
-      <output id="team-results" class="results-grid" aria-live="polite" aria-label="Equipos generados"></output>
+      <output id="team-results" class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4 mt-8"
+        aria-live="polite" aria-label="Equipos generados"></output>
     </section>
 
-    <aside class="app-aside" id="history-aside" aria-label="Historial de operaciones">
-      <header class="app-aside__header">
-        <h2 class="app-aside__title">Historial</h2>
-        <button type="button" class="btn btn--danger btn--sm" id="clear-history-btn" aria-label="Limpiar historial">Limpiar</button>
+    <aside
+      class="hidden lg:block bg-dark-bg-alt border border-dark-border rounded-lg p-6 overflow-y-auto max-h-[calc(100vh-3.5rem-3rem)] sticky top-[calc(3.5rem+1.5rem)] self-start"
+      id="history-aside" aria-label="Historial de operaciones">
+      <header class="flex justify-between items-center mb-4">
+        <h2 class="font-bold">Historial</h2>
+        <button type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 disabled:opacity-50 px-2 py-1 text-xs bg-danger text-white hover:bg-danger-dark"
+          id="clear-history-btn" aria-label="Limpiar historial">Limpiar</button>
       </header>
-      <ul id="history-list" aria-live="polite"></ul>
+      <ul id="history-list" aria-live="polite" class="divide-y divide-dark-border"></ul>
     </aside>
   </main>
 
-  <button type="button" class="history-toggle-btn" id="history-toggle-btn" aria-label="Abrir historial">&#9201;</button>
+  <button type="button"
+    class="fixed bottom-4 right-4 w-12 h-12 bg-primary rounded-full text-white text-xl z-[100] lg:hidden flex items-center justify-center shadow-lg hover:bg-primary-dark hover:-translate-y-1 transition-all"
+    id="history-toggle-btn" aria-label="Abrir historial">&#9201;</button>
 
   <script type="module" src="js/app.js"></script>
 </body>
+
 </html>

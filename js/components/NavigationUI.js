@@ -14,8 +14,18 @@ export class NavigationUI {
     const currentPath = window.location.pathname;
     this.navLinks.forEach((link) => {
       const linkPath = new URL(link.href, window.location.origin).pathname;
-      const isActive = currentPath === linkPath;
-      link.classList.toggle('nav-link--active', isActive);
+      const isActive = currentPath === linkPath || (currentPath.endsWith('/') && linkPath.endsWith('index.html'));
+      
+      const activeClasses = ['text-light-inverse', 'bg-primary', 'hover:text-light-inverse', 'hover:bg-primary-dark'];
+      const inactiveClasses = ['text-light-muted', 'hover:text-light-text', 'hover:bg-dark-surface', 'hover:no-underline'];
+      
+      if (isActive) {
+        link.classList.remove(...inactiveClasses);
+        link.classList.add(...activeClasses);
+      } else {
+        link.classList.remove(...activeClasses);
+        link.classList.add(...inactiveClasses);
+      }
     });
   }
 

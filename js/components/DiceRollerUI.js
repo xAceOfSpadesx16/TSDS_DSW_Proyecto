@@ -58,7 +58,7 @@ export class DiceRollerUI {
     clearContainer(this.diceTotal);
 
     const face = createElement('output', {
-      className: 'dice-face dice-face--rolling',
+      className: 'w-20 h-20 flex items-center justify-center bg-dark-surface border-2 border-dark-border rounded-xl font-mono text-3xl font-extrabold animate-dice-shake',
       ariaLabel: `Tirando d${sides}`
     }, ['?']);
     this.diceResult.appendChild(face);
@@ -74,15 +74,15 @@ export class DiceRollerUI {
       } else {
         const result = this.service.rollDice(sides, modifier);
         face.textContent = result.rolls[0];
-        face.classList.remove('dice-face--rolling');
-        face.classList.add('animate-pulse');
+        face.classList.remove('animate-dice-shake');
+        face.classList.add('animate-fade-in');
 
         let totalText = `${result.total}`;
         if (modifier > 0) totalText += ` (${result.rolls[0]} + ${modifier})`;
         else if (modifier < 0) totalText += ` (${result.rolls[0]} - ${Math.abs(modifier)})`;
 
         const totalDisplay = createElement('p', {
-          className: 'dice-total-display'
+          className: 'text-sm text-light-muted mt-2'
         }, [`Total: ${totalText}`]);
         this.diceTotal.appendChild(totalDisplay);
 
@@ -115,7 +115,7 @@ export class DiceRollerUI {
 
       numbers.forEach((n) => {
         this.numberGenResult.appendChild(
-          createElement('data', { className: 'number-pill animate-pulse', value: String(n) }, [String(n)])
+          createElement('data', { className: 'inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary text-white font-bold text-lg animate-fade-in', value: String(n) }, [String(n)])
         );
       });
 
@@ -127,7 +127,7 @@ export class DiceRollerUI {
       document.dispatchEvent(new CustomEvent('history-updated'));
     } catch (err) {
       this.numberGenResult.appendChild(
-        createElement('p', { className: 'dice-error-msg' }, [err.message])
+        createElement('p', { className: 'text-danger text-sm font-semibold w-full text-center' }, [err.message])
       );
     }
   }

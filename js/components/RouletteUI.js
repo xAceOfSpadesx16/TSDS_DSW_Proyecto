@@ -75,14 +75,14 @@ export class RouletteUI {
     clearContainer(this.optionsList);
 
     this.items.forEach((item, idx) => {
-      const row = createElement('li', { className: 'roulette-option-entry' }, [
+      const row = createElement('li', { className: 'flex items-center gap-4 bg-dark-surface p-3 rounded-lg border border-dark-border' }, [
         createElement('i', {
-          className: 'roulette-option-swatch',
-          cssVars: { '--swatch-color': item.color }
+          className: 'w-6 h-6 rounded-full shadow-inner',
+          style: `background-color: ${item.color}`
         }, []),
         createElement('strong', {}, [item.label]),
         createElement('button', {
-          className: 'btn btn--danger btn--sm',
+          className: 'w-8 h-8 flex items-center justify-center rounded-md font-bold transition-all duration-150 bg-danger text-white hover:bg-danger-dark ml-auto',
           ariaLabel: `Eliminar ${item.label}`,
           onClick: () => {
             this.items.splice(idx, 1);
