@@ -1,0 +1,37 @@
+/* Directivas de Tailwind: procesadas por PostCSS durante el build. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Estilos globales preservados literalmente del antiguo `css/globals.css`.
+ * Si hay que ajustar keyframes o la flecha de la ruleta, este archivo es
+ * la única fuente de verdad.
+ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes diceShake {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(5deg); }
+  75%      { transform: rotate(-5deg); }
+}
+.animate-fade-in      { animation: fadeIn 0.25s ease; }
+.animate-dice-shake   { animation: diceShake 0.1s infinite; }
+
+/* Regla para ocultar tabpanels no activos, gestionado por aria. */
+[role="tabpanel"][aria-hidden="true"] { display: none; }
+
+/* Flecha indicadora sobre la ruleta. */
+.roulette-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -12px; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 24px solid #ff7675;
+  z-index: 10;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
