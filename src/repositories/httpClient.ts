@@ -12,8 +12,14 @@ import { ApiError, type ApiErrorBody } from '../domain/types';
 
 const DEFAULT_BASE_URL = 'http://127.0.0.1:8000/api';
 
-const baseUrl: string =
-  (import.meta.env.VITE_API_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
+// Resuelve la URL base eliminando las barras finales redundantes. Separada en
+// función para que sea comprobable (la inicialización del módulo no siempre se
+// atribuye a un test en la cobertura de ramas).
+export function resolveBaseUrl(): string {
+  return (import.meta.env.VITE_API_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
+}
+
+const baseUrl: string = resolveBaseUrl();
 
 // Proveedor de token lazy: el authStore se registra a sí mismo una vez
 // inicializado. Mientras no haya registro, las requests salen anónimas.
