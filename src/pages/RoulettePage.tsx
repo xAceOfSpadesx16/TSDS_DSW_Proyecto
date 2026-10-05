@@ -123,46 +123,61 @@ export function RoulettePage() {
     setOptions((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const rafIdRef = useRef<number>(0);
+
+  // Cancela cualquier animación pendiente al desmontar (evita fugas de rAF).
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
+
   const onSpin = () => {
     if (spinning || options.length < 2) return;
     setError(null);
-    const { local, backend } = rouletteStrategy.execute({ options });
-    setResult(local);
-    setSpinning(true);
+    try {
+      const { local, backend } = rouletteStrategy.execute({ options });
+      setResult(local);
+      setSpinning(true);
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const startRotation = rotationRef.current;
-    const endRotation = startRotation + local.finalAngle;
-    const startTime = performance.now();
-    const duration = 4500;
+      const startRotation = rotationRef.current;
+      const endRotation = startRotation + local.finalAngle;
+      const startTime = performance.now();
+      const duration = 4500;
 
-    const tick = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 4);
-      const current = startRotation + (endRotation - startRotation) * eased;
-      rotationRef.current = current;
-      drawRoulette(canvas, options, current);
-      if (progress < 1) {
-        requestAnimationFrame(tick);
-      } else {
-        setSpinning(false);
-        dialogRef.current?.showModal();
-        void addHistory({
-          module: 'roulette',
-          description: `Ganador: ${local.winner.label}`,
-          record: {
-            module_name: 'roulette',
-            action: rouletteStrategy.actionLabel({ options }),
-            payload: rouletteStrategy.buildPayload({ options }),
-            result: backend,
-          },
-        });
-      }
-    };
-    requestAnimationFrame(tick);
+      const tick = (now: number) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 4);
+        const current = startRotation + (endRotation - startRotation) * eased;
+        rotationRef.current = current;
+        drawRoulette(canvas, options, current);
+        if (progress < 1) {
+          rafIdRef.current = requestAnimationFrame(tick);
+        } else {
+          setSpinning(false);
+          dialogRef.current?.showModal();
+          void addHistory({
+            module: 'roulette',
+            description: `Ganador: ${local.winner.label}`,
+            record: {
+              module_name: 'roulette',
+              action: rouletteStrategy.actionLabel({ options }),
+              payload: rouletteStrategy.buildPayload({ options }),
+              result: backend,
+            },
+          });
+        }
+      };
+      rafIdRef.current = requestAnimationFrame(tick);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo girar la ruleta.');
+    }
   };
 
   return (

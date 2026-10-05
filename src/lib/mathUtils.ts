@@ -26,9 +26,17 @@ export function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/** Baraja in-place. Alias explícito para indicar mutación cuando se quiere. */
+/**
+ * Baraja in-place. Alias explícito para indicar mutación cuando se quiere.
+ * Muta el arreglo recibido (Fisher–Yates, sin `.slice()`) y devuelve la misma
+ * referencia mutada, tal como indica su contrato.
+ */
 export function shuffleInPlace<T>(array: T[]): T[] {
-  return fisherYatesShuffle(array);
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
 
 export interface WeightedEntry {

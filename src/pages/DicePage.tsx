@@ -9,7 +9,7 @@
 // envía al backend si hay sesión).
 // =============================================================================
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
@@ -40,6 +40,17 @@ function describeDice(result: DiceResult, sides: number): string {
 export function DicePage() {
   const [subtab, setSubtab] = useState<SubTab>('rpg');
   const addHistory = useHistoryStore((s) => s.add);
+  const rafIdRef = useRef<number>(0);
+
+  // Cancela la animación de tirada si la página se desmonta en medio del
+  // "shake" (evita un setState sobre un componente desmontado / fuga de rAF).
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   // RPG state
   const [modifier, setModifier] = useState(0);
@@ -66,7 +77,7 @@ export function DicePage() {
     const tick = (now: number) => {
       if (now - animationStart < 500) {
         setDisplayRoll(1 + Math.floor(Math.random() * sides));
-        requestAnimationFrame(tick);
+        rafIdRef.current = requestAnimationFrame(tick);
       } else {
         setShaking(false);
         try {
@@ -88,7 +99,7 @@ export function DicePage() {
         }
       }
     };
-    requestAnimationFrame(tick);
+    rafIdRef.current = requestAnimationFrame(tick);
   };
 
   const onGenerateNumbers = (e: FormEvent) => {

@@ -34,8 +34,7 @@ export function TeamsPage() {
     setValue(next === 'count' ? 2 : 3);
   };
 
-  const onAddExclusion = (e: FormEvent) => {
-    e.preventDefault();
+  const onAddExclusion = () => {
     const a = exclusionA.trim();
     const b = exclusionB.trim();
     if (!a || !b || a === b) return;
@@ -160,10 +159,7 @@ export function TeamsPage() {
             <summary className="text-sm font-semibold text-light-text cursor-pointer">
               Reglas avanzadas (exclusiones)
             </summary>
-            <form
-              onSubmit={onAddExclusion}
-              className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end mt-3"
-            >
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end mt-3">
               <Field
                 id="exclusion-a"
                 label="Persona A"
@@ -178,10 +174,15 @@ export function TeamsPage() {
                 value={exclusionB}
                 onChange={(e) => setExclusionB(e.currentTarget.value)}
               />
-              <PrimaryButton id="add-exclusion-btn" type="submit" variant="ghost">
+              <PrimaryButton
+                id="add-exclusion-btn"
+                type="button"
+                variant="ghost"
+                onClick={onAddExclusion}
+              >
                 Agregar
               </PrimaryButton>
-            </form>
+            </div>
             <ul
               id="exclusion-list"
               className="mt-3 flex flex-wrap gap-2"
