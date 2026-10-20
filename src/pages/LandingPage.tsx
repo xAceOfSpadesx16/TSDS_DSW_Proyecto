@@ -39,9 +39,9 @@ const MODULES: ModuleCard[] = [
   {
     to: '/dice',
     icon: '⚄',
-    title: 'Dados y Números',
+    title: 'Dados RPG',
     description:
-      'Tiradas de dados RPG con modificador y generador de números aleatorios con opciones de rango y unicidad.',
+      'Tiradas de dados RPG con caras de d4 a d20 y modificador opcional.',
   },
   {
     to: '/numbers',

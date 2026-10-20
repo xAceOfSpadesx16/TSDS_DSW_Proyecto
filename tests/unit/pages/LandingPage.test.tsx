@@ -9,7 +9,8 @@ const MODULES: Array<{ title: RegExp; href: string }> = [
   { title: /Generador de Equipos/, href: '/teams' },
   { title: /Sorteo con Pesos/, href: '/weighted' },
   { title: /Ruleta de Decisiones/, href: '/roulette' },
-  { title: /Dados y Números/, href: '/dice' },
+  { title: /Dados RPG/, href: '/dice' },
+  { title: /Números Aleatorios/, href: '/numbers' },
 ];
 
 describe('LandingPage', () => {
@@ -30,14 +31,18 @@ describe('LandingPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('renderiza las 4 tarjetas de módulos con título, ícono y destino correctos', () => {
+  it('renderiza las 5 tarjetas de módulos con título, ícono y destino correctos', () => {
     renderLanding();
     for (const { title, href } of MODULES) {
       const card = screen.getByRole('link', { name: title });
       expect(card).toHaveAttribute('href', href);
     }
-    // Las 4 cards están presentes.
-    expect(screen.getAllByRole('link', { name: /Generador de Equipos|Sorteo con Pesos|Ruleta de Decisiones|Dados y Números/ })).toHaveLength(4);
+    // Las 5 cards están presentes.
+    expect(
+      screen.getAllByRole('link', {
+        name: /Generador de Equipos|Sorteo con Pesos|Ruleta de Decisiones|Dados RPG|Números Aleatorios/,
+      }),
+    ).toHaveLength(5);
   });
 
   it('no renderiza el panel de historial en esta vista', () => {

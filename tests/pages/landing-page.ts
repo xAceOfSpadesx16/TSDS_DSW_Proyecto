@@ -40,6 +40,6 @@ function moduleLabel(module: 'teams' | 'weighted' | 'roulette' | 'dice'): string
     case 'roulette':
       return 'Ruleta de Decisiones';
     case 'dice':
-      return 'Dados y Números';
+      return 'Dados RPG';
   }
 }

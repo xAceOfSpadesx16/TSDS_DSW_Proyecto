@@ -1,31 +1,17 @@
 // =============================================================================
 // DicePage (/dice)
 //
-// Dos pestañas (subtabs) accesibles:
-// - "Dados RPG": 5 botones (d4/d6/d8/d12/d20), modificador y resultado.
-// - "Números":    formulario con count/min/max/unique.
-//
-// Cada acción exitosa empuja una entrada al `historyStore` (que además la
-// envía al backend si hay sesión).
+// Tiradas de dados RPG: 5 botones (d4/d6/d8/d12/d20), modificador y resultado.
+// Los números aleatorios viven en su propia pantalla (`/numbers`).
 // =============================================================================
 
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
 import { diceStrategy } from '../strategies/DiceStrategy';
-import { numbersStrategy } from '../strategies/NumbersStrategy';
 import { useHistoryStore } from '../store/historyStore';
-import {
-  clampMin,
-  readNumeric,
-  toNumberOr,
-  type NumericInput,
-} from '../lib/numericInput';
-import type { DiceResult, NumbersResult } from '../domain/contracts';
-
-type SubTab = 'rpg' | 'numbers';
+import type { DiceResult } from '../domain/contracts';
 
 const DICE_SIDES: ReadonlyArray<number> = [4, 6, 8, 12, 20];
 
@@ -44,7 +30,6 @@ function describeDice(result: DiceResult, sides: number): string {
 }
 
 export function DicePage() {
-  const [subtab, setSubtab] = useState<SubTab>('rpg');
   const addHistory = useHistoryStore((s) => s.add);
   const rafIdRef = useRef<number>(0);
 
@@ -58,20 +43,11 @@ export function DicePage() {
     };
   }, []);
 
-  // RPG state
   const [modifier, setModifier] = useState(0);
   const [shaking, setShaking] = useState(false);
   const [displayRoll, setDisplayRoll] = useState(1);
   const [diceResult, setDiceResult] = useState<DiceResult | null>(null);
   const [diceError, setDiceError] = useState<string | null>(null);
-
-  // Numbers state
-  const [count, setCount] = useState<NumericInput>(5);
-  const [min, setMin] = useState<NumericInput>(1);
-  const [max, setMax] = useState<NumericInput>(50);
-  const [unique, setUnique] = useState(true);
-  const [numbersResult, setNumbersResult] = useState<NumbersResult | null>(null);
-  const [numbersError, setNumbersError] = useState<string | null>(null);
 
   const onRollDice = (sides: number) => {
     setDiceError(null);
@@ -115,40 +91,6 @@ export function DicePage() {
     rafIdRef.current = requestAnimationFrame(tick);
   };
 
-  const onGenerateNumbers = (e: FormEvent) => {
-    e.preventDefault();
-    setNumbersError(null);
-    setNumbersResult(null);
-
-    // Los valores vacíos se resuelven al enviar; el mínimo se aplica acá.
-    const input = {
-      count: clampMin(count, 1),
-      min: toNumberOr(min),
-      max: toNumberOr(max),
-      unique,
-    };
-    setCount(input.count);
-    setMin(input.min);
-    setMax(input.max);
-
-    try {
-      const { local, backend } = numbersStrategy.execute(input);
-      setNumbersResult(local);
-      void addHistory({
-        module: 'numbers',
-        description: numbersStrategy.actionLabel(input),
-        record: {
-          module_name: 'numbers',
-          action: numbersStrategy.actionLabel(input),
-          payload: numbersStrategy.buildPayload(input),
-          result: backend,
-        },
-      });
-    } catch (err) {
-      setNumbersError(err instanceof Error ? err.message : 'Generación no válida.');
-    }
-  };
-
   return (
     <main
       className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 p-6 w-full mx-auto"
@@ -156,53 +98,12 @@ export function DicePage() {
     >
       <section
         id="section-dice"
-        aria-label="Dados y números"
+        aria-label="Dados RPG"
         className="min-w-0 animate-fade-in max-w-3xl mx-auto flex flex-col gap-4"
       >
-        <h1 className="text-3xl font-bold">Dados y Números</h1>
+        <h1 className="text-3xl font-bold">Dados RPG</h1>
 
-        {/* Subtabs */}
-        <div role="tablist" aria-label="Dados y números" className="flex gap-2 border-b border-dark-border">
-          <button
-            id="subtab-rpg"
-            role="tab"
-            type="button"
-            aria-selected={subtab === 'rpg'}
-            aria-controls="panel-rpg"
-            onClick={() => setSubtab('rpg')}
-            className={`px-4 py-2 text-sm font-semibold rounded-t-md transition-colors ${
-              subtab === 'rpg'
-                ? 'bg-dark-surface text-light-text'
-                : 'text-light-muted hover:text-light-text'
-            }`}
-          >
-            Dados RPG
-          </button>
-          <button
-            id="subtab-numbers"
-            role="tab"
-            type="button"
-            aria-selected={subtab === 'numbers'}
-            aria-controls="panel-numbers"
-            onClick={() => setSubtab('numbers')}
-            className={`px-4 py-2 text-sm font-semibold rounded-t-md transition-colors ${
-              subtab === 'numbers'
-                ? 'bg-dark-surface text-light-text'
-                : 'text-light-muted hover:text-light-text'
-            }`}
-          >
-            Números
-          </button>
-        </div>
-
-        {/* Panel RPG */}
-        <div
-          id="panel-rpg"
-          role="tabpanel"
-          aria-hidden={subtab !== 'rpg'}
-          aria-labelledby="subtab-rpg"
-          className="bg-dark-surface border border-dark-border rounded-2xl p-6 flex flex-col gap-4"
-        >
+        <div className="bg-dark-surface border border-dark-border rounded-2xl p-6 flex flex-col gap-4">
           <div className="flex flex-wrap gap-2">
             {DICE_SIDES.map((sides) => (
               <button
@@ -255,74 +156,6 @@ export function DicePage() {
             <p className="text-sm text-danger" role="alert">
               {diceError}
             </p>
-          ) : null}
-        </div>
-
-        {/* Panel Numbers */}
-        <div
-          id="panel-numbers"
-          role="tabpanel"
-          aria-hidden={subtab !== 'numbers'}
-          aria-labelledby="subtab-numbers"
-          className="bg-dark-surface border border-dark-border rounded-2xl p-6 flex flex-col gap-4"
-        >
-          <form id="number-gen-form" onSubmit={onGenerateNumbers} className="flex flex-col gap-3">
-            <Field
-              id="num-count"
-              label="Cantidad"
-              type="number"
-              min={1}
-              value={count}
-              onChange={(e) => setCount(readNumeric(e.currentTarget.value))}
-              onBlur={() => setCount(clampMin(count, 1))}
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <Field
-                id="num-min"
-                label="Mínimo"
-                type="number"
-                value={min}
-                onChange={(e) => setMin(readNumeric(e.currentTarget.value))}
-                onBlur={() => setMin(toNumberOr(min))}
-              />
-              <Field
-                id="num-max"
-                label="Máximo"
-                type="number"
-                value={max}
-                onChange={(e) => setMax(readNumeric(e.currentTarget.value))}
-                onBlur={() => setMax(toNumberOr(max))}
-              />
-            </div>
-            <label className="inline-flex items-center gap-2 text-sm text-light-text">
-              <input
-                id="num-unique"
-                type="checkbox"
-                checked={unique}
-                onChange={(e) => setUnique(e.currentTarget.checked)}
-                className="w-4 h-4 rounded border-dark-border bg-dark-surface text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
-              />
-              Sin repetición
-            </label>
-
-            <PrimaryButton type="submit" variant="primary">
-              Generar
-            </PrimaryButton>
-          </form>
-
-          {numbersError ? (
-            <p className="text-sm text-danger" role="alert">
-              {numbersError}
-            </p>
-          ) : null}
-
-          {numbersResult ? (
-            <output
-              id="number-gen-result"
-              className="bg-dark-bg-alt border border-dark-border rounded-md p-4 font-mono text-light-text text-center"
-            >
-              {numbersResult.numbers.join(', ')}
-            </output>
           ) : null}
         </div>
       </section>

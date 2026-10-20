@@ -20,9 +20,6 @@
 .animate-fade-in      { animation: fadeIn 0.25s ease; }
 .animate-dice-shake   { animation: diceShake 0.1s infinite; }
 
-/* Regla para ocultar tabpanels no activos, gestionado por aria. */
-[role="tabpanel"][aria-hidden="true"] { display: none; }
-
 /* Flecha indicadora sobre la ruleta. */
 .roulette-wrapper::before {
   content: '';

@@ -70,7 +70,7 @@ describe('router', () => {
       ['/teams', 'Generador de Equipos'],
       ['/weighted', 'Sorteo con Pesos'],
       ['/roulette', 'Ruleta de Decisiones'],
-      ['/dice', 'Dados y Números'],
+      ['/dice', 'Dados RPG'],
       ['/login', 'Iniciar sesión'],
       ['/register', 'Registro'],
     ];

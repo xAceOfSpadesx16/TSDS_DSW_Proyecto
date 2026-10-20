@@ -1,5 +1,5 @@
 // =============================================================================
-// DicePage — Page Object del módulo Dados y Números (/dice).
+// DicePage — Page Object del módulo Dados RPG (/dice).
 // =============================================================================
 
 import type { Page } from '@playwright/test';
@@ -9,16 +9,7 @@ export class DicePage {
 
   async goto(): Promise<void> {
     await this.page.goto('/dice');
-    await this.page.locator('#subtab-rpg').waitFor();
-  }
-
-  // ---- Dados RPG ----------------------------------------------------------
-  async switchToRpg(): Promise<void> {
-    await this.page.locator('#subtab-rpg').click();
-  }
-
-  async switchToNumbers(): Promise<void> {
-    await this.page.locator('#subtab-numbers').click();
+    await this.page.locator('#section-dice').waitFor();
   }
 
   async rollDice(sides: number): Promise<void> {
@@ -41,21 +32,6 @@ export class DicePage {
   /** Total con modificador, si aplica. */
   async total(): Promise<string | null> {
     const el = this.page.locator('#dice-total').first();
-    if (await el.count() === 0) return null;
-    return el.textContent();
-  }
-
-  // ---- Números ------------------------------------------------------------
-  async generateNumbers(count: number, min: number, max: number): Promise<void> {
-    await this.switchToNumbers();
-    await this.page.getByLabel('Cantidad').fill(String(count));
-    await this.page.getByLabel('Mínimo').fill(String(min));
-    await this.page.getByLabel('Máximo').fill(String(max));
-    await this.page.getByRole('button', { name: 'Generar' }).click();
-  }
-
-  async numbersResult(): Promise<string | null> {
-    const el = this.page.locator('#number-gen-result').first();
     if (await el.count() === 0) return null;
     return el.textContent();
   }

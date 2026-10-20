@@ -19,7 +19,7 @@ const rollDice = (sides: number) => {
   fireEvent.click(screen.getByRole('button', { name: `d${sides}` }));
 };
 
-describe('DicePage — pestaña Dados RPG', () => {
+describe('DicePage — dados', () => {
   beforeEach(() => {
     installLocalStorage();
     resetHistory();
@@ -41,18 +41,10 @@ describe('DicePage — pestaña Dados RPG', () => {
     expect(document.querySelector('#dice-result')).toHaveTextContent('1');
   });
 
-  it('cambia de subpestaña (aria-selected / aria-hidden) entre RPG y Números', () => {
+  it('no renderiza la pestaña Números ni un tablist', () => {
     renderDice();
-    const rpg = screen.getByRole('tab', { name: 'Dados RPG' });
-    const numbers = screen.getByRole('tab', { name: 'Números' });
-    expect(rpg).toHaveAttribute('aria-selected', 'true');
-    expect(document.querySelector('#panel-rpg')).toHaveAttribute('aria-hidden', 'false');
-
-    fireEvent.click(numbers);
-    expect(numbers).toHaveAttribute('aria-selected', 'true');
-    expect(rpg).toHaveAttribute('aria-selected', 'false');
-    expect(document.querySelector('#panel-numbers')).toHaveAttribute('aria-hidden', 'false');
-    expect(document.querySelector('#panel-rpg')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Números' })).not.toBeInTheDocument();
   });
 
   it('tira un d20+3, muestra el total y registra el sorteo en el historial', async () => {
@@ -145,60 +137,5 @@ describe('DicePage — pestaña Dados RPG', () => {
     expect(
       document.querySelector('#dice-total')!.textContent,
     ).toContain('tiradas: 3, 5');
-  });
-});
-
-describe('DicePage — pestaña Números', () => {
-  beforeEach(() => {
-    installLocalStorage();
-    resetHistory();
-    renderDice();
-    // Navegar a la pestaña de números.
-    fireEvent.click(screen.getByRole('tab', { name: 'Números' }));
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
-  });
-
-  const generate = () => fireEvent.click(screen.getByRole('button', { name: 'Generar' }));
-
-  it('genera números con repetición cuando el checkbox está desactivado', async () => {
-    const user = createUserEvent();
-    const unique = screen.getByRole('checkbox', { name: 'Sin repetición' });
-    await user.click(unique); // unique = false
-    generate();
-
-    await waitFor(() => expect(document.querySelector('#number-gen-result')).toBeInTheDocument());
-    const text = document.querySelector('#number-gen-result')!.textContent!;
-    // 5 números separados por coma.
-    const nums = text.split(',').map((n) => parseInt(n.trim(), 10));
-    expect(nums).toHaveLength(5);
-    expect(useHistoryStore.getState().entries.at(-1)?.description).toContain('con repetición');
-  });
-
-  it('usa unicidad por defecto y lo registra como "únicos"', async () => {
-    generate();
-    await waitFor(() => expect(document.querySelector('#number-gen-result')).toBeInTheDocument());
-    expect(useHistoryStore.getState().entries.at(-1)?.description).toContain('únicos');
-  });
-
-  it('muestra un error cuando el máximo es menor que el mínimo', async () => {
-    const user = createUserEvent();
-    await fillByLabel(user, 'Mínimo', '10');
-    await fillByLabel(user, 'Máximo', '5');
-    generate();
-    expect(screen.getByRole('alert')).toHaveTextContent('debe ser >= mínimo');
-  });
-
-  it('muestra un error al pedir más números únicos del rango disponible', async () => {
-    const user = createUserEvent();
-    await fillByLabel(user, 'Cantidad', '10');
-    await fillByLabel(user, 'Mínimo', '1');
-    await fillByLabel(user, 'Máximo', '5');
-    generate();
-    expect(screen.getByRole('alert')).toHaveTextContent('números únicos');
   });
 });
