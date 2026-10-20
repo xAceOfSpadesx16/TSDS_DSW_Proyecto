@@ -7,7 +7,7 @@
 // - reglas avanzadas: pares de exclusión (no pueden quedar juntos).
 // =============================================================================
 
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
@@ -29,6 +29,14 @@ function clampValue(value: NumericInput, mode: TeamsMode): number {
   return clampMin(value, valueMin(mode));
 }
 
+/** Participantes normalizados: una persona por línea, sin vacíos. */
+function parseParticipants(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((participant) => participant.trim())
+    .filter((participant) => participant.length > 0);
+}
+
 export function TeamsPage() {
   const [participantsText, setParticipantsText] = useState('');
   const [mode, setMode] = useState<TeamsMode>('count');
@@ -40,20 +48,54 @@ export function TeamsPage() {
   const [error, setError] = useState<string | null>(null);
   const addHistory = useHistoryStore((s) => s.add);
 
+  const participants = useMemo(() => parseParticipants(participantsText), [participantsText]);
+  const participantOptions = useMemo(
+    () => Array.from(new Set(participants)),
+    [participants],
+  );
+  const canAddExclusion =
+    exclusionA !== '' && exclusionB !== '' && exclusionA !== exclusionB;
+
   const onChangeMode = (next: TeamsMode) => {
     setMode(next);
     setValue(next === 'count' ? 2 : 3);
   };
+
+  /**
+   * Al cambiar la lista de participantes, las exclusiones que mencionan a
+   * alguien que ya no está se descartan: una regla sobre una persona ausente
+   * no se puede cumplir ni explicar.
+   */
+  const onChangeParticipants = (nextText: string) => {
+    setParticipantsText(nextText);
+    setError(null);
+    const nextParticipants = parseParticipants(nextText);
+    setExclusions((prev) =>
+      prev.filter(
+        ([a, b]) => nextParticipants.includes(a) && nextParticipants.includes(b),
+      ),
+    );
+    setExclusionA((prev) => (nextParticipants.includes(prev) ? prev : ''));
+    setExclusionB((prev) => (nextParticipants.includes(prev) ? prev : ''));
+  };
+
   const onAddExclusion = () => {
-    const a = exclusionA.trim();
-    const b = exclusionB.trim();
-    if (!a || !b || a === b) return;
-    setExclusions((prev) => [...prev, [a, b]]);
+    if (!canAddExclusion) return;
+    setError(null);
+    const a = exclusionA;
+    const b = exclusionB;
+    setExclusions((prev) => {
+      const alreadyExists = prev.some(
+        ([x, y]) => (x === a && y === b) || (x === b && y === a),
+      );
+      return alreadyExists ? prev : [...prev, [a, b]];
+    });
     setExclusionA('');
     setExclusionB('');
   };
 
   const onRemoveExclusion = (idx: number) => {
+    setError(null);
     setExclusions((prev) => prev.filter((_, i) => i !== idx));
   };
 
@@ -64,12 +106,8 @@ export function TeamsPage() {
     // El mínimo según el modo se aplica al enviar, no en cada tecla.
     const valueNum = clampValue(value, mode);
     setValue(valueNum);
-    const participants = participantsText
-      .split(/\r?\n/)
-      .map((p) => p.trim())
-      .filter((p) => p.length > 0);
     if (participants.length < 2) {
-      setError('Ingresa al menos 2 participantes.');
+      setError('Ingresá al menos 2 participantes.');
       return;
     }
     try {
@@ -116,7 +154,7 @@ export function TeamsPage() {
               aria-required="true"
               rows={6}
               value={participantsText}
-              onChange={(e) => setParticipantsText(e.currentTarget.value)}
+              onChange={(e) => onChangeParticipants(e.currentTarget.value)}
               placeholder={'Ana\nBruno\nCarla\nDiego'}
               className="px-3 py-2 rounded-md bg-dark-surface border border-dark-border text-light-text placeholder:text-light-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
             />
@@ -157,30 +195,56 @@ export function TeamsPage() {
             <summary className="text-sm font-semibold text-light-text cursor-pointer">
               Reglas avanzadas (exclusiones)
             </summary>
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end mt-3">
-              <Field
-                id="exclusion-a"
-                label="Persona A"
-                type="text"
-                value={exclusionA}
-                onChange={(e) => setExclusionA(e.currentTarget.value)}
-              />
-              <Field
-                id="exclusion-b"
-                label="Persona B"
-                type="text"
-                value={exclusionB}
-                onChange={(e) => setExclusionB(e.currentTarget.value)}
-              />
-              <PrimaryButton
-                id="add-exclusion-btn"
-                type="button"
-                variant="ghost"
-                onClick={onAddExclusion}
-              >
-                Agregar
-              </PrimaryButton>
-            </div>
+            {participantOptions.length < 2 ? (
+              <p className="mt-3 text-xs text-light-muted">
+                Cargá al menos dos participantes para elegir exclusiones.
+              </p>
+            ) : (
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-light-muted font-medium">Persona A</span>
+                  <select
+                    id="exclusion-a"
+                    value={exclusionA}
+                    onChange={(e) => setExclusionA(e.currentTarget.value)}
+                    className="min-h-[44px] px-3 py-2 rounded-md bg-dark-surface border border-dark-border text-light-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                  >
+                    <option value="">Elegí una persona</option>
+                    {participantOptions.map((participant) => (
+                      <option key={participant} value={participant}>
+                        {participant}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-light-muted font-medium">Persona B</span>
+                  <select
+                    id="exclusion-b"
+                    value={exclusionB}
+                    onChange={(e) => setExclusionB(e.currentTarget.value)}
+                    className="min-h-[44px] px-3 py-2 rounded-md bg-dark-surface border border-dark-border text-light-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                  >
+                    <option value="">Elegí una persona</option>
+                    {participantOptions.map((participant) => (
+                      <option key={participant} value={participant}>
+                        {participant}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <PrimaryButton
+                  id="add-exclusion-btn"
+                  type="button"
+                  variant="ghost"
+                  onClick={onAddExclusion}
+                  disabled={!canAddExclusion}
+                  className="min-h-[44px]"
+                >
+                  Agregar
+                </PrimaryButton>
+              </div>
+            )}
             <ul
               id="exclusion-list"
               className="mt-3 flex flex-wrap gap-2"

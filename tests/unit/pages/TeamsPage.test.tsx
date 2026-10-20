@@ -21,10 +21,13 @@ const fillParticipants = async (value: string) => {
   await fillByLabel(user, 'Participantes (uno por línea)', value);
 };
 
-// Rellena un campo de exclusión (Persona A / Persona B).
+// Elige una persona en un select de exclusión (Persona A / Persona B).
 const fillExclusion = async (which: 'a' | 'b', value: string) => {
   const user = createUserEvent();
-  await fillByLabel(user, which === 'a' ? 'Persona A' : 'Persona B', value);
+  await user.selectOptions(
+    screen.getByLabelText(which === 'a' ? 'Persona A' : 'Persona B'),
+    value,
+  );
 };
 
 describe('TeamsPage — participantes y modo', () => {
@@ -91,7 +94,28 @@ describe('TeamsPage — exclusiones', () => {
     vi.unstubAllGlobals();
   });
 
+  it('ofrece solo participantes en los selects de exclusión, sin texto libre', async () => {
+    await fillParticipants('Ana\nBruno\nCarla');
+
+    const selectA = screen.getByLabelText('Persona A') as HTMLSelectElement;
+    const selectB = screen.getByLabelText('Persona B') as HTMLSelectElement;
+    expect(Array.from(selectA.options).map((option) => option.value)).toEqual([
+      '',
+      'Ana',
+      'Bruno',
+      'Carla',
+    ]);
+    expect(Array.from(selectB.options).map((option) => option.value)).toEqual([
+      '',
+      'Ana',
+      'Bruno',
+      'Carla',
+    ]);
+    expect(screen.queryByRole('textbox', { name: 'Persona A' })).not.toBeInTheDocument();
+  });
+
   it('agrega y elimina un par de exclusiones', async () => {
+    await fillParticipants('Juan\nPedro');
     await fillExclusion('a', 'Juan');
     await fillExclusion('b', 'Pedro');
     fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
@@ -103,6 +127,8 @@ describe('TeamsPage — exclusiones', () => {
   });
 
   it('no agrega una exclusión con campos vacíos o iguales', async () => {
+    await fillParticipants('Juan\nPedro');
+
     // Iguales.
     await fillExclusion('a', 'Juan');
     await fillExclusion('b', 'Juan');
@@ -114,6 +140,17 @@ describe('TeamsPage — exclusiones', () => {
     await fillExclusion('b', '');
     fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
     expect(screen.queryByText('↔')).not.toBeInTheDocument();
+  });
+
+  it('elimina las exclusiones que incluyen a un participante que se quita', async () => {
+    await fillParticipants('Ana\nBruno\nCarla');
+    await fillExclusion('a', 'Ana');
+    await fillExclusion('b', 'Bruno');
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+    expect(screen.getByText('Ana ↔ Bruno')).toBeInTheDocument();
+
+    await fillParticipants('Ana\nCarla');
+    expect(screen.queryByText('Ana ↔ Bruno')).not.toBeInTheDocument();
   });
 
   it('respeta una exclusión colocando a las dos personas en equipos distintos', async () => {
@@ -184,5 +221,48 @@ describe('TeamsPage — generación y errores', () => {
     });
     generate();
     expect(screen.getByRole('alert')).toHaveTextContent('No se pueden formar 5 grupos');
+  });
+});
+
+describe('TeamsPage — restricciones imposibles', () => {
+  beforeEach(() => {
+    installLocalStorage();
+    resetHistory();
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it('muestra el error, no muestra resultados y no registra historial', async () => {
+    // El espía se instala antes del render para que el componente capture la
+    // versión espiada de `add`.
+    const addSpy = vi.spyOn(useHistoryStore.getState(), 'add');
+    render(<TeamsPage />);
+
+    await fillParticipants('Ana\nBruno\nCarla');
+    // Tres personas mutuamente excluidas en dos grupos: imposible.
+    await fillExclusion('a', 'Ana');
+    await fillExclusion('b', 'Bruno');
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+    await fillExclusion('a', 'Ana');
+    await fillExclusion('b', 'Carla');
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+    await fillExclusion('a', 'Bruno');
+    await fillExclusion('b', 'Carla');
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+    generate();
+
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        /No se pueden cumplir las restricciones/,
+      ),
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent('Ana ↔ Bruno');
+    expect(document.querySelector('#team-results')).not.toBeInTheDocument();
+    expect(addSpy).not.toHaveBeenCalled();
+    expect(useHistoryStore.getState().entries).toHaveLength(0);
   });
 });

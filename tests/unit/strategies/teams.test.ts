@@ -115,6 +115,15 @@ describe('TeamsStrategy', () => {
       const all = local.teams.flat();
       expect(all.sort()).toEqual(['a', 'b', 'c', 'd']);
     });
+
+    it('conserva los nombres repetidos al repartir', () => {
+      const { local } = new TeamsStrategy().execute({
+        participants: ['a', 'a', 'b', 'b'],
+        mode: 'count',
+        value: 2,
+      });
+      expect(local.teams.flat().sort()).toEqual(['a', 'a', 'b', 'b']);
+    });
   });
 
   describe('execute modo size', () => {
@@ -142,16 +151,93 @@ describe('TeamsStrategy', () => {
       expect(teamWithA).not.toContain('b');
     });
 
-    it('fallback sin excepciones cuando las exclusiones son imposibles', () => {
-      // 2 participantes, 1 grupo y excluidos entre sí: no se pueden separar.
-      const { local } = new TeamsStrategy().execute({
-        participants: ['a', 'b'],
-        mode: 'count',
-        value: 1,
-        exclusions: [['a', 'b']],
-      });
-      expect(local.teams).toHaveLength(1);
-      expect(local.teams[0]).toHaveLength(2);
+    it('lanza cuando las exclusiones son imposibles en vez de devolver un resultado inválido', () => {
+      // 3 participantes mutuamente excluidos y solo 2 grupos: no hay forma
+      // de separar los tres pares.
+      expect(() =>
+        new TeamsStrategy().execute({
+          participants: ['a', 'b', 'c'],
+          mode: 'count',
+          value: 2,
+          exclusions: [
+            ['a', 'b'],
+            ['a', 'c'],
+            ['b', 'c'],
+          ],
+        }),
+      ).toThrow(/No se pueden cumplir las restricciones.*a ↔ b/);
+    });
+
+    it('nombra todas las restricciones, incluida la que vuelve imposible el conjunto', () => {
+      expect(() =>
+        new TeamsStrategy().execute({
+          participants: ['a', 'b', 'c', 'd', 'e'],
+          mode: 'count',
+          value: 2,
+          exclusions: [
+            ['a', 'b'],
+            ['a', 'c'],
+            ['a', 'd'],
+            ['b', 'c'],
+          ],
+        }),
+      ).toThrow(/b ↔ c/);
+    });
+
+    it('no colisiona con nombres que contienen el separador |', () => {
+      const strategy = new TeamsStrategy();
+      for (let i = 0; i < 50; i++) {
+        const { local } = strategy.execute({
+          participants: ['a|b', 'c', 'a', 'b|c', 'd'],
+          mode: 'count',
+          value: 2,
+          exclusions: [
+            ['a|b', 'c'],
+            ['a', 'b|c'],
+          ],
+        });
+        const teamOf = (name: string) =>
+          local.teams.findIndex((team) => team.includes(name));
+        expect(teamOf('a|b')).not.toBe(teamOf('c'));
+        expect(teamOf('a')).not.toBe(teamOf('b|c'));
+      }
+    });
+
+    it('lanza si una exclusión menciona a alguien que no participa', () => {
+      expect(() =>
+        new TeamsStrategy().execute({
+          participants: ['a', 'b', 'c'],
+          mode: 'count',
+          value: 2,
+          exclusions: [['a', 'z']],
+        }),
+      ).toThrow(/incluye a alguien que no participa/);
+    });
+
+    it('lanza si una exclusión repite a la misma persona', () => {
+      expect(() =>
+        new TeamsStrategy().execute({
+          participants: ['a', 'b'],
+          mode: 'count',
+          value: 2,
+          exclusions: [['a', 'a']],
+        }),
+      ).toThrow(/no puede repetir a la misma persona/);
+    });
+
+    it('respeta una exclusión posible en 50 sorteos consecutivos', () => {
+      const strategy = new TeamsStrategy();
+      for (let i = 0; i < 50; i++) {
+        const { local } = strategy.execute({
+          participants: ['a', 'b', 'c', 'd', 'e', 'f'],
+          mode: 'count',
+          value: 2,
+          exclusions: [['a', 'b']],
+        });
+        const teamWithA = local.teams.find((team) => team.includes('a'));
+        expect(teamWithA).toBeDefined();
+        expect(teamWithA).not.toContain('b');
+      }
     });
   });
 
