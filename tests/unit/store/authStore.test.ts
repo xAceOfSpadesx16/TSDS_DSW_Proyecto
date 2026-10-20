@@ -75,11 +75,21 @@ describe('authStore', () => {
       expect(state.token).toBeNull();
     });
 
+    it('ignora un token vacío', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ user: { id: 'u1' }, token: '', expires_at: null }),
+      );
+      const { store } = await freshDeps();
+      expect(store.getState().user).toBeNull();
+      expect(store.getState().token).toBeNull();
+    });
+
     it('hidrata el usuario desde un localStorage válido', async () => {
       const persisted = {
         user: { id: 'u1', name: 'Ada', email: 'ada@example.com' },
         token: 'persisted-token',
-        expiresAt: Date.now() + 3600_000,
+        expires_at: Date.now() + 3600_000,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
       const { store } = await freshDeps();

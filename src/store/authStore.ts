@@ -10,6 +10,11 @@ import { create } from 'zustand';
 
 import type { LoginPayload, RegisterPayload, User } from '../domain/types';
 import { ApiError } from '../domain/types';
+import {
+  readStoredJson,
+  removeStoredKey,
+  writeStoredJson,
+} from '../lib/storage';
 import { authRepository } from '../repositories/authRepository';
 import {
   setAdoptedTokenHandler,
@@ -27,23 +32,29 @@ interface PersistedAuth {
   expires_at: number | null;
 }
 
-function loadPersisted(): PersistedAuth | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as PersistedAuth;
-    if (!parsed?.token || !parsed?.user) return null;
-    return parsed;
-  } catch {
-    return null;
+function isPersistedAuth(value: unknown): value is PersistedAuth {
+  if (typeof value !== 'object' || value === null) {
+    return false;
   }
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.token === 'string' &&
+    candidate.token.length > 0 &&
+    typeof candidate.user === 'object' &&
+    candidate.user !== null &&
+    (candidate.expires_at === null || typeof candidate.expires_at === 'number')
+  );
+}
+
+function loadPersisted(): PersistedAuth | null {
+  return readStoredJson(STORAGE_KEY, isPersistedAuth);
 }
 
 function persist(state: PersistedAuth | null): void {
   if (state === null) {
-    localStorage.removeItem(STORAGE_KEY);
+    removeStoredKey(STORAGE_KEY);
   } else {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    writeStoredJson(STORAGE_KEY, state);
   }
 }
 

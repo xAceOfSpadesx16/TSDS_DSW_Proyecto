@@ -1,58 +1,37 @@
 // =============================================================================
 // historyStore
 //
-// Mantiene la lista de sorteos para alimentar el panel lateral. Combina
-// dos fuentes:
-// 1. Invitado: mirror local en memoria (funciona offline o sin login),
-//    acotado a las últimas MAX_LOCAL_ENTRIES operaciones.
-// 2. Usuario logueado: los sorteos se persisten vía
-//    `historyRepository.create` y se releen del backend con
-//    `historyRepository.list`. La paginación la maneja el store
-//    (`currentPage` / `lastPage`) para el botón "cargar más".
+// Mantiene la lista de sorteos visible. Combina tres fuentes:
+// 1. Invitado: historial persistido en `localStorage` (máximo 100 entradas)
+//    a través de `storage.ts`.
+// 2. Usuario logueado: historial paginado del backend.
+// 3. Pendientes: sorteos que fallaron al guardarse con sesión activa,
+//    persistidos por id de usuario y reintentados al recuperar la sesión.
 //
-// Cuando hay sesión, la lista en memoria refleja lo que devuelve el
-// backend: los ids son los UUID del servidor, así que borrar o limpiar
-// alcanza el backend. Sin sesión, los ids son `local-*` y solo viven en
-// memoria.
-//
-// Errores del backend en `add` NO abortan la acción local (modo
-// "graceful degradation"); en `load` / `loadMore` tampoco, para no dejar
-// el panel en blanco si la API no responde.
+// La vista autenticada nunca muestra el historial de invitado: al entrar se
+// ofrece importarlo; al salir se vuelve al historial guardado en el navegador.
 // =============================================================================
 
 import { create } from 'zustand';
 
 import type { CreateHistoryPayload, HistoryRecord, ModuleName } from '../domain/types';
 import { ApiError } from '../domain/types';
+import {
+  clearGuestHistory,
+  clearPendingDraws,
+  isStorageAvailable,
+  loadGuestHistory,
+  loadPendingDraws,
+  MAX_GUEST_ENTRIES,
+  removePendingDraw,
+  saveGuestHistory,
+  savePendingDraw,
+  type LocalHistoryEntry,
+} from '../lib/storage';
 import { historyRepository } from '../repositories/historyRepository';
 import { useAuthStore, selectIsAuthenticated } from './authStore';
 
-export interface LocalHistoryEntry {
-  /** id local estable para key de React; los del backend son UUIDs. */
-  id: string;
-  module: ModuleName;
-  description: string;
-  timestamp: string;
-  /** `true` si fue confirmado por el backend; `false` si solo es local. */
-  synced: boolean;
-  /**
-   * Sorteos que fallaron al guardarse con sesión activa, pendientes de
-   * reintento. Viven solo en memoria (se pierden al recargar) y guardan el
-   * id del usuario dueño para no enviarlos nunca con otra cuenta.
-   */
-  pending?: PendingDraw;
-}
-
-/** Un sorteo que no llegó al backend y espera reintentarse. */
-export interface PendingDraw {
-  /** Cuerpo que se envió (o intentó enviarse) a `POST /api/history`. */
-  record: CreateHistoryPayload;
-  /** `id` del usuario con el que se sorteó. */
-  userId: number;
-}
-
-/** Tope de entradas en memoria para invitados. Con sesión no aplica. */
-const MAX_LOCAL_ENTRIES = 20;
+export type { LocalHistoryEntry, PendingDraw } from '../lib/storage';
 
 /** Tamaño de página pedido al backend. */
 const PAGE_SIZE = 20;
@@ -79,6 +58,12 @@ function toEntry(record: HistoryRecord): LocalHistoryEntry {
 
 export interface HistoryState {
   entries: LocalHistoryEntry[];
+  /** Copia del historial de invitado guardado, para el diálogo de importación. */
+  guestEntries: LocalHistoryEntry[];
+  /** `true` cuando hay historial de invitado y el usuario acaba de entrar. */
+  guestImportPending: boolean;
+  /** Error de la última importación de invitado. */
+  guestImportError: string | null;
   /** Página actual del backend; 1 mientras no se haya cargado nada. */
   currentPage: number;
   /** Última página disponible según el backend; 1 por defecto. */
@@ -91,26 +76,28 @@ export interface HistoryState {
    */
   error: string | null;
   add(payload: { module: ModuleName; description: string; record: CreateHistoryPayload }): Promise<void>;
-  /**
-   * Reenvía los pendientes del usuario indicado, en orden, y recién después
-   * trae la página 1 del backend.
-   *
-   * Los que se guardan dejan de ser pendientes; los que vuelven a fallar
-   * se conservan en la lista después del `load()`. Los pendientes de otro
-   * usuario se descartan: nunca se envían con otra cuenta. Sin sesión no
-   * hace nada.
-   */
+  /** Carga el historial guardado en este navegador (modo invitado). */
+  loadGuest(): void;
+  /** Detecta historial de invitado y abre la oferta de importación. */
+  requestGuestImport(): void;
+  /** Importa el historial de invitado a la cuenta; conserva lo que falle. */
+  importGuestHistory(): Promise<void>;
+  /** Cierra la oferta y conserva el historial de invitado. */
+  dismissGuestImport(): void;
   load(): Promise<void>;
   /** Trae la página siguiente y la agrega. Sin sesión, no hace nada. */
   loadMore(): Promise<void>;
   /** Borra una entrada. Con sesión y UUID, borra en el backend; si no, solo en memoria. */
   remove(id: string): Promise<void>;
-  /** Vacía la lista. Con sesión, borra todos los registros en el backend. */
+  /** Vacía la lista visible. Con sesión, borra todos los registros del backend. */
   clear(): Promise<void>;
 }
 
 export const useHistoryStore = create<HistoryState>((set, get) => ({
   entries: [],
+  guestEntries: [],
+  guestImportPending: false,
+  guestImportError: null,
   currentPage: 1,
   lastPage: 1,
   loading: false,
@@ -121,27 +108,35 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
     // bien, el mensaje viejo ya no describe la situación.
     set({ error: null });
 
-    // 1) Mirror local inmediato (optimista). El UI ve la nueva entrada
-    //    incluso si el backend tarda o falla.
     const localEntry: LocalHistoryEntry = {
       id: newLocalId(),
       module,
       description,
       timestamp: new Date().toISOString(),
       synced: false,
+      record,
     };
     const authenticated = selectIsAuthenticated(useAuthStore.getState());
 
-    set((s) => ({
-      entries: authenticated
-        ? [localEntry, ...s.entries]
-        : [localEntry, ...s.entries].slice(0, MAX_LOCAL_ENTRIES),
-    }));
-
-    // 2) Si hay sesión intentamos sincronizar con el backend.
     if (!authenticated) {
+      set((s) => {
+        // `localStorage` es la fuente de verdad; si no está disponible,
+        // conservamos lo que ya había en memoria.
+        const current = isStorageAvailable()
+          ? loadGuestHistory()
+          : s.guestEntries;
+        const next = [localEntry, ...current].slice(0, MAX_GUEST_ENTRIES);
+        saveGuestHistory(next);
+        return { entries: next, guestEntries: next };
+      });
       return;
     }
+
+    // 1) Mirror local inmediato (optimista). El UI ve la nueva entrada
+    //    incluso si el backend tarda o falla.
+    set((s) => ({ entries: [localEntry, ...s.entries] }));
+
+    const userId = useAuthStore.getState().user?.id;
     try {
       await historyRepository.create(record);
       // Marcamos como sincronizada la entry local que acabamos de crear.
@@ -155,15 +150,18 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
     } catch (err) {
       // Degradación agraciada: la entrada local queda en pantalla con
       // `synced: false` y el error queda visible en el panel. Con sesión
-      // activa además queda pendiente: se reintentará al recuperar la
-      // sesión del mismo usuario.
-      const userId = useAuthStore.getState().user?.id;
+      // activa además queda pendiente y se persiste por usuario.
       if (userId !== undefined && userId !== null) {
+        const pendingEntry: LocalHistoryEntry = {
+          ...localEntry,
+          pending: { record, userId },
+        };
         set((s) => ({
           entries: s.entries.map((e) =>
-            e.id === localEntry.id ? { ...e, pending: { record, userId } } : e,
+            e.id === localEntry.id ? pendingEntry : e,
           ),
         }));
+        savePendingDraw(userId, pendingEntry);
       }
       reportSyncError('guardar el sorteo', err);
       return;
@@ -174,12 +172,110 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
     await retryPendingDraws();
   },
 
+  loadGuest() {
+    const guest = loadGuestHistory();
+    set({
+      entries: guest,
+      guestEntries: guest,
+      currentPage: 1,
+      lastPage: 1,
+      loading: false,
+      error: null,
+      guestImportPending: false,
+      guestImportError: null,
+    });
+  },
+
+  requestGuestImport() {
+    const guest = loadGuestHistory();
+    if (guest.length === 0) {
+      set({ guestEntries: [], guestImportPending: false, guestImportError: null });
+      return;
+    }
+    set({ guestEntries: guest, guestImportPending: true, guestImportError: null });
+  },
+
+  async importGuestHistory() {
+    const current = get().guestEntries;
+    const guest = current.length > 0 ? current : loadGuestHistory();
+    if (guest.length === 0) {
+      set({ guestImportPending: false, guestImportError: null });
+      return;
+    }
+
+    // El historial se guarda con la entrada más reciente primero; el
+    // backend debe recibirlo en orden cronológico.
+    const ordered = [...guest].reverse();
+    let failureIndex = -1;
+    for (let i = 0; i < ordered.length; i++) {
+      const entry = ordered[i];
+      if (!entry.record) {
+        failureIndex = i;
+        break;
+      }
+      try {
+        await historyRepository.create(entry.record);
+      } catch {
+        failureIndex = i;
+        break;
+      }
+    }
+
+    if (failureIndex !== -1) {
+      // Lo importado ya está en el backend; lo que falló y lo posterior
+      // siguen guardados en el navegador, en el orden original.
+      const remaining = ordered.slice(failureIndex).reverse();
+      saveGuestHistory(remaining);
+      const noun = remaining.length === 1 ? 'sorteo' : 'sorteos';
+      const message = `No se pudieron importar ${remaining.length} ${noun}. Quedaron guardados en este navegador.`;
+      set({
+        guestEntries: remaining,
+        guestImportError: message,
+        error: message,
+        guestImportPending: true,
+      });
+      throw new Error(message);
+    }
+
+    clearGuestHistory();
+    set({
+      guestEntries: [],
+      guestImportPending: false,
+      guestImportError: null,
+      error: null,
+    });
+    await get().load();
+  },
+
+  dismissGuestImport() {
+    set({ guestImportPending: false, guestImportError: null, error: null });
+  },
+
   async load() {
     const auth = useAuthStore.getState();
     if (!selectIsAuthenticated(auth)) {
       return;
     }
-    set({ loading: true, error: null });
+
+    // La vista autenticada no mezcla el historial de invitado: al entrar,
+    // solo sobreviven los pendientes que ya estaban en memoria. El invitado
+    // queda en `storage` para el diálogo de importación o el próximo logout.
+    const inMemoryPending = get().entries.filter(
+      (entry) => entry.pending !== undefined,
+    );
+    set({ loading: true, error: null, entries: inMemoryPending });
+
+    // Los pendientes guardados en el navegador se recuperan antes del
+    // reintento. Los que ya están en memoria se respetan por id.
+    const userId = auth.user?.id;
+    if (userId !== undefined && userId !== null) {
+      const persisted = loadPendingDraws(userId).filter(
+        (entry) => !get().entries.some((current) => current.id === entry.id),
+      );
+      if (persisted.length > 0) {
+        set((s) => ({ entries: [...persisted, ...s.entries] }));
+      }
+    }
 
     // Los pendientes van antes que el `load()`: si uno falla, tiene que
     // sobrevivir al reemplazo de la lista. `retryPendingDraws` comparte el
@@ -188,6 +284,16 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
 
     try {
       const res = await historyRepository.list({ page: 1, per_page: PAGE_SIZE });
+      const currentAuth = useAuthStore.getState();
+      if (
+        !selectIsAuthenticated(currentAuth) ||
+        currentAuth.user?.id !== userId
+      ) {
+        // La sesión cambió mientras la request estaba en vuelo: no
+        // repoblamos la vista con datos de una cuenta que ya no está.
+        set({ loading: false });
+        return;
+      }
       const fromServer = res.data.map(toEntry);
       // Los pendientes que sobrevivieron al reintento se agregan arriba de
       // la lista del servidor: son sorteos que el backend todavía no tiene.
@@ -221,9 +327,18 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
       return;
     }
     set({ loading: true, error: null });
+    const userId = useAuthStore.getState().user?.id;
     try {
       const next = currentPage + 1;
       const res = await historyRepository.list({ page: next, per_page: PAGE_SIZE });
+      const currentAuth = useAuthStore.getState();
+      if (
+        !selectIsAuthenticated(currentAuth) ||
+        currentAuth.user?.id !== userId
+      ) {
+        set({ loading: false });
+        return;
+      }
       set((s) => ({
         // Deduplicamos por id: si el usuario sorteó entre medio, el
         // backend puede repetir un registro en la página siguiente.
@@ -246,13 +361,20 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   async remove(id) {
     set({ error: null });
 
+    const entry = get().entries.find((e) => e.id === id);
+    if (!entry) {
+      return;
+    }
+
+    const authenticated = selectIsAuthenticated(useAuthStore.getState());
+    const pendingUserId = entry.pending?.userId;
+    const isPending = pendingUserId !== undefined;
+
     // Un pendiente nunca llegó al backend: se quita solo de memoria, sin
     // tocar el servidor (no hay nada que borrar allá).
-    const isPending = useHistoryStore.getState().entries.some((e) => e.id === id && e.pending);
-
     // Los ids `local-*` nunca estuvieron en el backend: se quita solo de
     // memoria. Lo mismo sin sesión, donde el historial es local por diseño.
-    if (!isPending && selectIsAuthenticated(useAuthStore.getState()) && !isLocalId(id)) {
+    if (authenticated && !isPending && !isLocalId(id)) {
       try {
         await historyRepository.remove(id);
       } catch (err) {
@@ -262,21 +384,49 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
         return;
       }
     }
-    set((s) => ({ entries: s.entries.filter((e) => e.id !== id) }));
+
+    if (isPending && pendingUserId !== undefined) {
+      removePendingDraw(pendingUserId, id);
+    }
+
+    set((s) => {
+      const entries = s.entries.filter((e) => e.id !== id);
+      if (!authenticated) {
+        const guestEntries = s.guestEntries.filter((e) => e.id !== id);
+        saveGuestHistory(guestEntries);
+        return { entries, guestEntries };
+      }
+      return { entries };
+    });
   },
 
   async clear() {
     set({ error: null });
 
-    if (selectIsAuthenticated(useAuthStore.getState())) {
+    const auth = useAuthStore.getState();
+    if (selectIsAuthenticated(auth)) {
       try {
         await historyRepository.clearAll();
       } catch (err) {
         reportSyncError('limpiar el historial', err);
         return;
       }
+      const userId = auth.user?.id;
+      if (userId !== undefined && userId !== null) {
+        clearPendingDraws(userId);
+      }
+      set({ entries: [], currentPage: 1, lastPage: 1, error: null });
+      return;
     }
-    set({ entries: [], currentPage: 1, lastPage: 1, error: null });
+
+    clearGuestHistory();
+    set({
+      entries: [],
+      guestEntries: [],
+      currentPage: 1,
+      lastPage: 1,
+      error: null,
+    });
   },
 }));
 
@@ -318,7 +468,7 @@ export function retryPendingDraws(): Promise<void> {
  *
  * Reglas:
  *   - Los pendientes de OTRO usuario se descartan de la lista: nunca se
- *     envían con otra cuenta (serían sorteos ajenos).
+ *     envían con una cuenta (serían sorteos ajenos).
  *   - Los que se guardan dejan de ser pendientes y quedan `synced: true`.
  *   - Los que vuelven a fallar conservan su `pending` para el próximo intento.
  *   - No toca `error`: un reintento fallido es esperado y `load()` va a
@@ -350,6 +500,7 @@ async function retryPending(userId: number | undefined): Promise<void> {
 
     try {
       await historyRepository.create(pending.record);
+      removePendingDraw(pending.userId, entry.id);
       useHistoryStore.setState((s) => ({
         entries: s.entries.map((e) =>
           e.id === entry.id ? { ...e, synced: true, pending: undefined } : e,

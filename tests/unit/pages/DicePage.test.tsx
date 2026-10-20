@@ -12,7 +12,7 @@ import { mockRequestAnimationFrame } from '../helpers/domMocks';
 const resetHistory = () => useHistoryStore.setState({ entries: [] });
 
 function renderDice() {
-  render(<DicePage />);
+  return render(<DicePage />);
 }
 
 const rollDice = (sides: number) => {
@@ -137,5 +137,32 @@ describe('DicePage — dados', () => {
     expect(
       document.querySelector('#dice-total')!.textContent,
     ).toContain('tiradas: 3, 5');
+  });
+
+  it('restaura modificador y último dado, y los restablece', async () => {
+    mockRequestAnimationFrame();
+    const user = createUserEvent();
+    const first = renderDice();
+    await fillByLabel(user, 'Modificador', '3');
+    rollDice(20);
+    await waitFor(() =>
+      expect(document.querySelector('#dice-total')).toBeInTheDocument(),
+    );
+
+    first.unmount();
+    renderDice();
+
+    expect(screen.getByLabelText('Modificador')).toHaveValue(3);
+    expect(screen.getByRole('button', { name: 'd20' })).toHaveAttribute(
+      'data-active',
+      'true',
+    );
+
+    const userAfterReload = createUserEvent();
+    await userAfterReload.click(screen.getByRole('button', { name: 'Restablecer' }));
+    expect(screen.getByLabelText('Modificador')).toHaveValue(0);
+    expect(screen.getByRole('button', { name: 'd20' })).not.toHaveAttribute(
+      'aria-current',
+    );
   });
 });

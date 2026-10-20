@@ -18,7 +18,7 @@ const resetHistory = () =>
   useHistoryStore.setState({ entries: [], currentPage: 1, lastPage: 1, error: null });
 
 function renderNumbers() {
-  render(<NumbersPage />);
+  return render(<NumbersPage />);
 }
 
 const generate = () => {
@@ -192,5 +192,31 @@ describe('NumbersPage — formulario', () => {
 
     await waitFor(() => expect(document.querySelector('#numbers-result')).toBeInTheDocument());
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('restaura las opciones y las restablece', async () => {
+    cleanup();
+    const user = createUserEvent();
+    const first = renderNumbers();
+    await fillByLabel(user, 'Cantidad', '7');
+    await fillByLabel(user, 'Mínimo', '2');
+    await fillByLabel(user, 'Máximo', '9');
+    await user.click(screen.getByLabelText('Sin repetición'));
+
+    first.unmount();
+    renderNumbers();
+
+    expect(screen.getByLabelText('Cantidad')).toHaveValue(7);
+    expect(screen.getByLabelText('Mínimo')).toHaveValue(2);
+    expect(screen.getByLabelText('Máximo')).toHaveValue(9);
+    expect(screen.getByLabelText('Sin repetición')).not.toBeChecked();
+
+    const userAfterReload = createUserEvent();
+    await userAfterReload.click(screen.getByRole('button', { name: 'Restablecer' }));
+
+    expect(screen.getByLabelText('Cantidad')).toHaveValue(5);
+    expect(screen.getByLabelText('Mínimo')).toHaveValue(1);
+    expect(screen.getByLabelText('Máximo')).toHaveValue(50);
+    expect(screen.getByLabelText('Sin repetición')).toBeChecked();
   });
 });

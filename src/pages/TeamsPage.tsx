@@ -7,11 +7,12 @@
 // - reglas avanzadas: pares de exclusión (no pueden quedar juntos).
 // =============================================================================
 
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
+import { clearTeamsOptions, loadTeamsOptions, saveTeamsOptions } from '../lib/storage';
 import { teamsStrategy } from '../strategies/TeamsStrategy';
 import { useHistoryStore } from '../store/historyStore';
 import { clampMin, readNumeric, type NumericInput } from '../lib/numericInput';
@@ -38,15 +39,35 @@ function parseParticipants(text: string): string[] {
 }
 
 export function TeamsPage() {
-  const [participantsText, setParticipantsText] = useState('');
-  const [mode, setMode] = useState<TeamsMode>('count');
-  const [value, setValue] = useState<NumericInput>(2);
+  const [initialOptions] = useState(() => loadTeamsOptions());
+  const [participantsText, setParticipantsText] = useState(
+    initialOptions?.participantsText ?? '',
+  );
+  const [mode, setMode] = useState<TeamsMode>(initialOptions?.mode ?? 'count');
+  const [value, setValue] = useState<NumericInput>(initialOptions?.value ?? 2);
   const [exclusionA, setExclusionA] = useState('');
   const [exclusionB, setExclusionB] = useState('');
-  const [exclusions, setExclusions] = useState<Exclusion[]>([]);
+  const [exclusions, setExclusions] = useState<Exclusion[]>(() => {
+    if (!initialOptions) {
+      return [];
+    }
+    const names = parseParticipants(initialOptions.participantsText);
+    return initialOptions.exclusions.filter(
+      ([a, b]) => names.includes(a) && names.includes(b),
+    );
+  });
   const [result, setResult] = useState<TeamsResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const addHistory = useHistoryStore((s) => s.add);
+
+  useEffect(() => {
+    saveTeamsOptions({
+      participantsText,
+      mode,
+      value: clampValue(value, mode),
+      exclusions,
+    });
+  }, [participantsText, mode, value, exclusions]);
 
   const participants = useMemo(() => parseParticipants(participantsText), [participantsText]);
   const participantOptions = useMemo(
@@ -97,6 +118,18 @@ export function TeamsPage() {
   const onRemoveExclusion = (idx: number) => {
     setError(null);
     setExclusions((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const onReset = () => {
+    clearTeamsOptions();
+    setParticipantsText('');
+    setMode('count');
+    setValue(2);
+    setExclusions([]);
+    setExclusionA('');
+    setExclusionB('');
+    setResult(null);
+    setError(null);
   };
 
   const onGenerate = (e: FormEvent) => {
@@ -271,9 +304,19 @@ export function TeamsPage() {
             </ul>
           </details>
 
-          <PrimaryButton id="generate-teams-btn" type="submit" variant="primary">
-            Generar Equipos
-          </PrimaryButton>
+          <div className="flex flex-wrap gap-2">
+            <PrimaryButton id="generate-teams-btn" type="submit" variant="primary">
+              Generar Equipos
+            </PrimaryButton>
+            <PrimaryButton
+              id="teams-reset-btn"
+              type="button"
+              variant="ghost"
+              onClick={onReset}
+            >
+              Restablecer
+            </PrimaryButton>
+          </div>
         </form>
 
         {error ? (

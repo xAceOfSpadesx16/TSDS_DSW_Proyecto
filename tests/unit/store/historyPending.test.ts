@@ -12,11 +12,13 @@ import {
 } from '../../../src/store/historyStore';
 import { useAuthStore } from '../../../src/store/authStore';
 import { historyRepository } from '../../../src/repositories/historyRepository';
+import { loadPendingDraws } from '../../../src/lib/storage';
 import {
   ApiError,
   type CreateHistoryPayload,
   type HistoryRecord,
 } from '../../../src/domain/types';
+import { installLocalStorage } from '../helpers/localStorageMock';
 
 vi.mock('../../../src/repositories/historyRepository', () => ({
   historyRepository: {
@@ -82,6 +84,7 @@ function authenticate(userId: number): void {
 
 describe('historyStore — sorteos pendientes', () => {
   beforeEach(() => {
+    installLocalStorage();
     useAuthStore.setState({ user: null, token: null, expiresAt: null });
     useHistoryStore.setState({ entries: [], currentPage: 1, lastPage: 1, loading: false, error: null });
     vi.mocked(historyRepository.create).mockReset();
@@ -110,6 +113,30 @@ describe('historyStore — sorteos pendientes', () => {
     const [entry] = useHistoryStore.getState().entries;
     expect(entry.pending).toEqual({ record: RECORD, userId: 7 });
     expect(entry.synced).toBe(false);
+  });
+
+  it('un pendiente persiste por usuario y se reintenta al recargar', async () => {
+    authenticate(7);
+    vi.mocked(historyRepository.create).mockRejectedValueOnce(
+      new ApiError(500, { message: 'Server error' }),
+    );
+
+    await useHistoryStore.getState().add({
+      module: 'dice',
+      description: 'd20 = 15',
+      record: RECORD,
+    });
+
+    expect(loadPendingDraws(7)).toHaveLength(1);
+    // Simula una recarga: la lista en memoria se vacía, pero el pendiente
+    // sigue guardado en localStorage.
+    useHistoryStore.setState({ entries: [] });
+    vi.mocked(historyRepository.create).mockResolvedValue(savedRecord());
+
+    await useHistoryStore.getState().load();
+
+    expect(historyRepository.create).toHaveBeenCalledWith(RECORD);
+    expect(loadPendingDraws(7)).toHaveLength(0);
   });
 
   it('add() fallido sin sesión NO deja pendiente (entradas de invitado)', async () => {
@@ -356,6 +383,55 @@ describe('historyStore — sorteos pendientes', () => {
 
     // El segundo se sumó al reintento en vuelo, no mandó otra petición.
     expect(historyRepository.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('no repuebla la lista si la sesión se cierra durante load()', async () => {
+    authenticate(7);
+    let resolveList!: (value: {
+      data: HistoryRecord[];
+      meta: { current_page: number; last_page: number; per_page: number; total: number };
+    }) => void;
+    vi.mocked(historyRepository.list).mockReturnValue(
+      new Promise((resolve) => {
+        resolveList = resolve;
+      }),
+    );
+
+    const loading = useHistoryStore.getState().load();
+    useAuthStore.setState({ user: null, token: null, expiresAt: null });
+    resolveList({
+      data: [savedRecord().data],
+      meta: { current_page: 1, last_page: 1, per_page: 20, total: 1 },
+    });
+    await loading;
+
+    expect(useHistoryStore.getState().entries).toEqual([]);
+    expect(useHistoryStore.getState().loading).toBe(false);
+  });
+
+  it('no repuebla la lista si la sesión se cierra durante loadMore()', async () => {
+    authenticate(7);
+    useHistoryStore.setState({ entries: [], currentPage: 1, lastPage: 2 });
+    let resolveList!: (value: {
+      data: HistoryRecord[];
+      meta: { current_page: number; last_page: number; per_page: number; total: number };
+    }) => void;
+    vi.mocked(historyRepository.list).mockReturnValue(
+      new Promise((resolve) => {
+        resolveList = resolve;
+      }),
+    );
+
+    const loading = useHistoryStore.getState().loadMore();
+    useAuthStore.setState({ user: null, token: null, expiresAt: null });
+    resolveList({
+      data: [savedRecord().data],
+      meta: { current_page: 2, last_page: 2, per_page: 20, total: 1 },
+    });
+    await loading;
+
+    expect(useHistoryStore.getState().entries).toEqual([]);
+    expect(useHistoryStore.getState().loading).toBe(false);
   });
 
   it('sin sesión, load() no reintenta nada', async () => {

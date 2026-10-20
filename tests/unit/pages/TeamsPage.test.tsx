@@ -10,7 +10,7 @@ import { installLocalStorage } from '../helpers/localStorageMock';
 const resetHistory = () => useHistoryStore.setState({ entries: [] });
 
 function renderTeams() {
-  render(<TeamsPage />);
+  return render(<TeamsPage />);
 }
 
 const generate = () => fireEvent.click(screen.getByRole('button', { name: 'Generar Equipos' }));
@@ -171,6 +171,42 @@ describe('TeamsPage — exclusiones', () => {
     const juanTeam = teamMembers.findIndex((m) => m.includes('Juan'));
     const pedroTeam = teamMembers.findIndex((m) => m.includes('Pedro'));
     expect(juanTeam).not.toBe(pedroTeam);
+  });
+
+  it('restaura participantes, modo, valor y exclusiones, y los restablece', async () => {
+    cleanup();
+    const user = createUserEvent();
+    const first = renderTeams();
+    await fillParticipants('Ana\nBruno\nCarla');
+    await fillExclusion('a', 'Ana');
+    await fillExclusion('b', 'Bruno');
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tamaño de grupo' }));
+    await fillByLabel(user, 'Tamaño de grupo', '3');
+
+    first.unmount();
+    renderTeams();
+
+    expect(screen.getByLabelText('Participantes (uno por línea)')).toHaveValue(
+      'Ana\nBruno\nCarla',
+    );
+    expect(screen.getByText('Ana ↔ Bruno')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tamaño de grupo' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByLabelText('Tamaño de grupo')).toHaveValue(3);
+
+    const userAfterReload = createUserEvent();
+    await userAfterReload.click(screen.getByRole('button', { name: 'Restablecer' }));
+
+    expect(screen.getByLabelText('Participantes (uno por línea)')).toHaveValue('');
+    expect(screen.queryByText('Ana ↔ Bruno')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cantidad de grupos' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByLabelText('Cantidad de grupos')).toHaveValue(2);
   });
 });
 

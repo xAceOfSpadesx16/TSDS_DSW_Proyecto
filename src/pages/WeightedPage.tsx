@@ -7,11 +7,16 @@
 // - Reset restaura la lista original.
 // =============================================================================
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
+import {
+  clearWeightedOptions,
+  loadWeightedOptions,
+  saveWeightedOptions,
+} from '../lib/storage';
 import { weightedStrategy } from '../strategies/WeightedStrategy';
 import { useHistoryStore } from '../store/historyStore';
 import { readNumeric, type NumericInput } from '../lib/numericInput';
@@ -24,14 +29,23 @@ function clampWeight(value: NumericInput): number {
 }
 
 export function WeightedPage() {
-  const [entries, setEntries] = useState<WeightedEntry[]>([]);
-  const [originalEntries, setOriginalEntries] = useState<WeightedEntry[]>([]);
+  const [initialOptions] = useState(() => loadWeightedOptions());
+  const [entries, setEntries] = useState<WeightedEntry[]>(
+    initialOptions?.entries ?? [],
+  );
+  const [originalEntries, setOriginalEntries] = useState<WeightedEntry[]>(
+    initialOptions?.originalEntries ?? [],
+  );
   const [name, setName] = useState('');
   const [weight, setWeight] = useState<NumericInput>(1);
-  const [autoRemove, setAutoRemove] = useState(false);
+  const [autoRemove, setAutoRemove] = useState(initialOptions?.autoRemove ?? false);
   const [result, setResult] = useState<WeightedResultLocal | null>(null);
   const [error, setError] = useState<string | null>(null);
   const addHistory = useHistoryStore((s) => s.add);
+
+  useEffect(() => {
+    saveWeightedOptions({ entries, originalEntries, autoRemove });
+  }, [entries, originalEntries, autoRemove]);
 
   const totalWeight = entries.reduce((acc, e) => acc + e.weight, 0);
 
@@ -81,6 +95,17 @@ export function WeightedPage() {
 
   const onReset = () => {
     setEntries(originalEntries);
+    setResult(null);
+    setError(null);
+  };
+
+  const onClear = () => {
+    clearWeightedOptions();
+    setEntries([]);
+    setOriginalEntries([]);
+    setName('');
+    setWeight(1);
+    setAutoRemove(false);
     setResult(null);
     setError(null);
   };
@@ -166,7 +191,7 @@ export function WeightedPage() {
           Auto-eliminar ganadores
         </label>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <PrimaryButton
             id="weighted-draw-btn"
             variant="accent"
@@ -182,6 +207,13 @@ export function WeightedPage() {
             disabled={originalEntries.length === 0}
           >
             Reiniciar
+          </PrimaryButton>
+          <PrimaryButton
+            id="weighted-clear-btn"
+            variant="ghost"
+            onClick={onClear}
+          >
+            Restablecer
           </PrimaryButton>
         </div>
 

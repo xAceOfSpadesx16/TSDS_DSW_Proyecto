@@ -86,8 +86,8 @@ describe('historyStore', () => {
     expect(entries[0].synced).toBe(true);
   });
 
-  it('mantiene solo las MAX_ENTRIES más recientes', async () => {
-    for (let i = 0; i < 25; i++) {
+  it('mantiene solo las 100 entradas más recientes', async () => {
+    for (let i = 0; i < 105; i++) {
       await useHistoryStore.getState().add({
         module: 'numbers',
         description: `Entrada ${i}`,
@@ -95,7 +95,7 @@ describe('historyStore', () => {
       });
     }
     const entries = useHistoryStore.getState().entries as Array<{ id: string }>;
-    expect(entries).toHaveLength(20);
+    expect(entries).toHaveLength(100);
     // La primera es la más reciente (la última añadida).
     expect(entries[0].id).toMatch(/^local-/);
   });

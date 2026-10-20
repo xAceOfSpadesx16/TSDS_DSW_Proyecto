@@ -11,7 +11,7 @@ import { installLocalStorage } from '../helpers/localStorageMock';
 const resetHistory = () => useHistoryStore.setState({ entries: [] });
 
 function renderWeighted() {
-  render(<WeightedPage />);
+  return render(<WeightedPage />);
 }
 
 const addParticipant = async (name: string, weight: number) => {
@@ -61,6 +61,24 @@ describe('WeightedPage — participantes y barras', () => {
     expect(bars).toHaveLength(2);
     expect(bars[0].style.width).toBe('30%');
     expect(bars[1].style.width).toBe('70%');
+  });
+
+  it('restaura participantes y pesos, y los restablece', async () => {
+    cleanup();
+    const first = renderWeighted();
+    await addParticipant('Ana', 3);
+    await addParticipant('Juan', 7);
+
+    first.unmount();
+    renderWeighted();
+
+    expect(screen.getByText('Ana')).toBeInTheDocument();
+    expect(screen.getByText('Juan')).toBeInTheDocument();
+    expect(screen.getByText('peso 3')).toBeInTheDocument();
+    expect(screen.getByText('peso 7')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Restablecer' }));
+    expect(screen.getByText(/Sin participantes cargados/)).toBeInTheDocument();
   });
 });
 

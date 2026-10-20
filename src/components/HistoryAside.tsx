@@ -144,7 +144,7 @@ export function HistoryAside({ variant = 'sidebar' }: Props) {
                   {entry.pending ? (
                     <span className="text-[10px] text-danger italic">sin guardar</span>
                   ) : !entry.synced ? (
-                    <span className="text-[10px] text-light-muted italic">solo local</span>
+                    <span className="text-[10px] text-light-muted italic">Guardado en este navegador</span>
                   ) : null}
                 </li>
               ))}

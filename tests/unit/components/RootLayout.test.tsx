@@ -11,6 +11,8 @@ import userEvent from '@testing-library/user-event';
 import { RootLayout } from '../../../src/components/RootLayout';
 import { ApiError, type LegalDisclaimer } from '../../../src/domain/types';
 import { useAuthStore } from '../../../src/store/authStore';
+import { useHistoryStore, type LocalHistoryEntry } from '../../../src/store/historyStore';
+import { mockNativeDialog } from '../helpers/domMocks';
 
 // El disclaimer se pide por red; se mockea el repositorio para poder
 // controlar tanto el éxito como el fallo.
@@ -34,6 +36,11 @@ const DISCLAIMER: LegalDisclaimer = {
 describe('RootLayout', () => {
   beforeEach(() => {
     useAuthStore.setState({ user: null, token: null, expiresAt: null });
+    useHistoryStore.setState({
+      guestEntries: [],
+      guestImportPending: false,
+      guestImportError: null,
+    });
     vi.mocked(legalRepository.getDisclaimer).mockReset();
   });
 
@@ -80,6 +87,11 @@ describe('RootLayout', () => {
 describe('RootLayout — disclaimer', () => {
   beforeEach(() => {
     useAuthStore.setState({ user: null, token: null, expiresAt: null });
+    useHistoryStore.setState({
+      guestEntries: [],
+      guestImportPending: false,
+      guestImportError: null,
+    });
     vi.mocked(legalRepository.getDisclaimer).mockReset();
   });
 
@@ -177,5 +189,89 @@ describe('RootLayout — disclaimer', () => {
 
     expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
+  });
+});
+
+describe('RootLayout — importación de invitado', () => {
+  const GUEST_ENTRY: LocalHistoryEntry = {
+    id: 'local-1',
+    module: 'dice',
+    description: 'd20 = 7',
+    timestamp: '2026-10-20T12:00:00.000Z',
+    synced: false,
+    record: {
+      module_name: 'dice',
+      action: 'd20',
+      payload: { sides: 20, modifier: 0 },
+      result: { rolls: [7], modifier: 0, total: 7 },
+    },
+  };
+
+  beforeEach(() => {
+    useAuthStore.setState({ user: null, token: null, expiresAt: null });
+    useHistoryStore.setState({
+      entries: [],
+      guestEntries: [],
+      guestImportPending: false,
+      guestImportError: null,
+    });
+    vi.mocked(legalRepository.getDisclaimer).mockResolvedValue(DISCLAIMER);
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
+
+  it('abre el diálogo y permite elegir "Ahora no"', async () => {
+    const { showModal, close } = mockNativeDialog();
+    useHistoryStore.setState({
+      guestEntries: [GUEST_ENTRY],
+      guestImportPending: true,
+    });
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <RootLayout />
+      </MemoryRouter>,
+    );
+
+    const dialog = document.getElementById('guest-import-dialog') as HTMLDialogElement;
+    await waitFor(() => expect(dialog.open).toBe(true));
+    expect(showModal).toHaveBeenCalled();
+    expect(
+      screen.getByRole('dialog', { name: 'Importar historial de invitado' }),
+    ).toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Ahora no' }));
+
+    await waitFor(() =>
+      expect(useHistoryStore.getState().guestImportPending).toBe(false),
+    );
+    expect(close).toHaveBeenCalled();
+    expect(dialog.open).toBe(false);
+  });
+
+  it('llama a importGuestHistory al confirmar', async () => {
+    mockNativeDialog();
+    const importSpy = vi
+      .spyOn(useHistoryStore.getState(), 'importGuestHistory')
+      .mockResolvedValue();
+    useHistoryStore.setState({
+      guestEntries: [GUEST_ENTRY],
+      guestImportPending: true,
+    });
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <RootLayout />
+      </MemoryRouter>,
+    );
+
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole('button', { name: 'Importar a mi cuenta' }),
+    );
+
+    expect(importSpy).toHaveBeenCalledTimes(1);
   });
 });

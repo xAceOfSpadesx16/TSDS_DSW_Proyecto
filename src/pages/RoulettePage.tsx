@@ -14,12 +14,21 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
+import {
+  clearRouletteOptions,
+  loadRouletteOptions,
+  saveRouletteOptions,
+} from '../lib/storage';
 import { calculateSegments, rouletteStrategy } from '../strategies/RouletteStrategy';
 import { useHistoryStore } from '../store/historyStore';
 import type { RouletteOption, RouletteResultLocal } from '../domain/contracts';
 
 const DEFAULT_COLOR = '#6c5ce7';
 const CANVAS_SIZE = 360;
+const DEFAULT_OPTIONS: ReadonlyArray<RouletteOption> = [
+  { label: 'Sí', color: DEFAULT_COLOR },
+  { label: 'No', color: '#00cec9' },
+];
 
 function drawRoulette(
   canvas: HTMLCanvasElement,
@@ -77,10 +86,12 @@ function drawRoulette(
 }
 
 export function RoulettePage() {
-  const [options, setOptions] = useState<RouletteOption[]>([
-    { label: 'Sí', color: DEFAULT_COLOR },
-    { label: 'No', color: '#00cec9' },
-  ]);
+  const [initialOptions] = useState(() => loadRouletteOptions());
+  const [options, setOptions] = useState<RouletteOption[]>(
+    initialOptions
+      ? initialOptions.options
+      : DEFAULT_OPTIONS.map((option) => ({ ...option })),
+  );
   const [label, setLabel] = useState('');
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [spinning, setSpinning] = useState(false);
@@ -91,6 +102,21 @@ export function RoulettePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const rotationRef = useRef(0);
+
+  useEffect(() => {
+    saveRouletteOptions(options);
+  }, [options]);
+
+  const onReset = () => {
+    clearRouletteOptions();
+    setOptions(DEFAULT_OPTIONS.map((option) => ({ ...option })));
+    setLabel('');
+    setColor(DEFAULT_COLOR);
+    setResult(null);
+    setError(null);
+    rotationRef.current = 0;
+    dialogRef.current?.close?.();
+  };
 
   // Repintar cuando cambian las opciones.
   useEffect(() => {
@@ -250,6 +276,18 @@ export function RoulettePage() {
             </li>
           ))}
         </ul>
+
+        <div className="flex justify-end">
+          <PrimaryButton
+            id="roulette-reset-btn"
+            type="button"
+            variant="ghost"
+            onClick={onReset}
+            disabled={spinning}
+          >
+            Restablecer
+          </PrimaryButton>
+        </div>
 
         <div className="flex flex-col items-center gap-4 py-4">
           <div className="roulette-wrapper relative">

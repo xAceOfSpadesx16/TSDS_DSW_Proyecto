@@ -11,11 +11,16 @@
 // pedir más números únicos de los que caben en el rango.
 // =============================================================================
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
+import {
+  clearNumbersOptions,
+  loadNumbersOptions,
+  saveNumbersOptions,
+} from '../lib/storage';
 import { numbersStrategy } from '../strategies/NumbersStrategy';
 import { useHistoryStore } from '../store/historyStore';
 import {
@@ -27,13 +32,38 @@ import {
 import type { NumbersResult } from '../domain/contracts';
 
 export function NumbersPage() {
-  const [count, setCount] = useState<NumericInput>(5);
-  const [min, setMin] = useState<NumericInput>(1);
-  const [max, setMax] = useState<NumericInput>(50);
-  const [unique, setUnique] = useState(true);
+  const [initialOptions] = useState(() => loadNumbersOptions());
+  const [count, setCount] = useState<NumericInput>(initialOptions?.count ?? 5);
+  const [min, setMin] = useState<NumericInput>(initialOptions?.min ?? 1);
+  const [max, setMax] = useState<NumericInput>(initialOptions?.max ?? 50);
+  const [unique, setUnique] = useState(initialOptions?.unique ?? true);
   const [result, setResult] = useState<NumbersResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const addHistory = useHistoryStore((s) => s.add);
+
+  useEffect(() => {
+    const countNum = clampMin(count, 1);
+    const minNum = toNumberOr(min);
+    const maxNum = toNumberOr(max);
+    if (maxNum >= minNum) {
+      saveNumbersOptions({
+        count: countNum,
+        min: minNum,
+        max: maxNum,
+        unique,
+      });
+    }
+  }, [count, min, max, unique]);
+
+  const onReset = () => {
+    clearNumbersOptions();
+    setCount(5);
+    setMin(1);
+    setMax(50);
+    setUnique(true);
+    setResult(null);
+    setError(null);
+  };
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -143,9 +173,19 @@ export function NumbersPage() {
             Sin repetición
           </label>
 
-          <PrimaryButton id="generate-numbers-btn" type="submit" variant="primary">
-            Generar
-          </PrimaryButton>
+          <div className="flex flex-wrap gap-2">
+            <PrimaryButton id="generate-numbers-btn" type="submit" variant="primary">
+              Generar
+            </PrimaryButton>
+            <PrimaryButton
+              id="numbers-reset-btn"
+              type="button"
+              variant="ghost"
+              onClick={onReset}
+            >
+              Restablecer
+            </PrimaryButton>
+          </div>
         </form>
 
         {error ? (

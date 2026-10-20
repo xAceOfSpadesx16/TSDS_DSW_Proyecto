@@ -73,14 +73,14 @@ describe('HistoryAside (sidebar)', () => {
     expect(screen.getByText('Tirada de dados')).toBeInTheDocument();
     expect(screen.getByText('Creación de equipos')).toBeInTheDocument();
 
-    // La entrada no sincronizada muestra "solo local".
+    // La entrada no sincronizada muestra que quedó guardada en el navegador.
     const list = document.getElementById('history-list')!;
     const items = list.querySelectorAll('li');
     expect(items).toHaveLength(2);
     const unsynced = Array.from(items).find((li) =>
       li.textContent?.includes('Creación de equipos'),
     );
-    expect(unsynced?.textContent).toContain('solo local');
+    expect(unsynced?.textContent).toContain('Guardado en este navegador');
 
     // (3.7.1) la marca temporal se renderiza HH:mm (dos dígitos).
     const rpgLi = Array.from(items).find((li) =>
@@ -93,8 +93,8 @@ describe('HistoryAside (sidebar)', () => {
     const descSpan = rpgLi.querySelector('span.truncate')!;
     expect(descSpan.getAttribute('title')).toBe('Tirada de dados');
 
-    // (3.7.3) una entrada sincronizada NO muestra el distintivo "solo local".
-    expect(rpgLi.textContent).not.toContain('solo local');
+    // (3.7.3) una entrada sincronizada NO muestra el distintivo local.
+    expect(rpgLi.textContent).not.toContain('Guardado en este navegador');
   });
 
   it('muestra el botón Limpiar y vacía la lista al pulsarlo', async () => {

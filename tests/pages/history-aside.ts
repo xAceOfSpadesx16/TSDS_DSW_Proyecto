@@ -32,35 +32,39 @@ export class HistoryAside {
     return first.locator('span.text-sm').first().textContent();
   }
 
-  /** `true` si la entrada está marcada como sincronizada (sin "solo local"). */
+  /** `true` si la entrada está marcada como sincronizada (sin distintivo local). */
   async isSynced(description: string): Promise<boolean> {
     const el = this.entry(description);
     // La fila debe existir: si no hay entrada, no puede estar sincronizada.
     // Sin esta verificación, una entrada inexistente devolvería `true`
     // (falso positivo, porque count() de la etiqueta da 0).
     if (await el.count() === 0) return false;
-    return (await el.locator('text="solo local"').count()) === 0;
+    return (
+      (await el.locator('text="Guardado en este navegador"').count()) === 0
+    );
   }
 
   /** `true` si la entrada sigue siendo solo local. */
   async isLocal(description: string): Promise<boolean> {
     const el = this.entry(description);
-    // Sin fila: no puede ser "solo local" (evita un falso positivo por
-    // negación de isSynced()).
+    // Sin fila: no puede ser local (evita un falso positivo por negación
+    // de isSynced()).
     if (await el.count() === 0) return false;
     return !(await this.isSynced(description));
   }
 
-  /** `true` si la entrada más reciente está sincronizada (sin "solo local"). */
+  /** `true` si la entrada más reciente está sincronizada. */
   async latestSynced(): Promise<boolean> {
     const first = this.page.locator('#history-list > li').first();
     if (await first.count() === 0) return false;
-    return (await first.locator('text="solo local"').count()) === 0;
+    return (
+      (await first.locator('text="Guardado en este navegador"').count()) === 0
+    );
   }
 
   /** `true` si la entrada más reciente sigue siendo solo local. */
   async latestLocal(): Promise<boolean> {
-    // Sin filas: no hay entrada, así que no puede ser "solo local" (evita un
+    // Sin filas: no hay entrada, así que no puede ser local (evita un
     // falso positivo por negación de latestSynced()).
     if (await this.page.locator('#history-list > li').count() === 0) return false;
     return !(await this.latestSynced());

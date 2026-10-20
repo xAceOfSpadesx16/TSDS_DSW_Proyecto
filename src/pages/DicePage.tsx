@@ -9,6 +9,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
+import { PrimaryButton } from '../components/PrimaryButton';
+import { clearDiceOptions, loadDiceOptions, saveDiceOptions } from '../lib/storage';
 import { diceStrategy } from '../strategies/DiceStrategy';
 import { useHistoryStore } from '../store/historyStore';
 import type { DiceResult } from '../domain/contracts';
@@ -43,15 +45,38 @@ export function DicePage() {
     };
   }, []);
 
-  const [modifier, setModifier] = useState(0);
+  const [initialOptions] = useState(() => loadDiceOptions());
+  const [modifier, setModifier] = useState(initialOptions?.modifier ?? 0);
+  const [lastSides, setLastSides] = useState<number | null>(
+    initialOptions?.lastSides ?? null,
+  );
   const [shaking, setShaking] = useState(false);
   const [displayRoll, setDisplayRoll] = useState(1);
   const [diceResult, setDiceResult] = useState<DiceResult | null>(null);
   const [diceError, setDiceError] = useState<string | null>(null);
 
+  useEffect(() => {
+    saveDiceOptions({ lastSides, modifier });
+  }, [lastSides, modifier]);
+
+  const onReset = () => {
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = 0;
+    }
+    clearDiceOptions();
+    setModifier(0);
+    setLastSides(null);
+    setShaking(false);
+    setDisplayRoll(1);
+    setDiceResult(null);
+    setDiceError(null);
+  };
+
   const onRollDice = (sides: number) => {
     setDiceError(null);
     setDiceResult(null);
+    setLastSides(sides);
     setShaking(true);
 
     // Animación: alternar caras durante ~500ms, luego commitear el resultado
@@ -109,8 +134,13 @@ export function DicePage() {
               <button
                 key={sides}
                 type="button"
-                className="dice-btn px-4 py-3 rounded-md bg-dark-bg-alt hover:bg-primary hover:text-light-inverse text-light-text text-lg font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                className={`dice-btn px-4 py-3 rounded-md text-lg font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light ${
+                  lastSides === sides
+                    ? 'bg-primary text-light-inverse'
+                    : 'bg-dark-bg-alt text-light-text hover:bg-primary hover:text-light-inverse'
+                }`}
                 data-sides={sides}
+                data-active={lastSides === sides}
                 onClick={() => onRollDice(sides)}
               >
                 d{sides}
@@ -157,6 +187,17 @@ export function DicePage() {
               {diceError}
             </p>
           ) : null}
+
+          <div className="flex justify-end">
+            <PrimaryButton
+              id="dice-reset-btn"
+              type="button"
+              variant="ghost"
+              onClick={onReset}
+            >
+              Restablecer
+            </PrimaryButton>
+          </div>
         </div>
       </section>
 

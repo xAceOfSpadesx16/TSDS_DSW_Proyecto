@@ -13,7 +13,7 @@ const DEFAULT_COLOR = '#6c5ce7';
 const resetHistory = () => useHistoryStore.setState({ entries: [] });
 
 function renderRoulette() {
-  render(<RoulettePage />);
+  return render(<RoulettePage />);
 }
 
 const addOption = async (label: string, color = DEFAULT_COLOR) => {
@@ -90,6 +90,23 @@ describe('RoulettePage — opciones', () => {
     const callsBefore = ctxSpy.mock.calls.length;
     window.dispatchEvent(new Event('resize'));
     expect(ctxSpy.mock.calls.length).toBeGreaterThan(callsBefore);
+  });
+
+  it('restaura las opciones y las restablece', async () => {
+    cleanup();
+    const first = renderRoulette();
+    await addOption('Quizás', '#00ff00');
+
+    first.unmount();
+    renderRoulette();
+
+    expect(screen.getByText('Quizás')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Restablecer' }));
+
+    expect(screen.queryByText('Quizás')).not.toBeInTheDocument();
+    expect(screen.getByText('Sí')).toBeInTheDocument();
+    expect(screen.getByText('No')).toBeInTheDocument();
   });
 });
 

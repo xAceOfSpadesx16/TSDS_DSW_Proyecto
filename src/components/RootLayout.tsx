@@ -18,9 +18,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import { Header } from './Header';
+import { PrimaryButton } from './PrimaryButton';
 import { legalRepository } from '../repositories/legalRepository';
 import { healthRepository } from '../repositories/healthRepository';
-import { retryPendingDraws } from '../store/historyStore';
+import { retryPendingDraws, useHistoryStore } from '../store/historyStore';
 import type { LegalDisclaimer } from '../domain/types';
 
 export function RootLayout() {
@@ -32,6 +33,14 @@ export function RootLayout() {
   // Distingue una recuperación (estaba caído) de un check exitoso inicial:
   // solo la recuperación dispara el reintento de pendientes.
   const wasDown = useRef(false);
+
+  const guestImportPending = useHistoryStore((s) => s.guestImportPending);
+  const guestEntries = useHistoryStore((s) => s.guestEntries);
+  const guestImportError = useHistoryStore((s) => s.guestImportError);
+  const importGuestHistory = useHistoryStore((s) => s.importGuestHistory);
+  const dismissGuestImport = useHistoryStore((s) => s.dismissGuestImport);
+  const guestDialogRef = useRef<HTMLDialogElement>(null);
+  const [importingGuest, setImportingGuest] = useState(false);
 
   const checkHealth = useCallback(() => {
     setChecking(true);
@@ -74,6 +83,30 @@ export function RootLayout() {
     checkHealth();
   }, [checkHealth]);
 
+  useEffect(() => {
+    const dialog = guestDialogRef.current;
+    if (!dialog) {
+      return;
+    }
+    if (guestImportPending && !dialog.open) {
+      dialog.showModal();
+    } else if (!guestImportPending && dialog.open) {
+      dialog.close();
+    }
+  }, [guestImportPending]);
+
+  const onImportGuest = async () => {
+    setImportingGuest(true);
+    try {
+      await importGuestHistory();
+    } catch {
+      // El store deja el mensaje en `guestImportError`; el diálogo sigue
+      // abierto para que el usuario pueda reintentar o elegir "Ahora no".
+    } finally {
+      setImportingGuest(false);
+    }
+  };
+
   return (
     <div className="min-h-screen grid grid-rows-[3.5rem_1fr] bg-dark-bg text-light-text font-sans antialiased">
       <Header />
@@ -84,6 +117,51 @@ export function RootLayout() {
         </div>
         {disclaimer ? <DisclaimerFooter disclaimer={disclaimer} /> : null}
       </div>
+
+      <dialog
+        id="guest-import-dialog"
+        ref={guestDialogRef}
+        aria-labelledby="guest-import-title"
+        className="rounded-2xl bg-dark-surface border border-dark-border text-light-text p-6 max-w-md backdrop:bg-black/70"
+        onCancel={(event) => {
+          event.preventDefault();
+          if (!importingGuest) {
+            dismissGuestImport();
+          }
+        }}
+      >
+        <h2 id="guest-import-title" className="text-xl font-bold mb-2">
+          Importar historial de invitado
+        </h2>
+        <p className="text-sm text-light-muted mb-4">
+          Tenés {guestEntries.length}{' '}
+          {guestEntries.length === 1 ? 'sorteo guardado' : 'sorteos guardados'} en
+          este navegador. ¿Querés pasarlos a tu cuenta?
+        </p>
+        {guestImportError ? (
+          <p role="alert" className="text-sm text-danger mb-4">
+            {guestImportError}
+          </p>
+        ) : null}
+        <div className="flex flex-wrap justify-end gap-2">
+          <PrimaryButton
+            type="button"
+            variant="ghost"
+            onClick={dismissGuestImport}
+            disabled={importingGuest}
+          >
+            Ahora no
+          </PrimaryButton>
+          <PrimaryButton
+            type="button"
+            variant="primary"
+            onClick={() => void onImportGuest()}
+            disabled={importingGuest}
+          >
+            {importingGuest ? 'Importando…' : 'Importar a mi cuenta'}
+          </PrimaryButton>
+        </div>
+      </dialog>
     </div>
   );
 }
