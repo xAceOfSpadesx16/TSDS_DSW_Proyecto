@@ -17,6 +17,12 @@ import { HistoryAside } from '../components/HistoryAside';
 import { diceStrategy } from '../strategies/DiceStrategy';
 import { numbersStrategy } from '../strategies/NumbersStrategy';
 import { useHistoryStore } from '../store/historyStore';
+import {
+  clampMin,
+  readNumeric,
+  toNumberOr,
+  type NumericInput,
+} from '../lib/numericInput';
 import type { DiceResult, NumbersResult } from '../domain/contracts';
 
 type SubTab = 'rpg' | 'numbers';
@@ -60,9 +66,9 @@ export function DicePage() {
   const [diceError, setDiceError] = useState<string | null>(null);
 
   // Numbers state
-  const [count, setCount] = useState(5);
-  const [min, setMin] = useState(1);
-  const [max, setMax] = useState(50);
+  const [count, setCount] = useState<NumericInput>(5);
+  const [min, setMin] = useState<NumericInput>(1);
+  const [max, setMax] = useState<NumericInput>(50);
   const [unique, setUnique] = useState(true);
   const [numbersResult, setNumbersResult] = useState<NumbersResult | null>(null);
   const [numbersError, setNumbersError] = useState<string | null>(null);
@@ -72,9 +78,16 @@ export function DicePage() {
     setDiceResult(null);
     setShaking(true);
 
-    // Animación: alternar caras durante ~500ms, luego commitear el resultado real.
-    const animationStart = performance.now();
+    // Animación: alternar caras durante ~500ms, luego commitear el resultado
+    // real. El tiempo se mide con el reloj de `requestAnimationFrame`: el
+    // primer timestamp recibido marca el inicio. No se usa `performance.now()`
+    // porque mezcla dos orígenes de tiempo (el del rAF y el de pared) y la
+    // duración pasaría a depender de cuándo arrancó el proceso.
+    let animationStart: number | null = null;
     const tick = (now: number) => {
+      if (animationStart === null) {
+        animationStart = now;
+      }
       if (now - animationStart < 500) {
         setDisplayRoll(1 + Math.floor(Math.random() * sides));
         rafIdRef.current = requestAnimationFrame(tick);
@@ -106,16 +119,28 @@ export function DicePage() {
     e.preventDefault();
     setNumbersError(null);
     setNumbersResult(null);
+
+    // Los valores vacíos se resuelven al enviar; el mínimo se aplica acá.
+    const input = {
+      count: clampMin(count, 1),
+      min: toNumberOr(min),
+      max: toNumberOr(max),
+      unique,
+    };
+    setCount(input.count);
+    setMin(input.min);
+    setMax(input.max);
+
     try {
-      const { local, backend } = numbersStrategy.execute({ count, min, max, unique });
+      const { local, backend } = numbersStrategy.execute(input);
       setNumbersResult(local);
       void addHistory({
         module: 'numbers',
-        description: `${count} números [${min}-${max}] (${unique ? 'únicos' : 'con repetición'})`,
+        description: numbersStrategy.actionLabel(input),
         record: {
           module_name: 'numbers',
-          action: numbersStrategy.actionLabel({ count, min, max, unique }),
-          payload: numbersStrategy.buildPayload({ count, min, max, unique }),
+          action: numbersStrategy.actionLabel(input),
+          payload: numbersStrategy.buildPayload(input),
           result: backend,
         },
       });
@@ -248,7 +273,8 @@ export function DicePage() {
               type="number"
               min={1}
               value={count}
-              onChange={(e) => setCount(Math.max(1, Number(e.currentTarget.value)))}
+              onChange={(e) => setCount(readNumeric(e.currentTarget.value))}
+              onBlur={() => setCount(clampMin(count, 1))}
             />
             <div className="grid grid-cols-2 gap-3">
               <Field
@@ -256,14 +282,16 @@ export function DicePage() {
                 label="Mínimo"
                 type="number"
                 value={min}
-                onChange={(e) => setMin(Number(e.currentTarget.value))}
+                onChange={(e) => setMin(readNumeric(e.currentTarget.value))}
+                onBlur={() => setMin(toNumberOr(min))}
               />
               <Field
                 id="num-max"
                 label="Máximo"
                 type="number"
                 value={max}
-                onChange={(e) => setMax(Number(e.currentTarget.value))}
+                onChange={(e) => setMax(readNumeric(e.currentTarget.value))}
+                onBlur={() => setMax(toNumberOr(max))}
               />
             </div>
             <label className="inline-flex items-center gap-2 text-sm text-light-text">

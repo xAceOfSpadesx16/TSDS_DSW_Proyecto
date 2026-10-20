@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { bindAuthStoreToHttpClient, useAuthStore } from '../../../src/store/authStore';
 import { useHistoryStore } from '../../../src/store/historyStore';
 import { ApiError, type CreateHistoryPayload } from '../../../src/domain/types';
-import { http, request, setTokenProvider } from '../../../src/repositories/httpClient';
+import { request, setTokenProvider } from '../../../src/repositories/httpClient';
 import { installLocalStorage } from '../helpers/localStorageMock';
 
 const STORAGE_KEY = 'thrive_auth_v1';
@@ -16,6 +16,18 @@ const AUTH_RECORD: CreateHistoryPayload = {
   payload: { sides: 20, modifier: 0 },
   result: { rolls: [15], modifier: 0, total: 15 },
 };
+
+/**
+ * Ejecuta la request esperando que falle y devuelve el `ApiError` tipado.
+ *
+ * `catch` entrega `unknown`, así que el helper concentrate la aserción en
+ * un solo lugar en vez de repetir el cast en cada test.
+ */
+async function failingRequest(path: string): Promise<ApiError> {
+  const err = await request(path).catch((e: unknown) => e);
+  expect(err).toBeInstanceOf(ApiError);
+  return err as ApiError;
+}
 
 /** Mock de respuesta fetch. `json` por defecto devuelve `data`. */
 function fetchResponse(data: unknown, status = 200) {
@@ -172,8 +184,7 @@ describe('resiliencia — errores sin JSON del backend', () => {
       }),
     );
 
-    const err = await request('/me').catch((e) => e);
-    expect(err).toBeInstanceOf(ApiError);
+    const err = await failingRequest('/me');
     expect(err.status).toBe(500);
     expect(err.message).toBe('Error 500');
   });
@@ -190,7 +201,7 @@ describe('resiliencia — errores sin JSON del backend', () => {
       }),
     );
 
-    const err = await request('/me').catch((e) => e);
+    const err = await failingRequest('/me');
     expect(err.status).toBe(502);
   });
 });

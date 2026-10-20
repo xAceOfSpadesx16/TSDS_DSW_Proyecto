@@ -17,6 +17,7 @@
     "noImplicitOverride": true,
     "verbatimModuleSyntax": true,
     "resolveJsonModule": true,
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]

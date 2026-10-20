@@ -21,6 +21,14 @@ export const authRepository = {
     return http.get<{ user: User }>('/auth/me');
   },
 
+  /**
+   * Renueva el token vencido. El `httpClient` la invoca una sola vez por
+   * ráfaga de 401 y comparte esa promesa entre las peticiones concurrentes.
+   */
+  refresh(): Promise<AuthResponse> {
+    return http.post<AuthResponse>('/auth/refresh');
+  },
+
   logout(): Promise<{ message: string }> {
     return http.post<{ message: string }>('/auth/logout');
   },

@@ -11,7 +11,7 @@ import type {
   TeamsMode,
   TeamsResult,
 } from '../domain/contracts';
-import type { DrawStrategy } from '../domain/contracts';
+import type { DrawExecution, DrawStrategy } from '../domain/contracts';
 import { fisherYatesShuffle } from '../lib/mathUtils';
 
 // Paleta compartida para los bordes de las tarjetas de equipo.
@@ -113,7 +113,7 @@ export class TeamsStrategy implements DrawStrategy<TeamsInput, TeamsResult, Team
     return `${input.participants.length} participantes → ${input.value} ${word}`;
   }
 
-  buildPayload(input: TeamsInput): Record<string, unknown> {
+  buildPayload(input: TeamsInput): TeamsInput {
     return {
       participants: input.participants,
       mode: input.mode,
@@ -124,7 +124,7 @@ export class TeamsStrategy implements DrawStrategy<TeamsInput, TeamsResult, Team
     };
   }
 
-  execute(input: TeamsInput): { local: TeamsResult; backend: TeamsResult } {
+  execute(input: TeamsInput): DrawExecution<TeamsResult, TeamsResult> {
     const participants = input.participants
       .map((p) => p.trim())
       .filter((p) => p.length > 0);

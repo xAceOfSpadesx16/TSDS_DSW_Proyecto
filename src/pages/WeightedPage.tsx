@@ -14,13 +14,20 @@ import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
 import { weightedStrategy } from '../strategies/WeightedStrategy';
 import { useHistoryStore } from '../store/historyStore';
+import { readNumeric, type NumericInput } from '../lib/numericInput';
 import type { WeightedEntry, WeightedResultLocal } from '../domain/contracts';
+
+/** Aplica el rango 1..100 del peso, resolviendo el vacío al mínimo. */
+function clampWeight(value: NumericInput): number {
+  if (value === '' || value < 1) return 1;
+  return Math.min(100, value);
+}
 
 export function WeightedPage() {
   const [entries, setEntries] = useState<WeightedEntry[]>([]);
   const [originalEntries, setOriginalEntries] = useState<WeightedEntry[]>([]);
   const [name, setName] = useState('');
-  const [weight, setWeight] = useState(1);
+  const [weight, setWeight] = useState<NumericInput>(1);
   const [autoRemove, setAutoRemove] = useState(false);
   const [result, setResult] = useState<WeightedResultLocal | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,9 +38,12 @@ export function WeightedPage() {
   const onAdd = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
-    if (!trimmed || weight < 1) return;
-    setEntries((prev) => [...prev, { name: trimmed, weight }]);
-    setOriginalEntries((prev) => [...prev, { name: trimmed, weight }]);
+    // El rango se aplica al enviar: un campo vacío pesa 1, no 0.
+    const weightNum = clampWeight(weight);
+    setWeight(weightNum);
+    if (!trimmed) return;
+    setEntries((prev) => [...prev, { name: trimmed, weight: weightNum }]);
+    setOriginalEntries((prev) => [...prev, { name: trimmed, weight: weightNum }]);
     setName('');
     setWeight(1);
   };
@@ -108,9 +118,8 @@ export function WeightedPage() {
             min={1}
             max={100}
             value={weight}
-            onChange={(e) =>
-              setWeight(Math.max(1, Math.min(100, Number(e.currentTarget.value))))
-            }
+            onChange={(e) => setWeight(readNumeric(e.currentTarget.value))}
+            onBlur={() => setWeight(clampWeight(weight))}
           />
           <PrimaryButton type="submit" variant="primary">
             + Agregar

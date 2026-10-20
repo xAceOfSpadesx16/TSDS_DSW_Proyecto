@@ -7,7 +7,7 @@
 // =============================================================================
 
 import type { DiceInput, DiceResult } from '../domain/contracts';
-import type { DrawStrategy } from '../domain/contracts';
+import type { DrawExecution, DrawStrategy } from '../domain/contracts';
 import { randomInt } from '../lib/mathUtils';
 
 const FORMULA_REGEX = /^(\d+)d(\d+)([+-]\d+)?$/i;
@@ -51,7 +51,7 @@ export class DiceStrategy implements DrawStrategy<DiceInput, DiceResult, DiceRes
     return `d${input.sides}${modStr}`;
   }
 
-  buildPayload(input: DiceInput): Record<string, unknown> {
+  buildPayload(input: DiceInput): DiceInput {
     return {
       sides: input.sides,
       modifier: input.modifier,
@@ -60,7 +60,7 @@ export class DiceStrategy implements DrawStrategy<DiceInput, DiceResult, DiceRes
     };
   }
 
-  execute(input: DiceInput): { local: DiceResult; backend: DiceResult } {
+  execute(input: DiceInput): DrawExecution<DiceResult, DiceResult> {
     const result = input.formula
       ? rollWithFormula(input.formula)
       : this.rollSimple(input);

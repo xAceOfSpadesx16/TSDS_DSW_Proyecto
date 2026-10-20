@@ -1,11 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError } from '../../../src/domain/types';
+import { ApiError, type CreateHistoryPayload } from '../../../src/domain/types';
 import { historyRepository } from '../../../src/repositories/historyRepository';
 import { selectRecentEntries, useHistoryStore } from '../../../src/store/historyStore';
 
 // El store depende de authStore (para saber si hay sesión) y de historyRepository.
 // Ambas se sustituyen por mocks para no tocar localStorage ni la red.
 const hoisted = vi.hoisted(() => ({ authState: { token: null as string | null, user: null as unknown } }));
+
+/**
+ * `record` con la forma que la unión discriminada `CreateHistoryPayload`
+ * exige para el módulo indicado. El store solo lo reenvía a
+ * `historyRepository.create` (mockeado acá), así que un shape mínimo pero
+ * válido alcanza.
+ */
+function diceRecord(action = 'd6'): CreateHistoryPayload {
+  return {
+    module_name: 'dice',
+    action,
+    payload: { sides: 6, modifier: 0 },
+    result: { rolls: [4], modifier: 0, total: 4 },
+  };
+}
 
 vi.mock('../../../src/store/authStore', () => ({
   selectIsAuthenticated: (s: { token: string | null; user: unknown }) => s.token !== null && s.user !== null,
@@ -33,10 +48,10 @@ describe('historyStore', () => {
     await useHistoryStore.getState().add({
       module: 'dice',
       description: 'Tirada de dados',
-      record: { module: 'dice', description: 'Tirada de dados', metadata: { sides: 6 } },
+      record: diceRecord(),
     });
 
-    const entries = useHistoryStore.getState().entries as Array<{ id: string; synced: boolean }>;
+    const entries = useHistoryStore.getState().entries;
     expect(entries).toHaveLength(1);
     expect(entries[0].synced).toBe(false);
     expect(entries[0].module).toBe('dice');
@@ -48,13 +63,22 @@ describe('historyStore', () => {
   it('sincroniza contra el backend cuando hay sesión', async () => {
     hoisted.authState = { token: 't', user: { id: 'u1' } };
     vi.mocked(historyRepository.create).mockResolvedValue({
-      data: { id: 'backend-1', module: 'dice', description: 'Tirada de dados' },
+      data: {
+        id: 'backend-1',
+        user_id: 1,
+        module_name: 'dice',
+        action: 'd6',
+        payload: { sides: 6, modifier: 0 },
+        result: { rolls: [4], modifier: 0, total: 4 },
+        created_at: '2026-10-05T00:00:00.000Z',
+        updated_at: '2026-10-05T00:00:00.000Z',
+      },
     });
 
     await useHistoryStore.getState().add({
       module: 'dice',
       description: 'Tirada de dados',
-      record: { module: 'dice', description: 'Tirada de dados', metadata: { sides: 6 } },
+      record: diceRecord(),
     });
 
     const entries = useHistoryStore.getState().entries as Array<{ id: string; synced: boolean }>;
@@ -67,7 +91,7 @@ describe('historyStore', () => {
       await useHistoryStore.getState().add({
         module: 'numbers',
         description: `Entrada ${i}`,
-        record: { module: 'numbers', description: `Entrada ${i}`, metadata: {} },
+        record: diceRecord(`Entrada ${i}`),
       });
     }
     const entries = useHistoryStore.getState().entries as Array<{ id: string }>;
@@ -78,13 +102,13 @@ describe('historyStore', () => {
 
   it('degrada gracefulmente ante un error de sincronización', async () => {
     hoisted.authState = { token: 't', user: { id: 'u1' } };
-    vi.mocked(historyRepository.create).mockRejectedValue(new ApiError(500, 'Server error'));
+    vi.mocked(historyRepository.create).mockRejectedValue(new ApiError(500, { message: 'Server error' }));
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     await useHistoryStore.getState().add({
       module: 'teams',
       description: 'Equipos',
-      record: { module: 'teams', description: 'Equipos', metadata: {} },
+      record: diceRecord('Equipos'),
     });
 
     const entries = useHistoryStore.getState().entries as Array<{ id: string; synced: boolean }>;
@@ -96,12 +120,12 @@ describe('historyStore', () => {
     await useHistoryStore.getState().add({
       module: 'dice',
       description: 'a',
-      record: { module: 'dice', description: 'a', metadata: {} },
+      record: diceRecord('a'),
     });
     await useHistoryStore.getState().add({
       module: 'dice',
       description: 'b',
-      record: { module: 'dice', description: 'b', metadata: {} },
+      record: diceRecord('b'),
     });
     useHistoryStore.getState().clear();
     expect(useHistoryStore.getState().entries).toHaveLength(0);
@@ -112,12 +136,12 @@ describe('historyStore', () => {
       await useHistoryStore.getState().add({
         module: 'dice',
         description: 'primera',
-        record: { module: 'dice', description: 'primera', metadata: {} },
+        record: diceRecord('primera'),
       });
       await useHistoryStore.getState().add({
         module: 'numbers',
         description: 'segunda',
-        record: { module: 'numbers', description: 'segunda', metadata: {} },
+        record: diceRecord('segunda'),
       });
 
       const recent = selectRecentEntries(useHistoryStore.getState());

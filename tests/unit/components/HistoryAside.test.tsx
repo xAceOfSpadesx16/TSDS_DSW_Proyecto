@@ -1,10 +1,24 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { LocalHistoryEntry } from '../../../src/store/historyStore';
 import { useHistoryStore } from '../../../src/store/historyStore';
 import { HistoryAside } from '../../../src/components/HistoryAside';
+import { ApiError } from '../../../src/domain/types';
+import { useAuthStore } from '../../../src/store/authStore';
+import { historyRepository } from '../../../src/repositories/historyRepository';
+
+// El store llama al backend cuando hay sesión; estos tests cubren el panel
+// sin red, así que se mockea el repositorio completo.
+vi.mock('../../../src/repositories/historyRepository', () => ({
+  historyRepository: {
+    create: vi.fn(),
+    list: vi.fn(),
+    remove: vi.fn(),
+    clearAll: vi.fn(),
+  },
+}));
 
 const entries: LocalHistoryEntry[] = [
   {
@@ -23,9 +37,22 @@ const entries: LocalHistoryEntry[] = [
   },
 ];
 
+beforeEach(() => {
+  // Sin sesión por defecto: el panel no toca el backend y "cargar más" queda
+  // oculto. Los tests que necesitan lo contrario lo activan explícitamente.
+  useAuthStore.setState({ user: null, token: null, expiresAt: null });
+  useHistoryStore.setState({
+    entries: [],
+    currentPage: 1,
+    lastPage: 1,
+    loading: false,
+    error: null,
+  });
+});
+
 afterEach(() => {
   cleanup();
-  useHistoryStore.setState({ entries: [] });
+  vi.restoreAllMocks();
 });
 
 describe('HistoryAside (sidebar)', () => {
@@ -83,6 +110,82 @@ describe('HistoryAside (sidebar)', () => {
       screen.getByText('Sin operaciones registradas.'),
     ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Limpiar' })).not.toBeInTheDocument();
+  });
+});
+
+describe('HistoryAside — errores', () => {
+  it('muestra el mensaje del store con role="alert"', () => {
+    useHistoryStore.setState({ error: 'No se pudo cargar el historial.' });
+    render(<HistoryAside />);
+
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent('No se pudo cargar el historial.');
+  });
+
+  it('un borrado fallido muestra el mensaje y no quita la entrada', async () => {
+    // Sesión activa para que `remove` intente borrar en el backend.
+    useAuthStore.setState({
+      user: { id: 1, name: 'Ada', email: 'ada@example.com' },
+      token: 'jwt',
+    });
+    useHistoryStore.setState({
+      entries: [{ ...entries[0], synced: true }],
+      error: null,
+    });
+    vi.mocked(historyRepository.remove).mockRejectedValue(
+      new ApiError(500, { message: 'No se pudo borrar el registro.' }),
+    );
+
+    const user = userEvent.setup();
+    render(<HistoryAside />);
+
+    await user.click(screen.getByRole('button', { name: /Borrar Tirada de dados/ }));
+
+    // El mensaje del backend queda visible...
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No se pudo borrar el registro.',
+    );
+    // ...y la entrada sigue en la lista, porque el backend no la borró.
+    expect(useHistoryStore.getState().entries).toHaveLength(1);
+    expect(screen.getByText('Tirada de dados')).toBeInTheDocument();
+  });
+
+  it('un borrado con error de red nombra la operación que falló', async () => {
+    // Sesión activa para que `remove` intente borrar en el backend.
+    useAuthStore.setState({
+      user: { id: 1, name: 'Ada', email: 'ada@example.com' },
+      token: 'jwt',
+    });
+    useHistoryStore.setState({
+      entries: [{ ...entries[0], synced: true }],
+      error: null,
+    });
+    // Fallo de red: no es `ApiError`, así que no hay mensaje del backend.
+    vi.mocked(historyRepository.remove).mockRejectedValue(new TypeError('Failed to fetch'));
+
+    const user = userEvent.setup();
+    render(<HistoryAside />);
+
+    await user.click(screen.getByRole('button', { name: /Borrar Tirada de dados/ }));
+
+    // El mensaje nombra la operación (borrar), no un texto genérico.
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('No se pudo borrar el registro.');
+    // Y la entrada sigue en la lista.
+    expect(useHistoryStore.getState().entries).toHaveLength(1);
+  });
+
+  it('el mensaje se limpia al empezar la siguiente operación', async () => {
+    useHistoryStore.setState({ entries, error: 'Error viejo' });
+    const user = userEvent.setup();
+    render(<HistoryAside />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Error viejo');
+
+    await user.click(screen.getByRole('button', { name: /Borrar Creación de equipos/ }));
+
+    expect(useHistoryStore.getState().error).toBeNull();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });
 

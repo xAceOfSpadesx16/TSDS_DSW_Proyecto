@@ -11,7 +11,13 @@ import { create } from 'zustand';
 import type { LoginPayload, RegisterPayload, User } from '../domain/types';
 import { ApiError } from '../domain/types';
 import { authRepository } from '../repositories/authRepository';
-import { setTokenProvider } from '../repositories/httpClient';
+import {
+  setAdoptedTokenHandler,
+  setStoredTokenReader,
+  setTokenProvider,
+  setTokenRefresher,
+  setUnauthorizedHandler,
+} from '../repositories/httpClient';
 
 const STORAGE_KEY = 'thrive_auth_v1';
 
@@ -49,13 +55,56 @@ export interface AuthState {
   status: 'idle' | 'loading' | 'error';
   error: string | null;
 
-  hydrate(): void;
+  hydrate(): Promise<void>;
   login(payload: LoginPayload): Promise<void>;
   register(payload: RegisterPayload): Promise<void>;
   logout(): Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => {
+/**
+ * Limpia la sesión persistida y el estado en memoria.
+ *
+ * Se usa en tres lugares: logout explícito, token vencido durante
+ * `hydrate()` y 401 recibido por el httpClient. Cada uno necesita el
+ * `set` del store, que solo existe dentro de `create`, así que la
+ * acción se declara aparte y se recibe por parámetro.
+ */
+function clearSession(set: (partial: Partial<AuthState>) => void): void {
+  persist(null);
+  set({ user: null, token: null, expiresAt: null, status: 'idle', error: null });
+}
+
+/**
+ * Pide un token nuevo y lo persiste con su expiración.
+ *
+ * Es la acción que usa el `httpClient` cuando recibe un 401, y también la
+ * que usa `hydrate()` cuando el token guardado ya venció. Devuelve `null`
+ * si el backend no renovó nada, para que el llamador decida si cierra la
+ * sesión.
+ *
+ * @param staleToken Token que el backend rechazó; solo se usa para el log.
+ */
+async function refreshSession(
+  set: (partial: Partial<AuthState>) => void,
+  staleToken?: string,
+): Promise<string | null> {
+  try {
+    const res = await authRepository.refresh();
+    const expiresAt = Date.now() + res.expires_in * 1000;
+    persist({ user: res.user, token: res.token, expires_at: expiresAt });
+    set({ user: res.user, token: res.token, expiresAt, status: 'idle', error: null });
+    return res.token;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[authStore] no se pudo renovar el token${staleToken ? ' rechazado' : ' vencido'}:`,
+      err,
+    );
+    return null;
+  }
+}
+
+export const useAuthStore = create<AuthState>((set, get) => {
   const persisted = loadPersisted();
   return {
     user: persisted?.user ?? null,
@@ -64,9 +113,43 @@ export const useAuthStore = create<AuthState>((set) => {
     status: 'idle',
     error: null,
 
-    hydrate() {
-      // Hook reservado para refresh manual contra /me cuando agreguemos
-      // manejo de expiración silenciosa.
+    /**
+     * Revalida la sesión persistida al arrancar la app.
+     *
+     * Si `expires_at` ya pasó se intenta un refresh antes de cerrar la
+     * sesión: el token puede seguir siendo renovable dentro de la ventana
+     * del backend (14 días). Si el refresh no prospera, se cierra.
+     */
+    async hydrate() {
+      const { token, expiresAt } = get();
+
+      if (!token) {
+        return;
+      }
+
+      if (expiresAt !== null && Date.now() >= expiresAt) {
+        const renewed = await refreshSession(set);
+        if (!renewed) {
+          // Token vencido y no renovable: se cierra la sesión.
+          clearSession(set);
+        }
+        return;
+      }
+
+      try {
+        const { user } = await authRepository.me();
+        set({ user, status: 'idle', error: null });
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 401) {
+          // El backend rechazó el token: la sesión no existe más.
+          clearSession(set);
+          return;
+        }
+        // Cualquier otro fallo (red caída, 500, timeout) no prueba que el
+        // token sea inválido, así que mantenemos la sesión y dejamos el
+        // error visible. El usuario sigue operando como hasta ahora.
+        set({ status: 'error', error: 'No se pudo verificar la sesión.' });
+      }
     },
 
     async login(payload) {
@@ -126,8 +209,7 @@ export const useAuthStore = create<AuthState>((set) => {
       } catch {
         // Ignorar: el borrado local es lo que importa.
       }
-      persist(null);
-      set({ user: null, token: null, expiresAt: null, status: 'idle', error: null });
+      clearSession(set);
     },
   };
 });
@@ -142,4 +224,46 @@ export const selectIsAuthenticated = (s: AuthState): boolean =>
  */
 export function bindAuthStoreToHttpClient(): void {
   setTokenProvider(() => useAuthStore.getState().token);
+
+  // Varias pestañas: el httpClient compara el token que recibió el 401 con
+  // el persistido. Si otra pestaña ya lo renovó, adopta ese token en vez de
+  // pedir un refresh propio.
+  setStoredTokenReader(() => loadPersisted()?.token ?? null);
+  setAdoptedTokenHandler((token) => {
+    const persisted = loadPersisted();
+    if (!persisted || persisted.token !== token) {
+      return;
+    }
+    useAuthStore.setState({
+      user: persisted.user,
+      token: persisted.token,
+      expiresAt: persisted.expires_at,
+      status: 'idle',
+      error: null,
+    });
+  });
+
+  // Un 401 en cualquier request con token deja la sesión muerta: la
+  // limpiamos sin redirigir (el error igual lo recibe el llamador). Si
+  // `localStorage` ya tiene otro token, otra pestaña lo renovó: se adopta
+  // y NO se borra la persistencia.
+  setUnauthorizedHandler((staleToken) => {
+    const persisted = loadPersisted();
+    if (persisted && persisted.token !== staleToken) {
+      useAuthStore.setState({
+        user: persisted.user,
+        token: persisted.token,
+        expiresAt: persisted.expires_at,
+        status: 'idle',
+        error: null,
+      });
+      return;
+    }
+    clearSession(useAuthStore.setState);
+  });
+
+  // Antes de limpiar, el httpClient intenta renovar el token una vez.
+  setTokenRefresher((staleToken) =>
+    refreshSession(useAuthStore.setState, staleToken),
+  );
 }

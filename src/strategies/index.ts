@@ -7,8 +7,22 @@
 // y crear la clase — no se toca ningún consumidor.
 // =============================================================================
 
-import type { ModuleName } from '../domain/types';
-import type { DrawStrategy } from '../domain/contracts';
+import type {
+  DiceInput,
+  DiceResult,
+  DrawStrategy,
+  ModuleName,
+  NumbersInput,
+  NumbersResult,
+  RouletteInput,
+  RouletteResultBackend,
+  RouletteResultLocal,
+  TeamsInput,
+  TeamsResult,
+  WeightedInput,
+  WeightedResultBackend,
+  WeightedResultLocal,
+} from '../domain/contracts';
 
 import { diceStrategy } from './DiceStrategy';
 import { numbersStrategy } from './NumbersStrategy';
@@ -16,24 +30,42 @@ import { rouletteStrategy } from './RouletteStrategy';
 import { teamsStrategy } from './TeamsStrategy';
 import { weightedStrategy } from './WeightedStrategy';
 
-// Unión explícita de tipos de estrategia para `make()`: la firma concreta
-// cambia por módulo pero todas extienden `DrawStrategy<unknown, unknown, ...>`.
-type AnyStrategy = DrawStrategy<unknown, unknown, Record<string, unknown>>;
-
-const STRATEGIES: Record<ModuleName, AnyStrategy> = {
-  dice: diceStrategy as AnyStrategy,
-  numbers: numbersStrategy as AnyStrategy,
-  roulette: rouletteStrategy as AnyStrategy,
-  teams: teamsStrategy as AnyStrategy,
-  weighted: weightedStrategy as AnyStrategy,
+/**
+ * Cada estrategia tipada por su módulo concreto.
+ *
+ * Antes se declaraba `DrawStrategy<unknown, unknown, Record<string, unknown>>`
+ * y se casteaba cada estrategia con `as`, lo que además de perder el
+ * tipado obligaba a los casts. Acá se declara el tipo real: cada entrada
+ * conserva su firma y `strategyFor` la devuelve tal cual.
+ */
+type StrategyByModule = {
+  dice: DrawStrategy<DiceInput, DiceResult, DiceResult>;
+  numbers: DrawStrategy<NumbersInput, NumbersResult, NumbersResult>;
+  roulette: DrawStrategy<RouletteInput, RouletteResultLocal, RouletteResultBackend>;
+  teams: DrawStrategy<TeamsInput, TeamsResult, TeamsResult>;
+  weighted: DrawStrategy<WeightedInput, WeightedResultLocal, WeightedResultBackend>;
 };
 
-export function strategyFor<T extends AnyStrategy>(module: ModuleName): T {
-  const strategy = STRATEGIES[module];
+const STRATEGIES: StrategyByModule = {
+  dice: diceStrategy,
+  numbers: numbersStrategy,
+  roulette: rouletteStrategy,
+  teams: teamsStrategy,
+  weighted: weightedStrategy,
+};
+
+/**
+ * Devuelve la estrategia del módulo pedido, ya con su tipo concreto.
+ *
+ * `M` se resuelve desde el argumento, así que `strategyFor('dice')` entrega
+ * un `DrawStrategy<DiceInput, DiceResult, DiceResult>` sin casts.
+ */
+export function strategyFor<M extends ModuleName>(module: M): StrategyByModule[M] {
+  const strategy: StrategyByModule[M] | undefined = STRATEGIES[module];
   if (!strategy) {
     throw new Error(`Estrategia no soportada para el módulo: ${module}`);
   }
-  return strategy as T;
+  return strategy;
 }
 
 export function supportedModules(): ModuleName[] {

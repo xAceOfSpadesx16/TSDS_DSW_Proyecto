@@ -5,7 +5,6 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { Header } from '../../../src/components/Header';
 import { useAuthStore } from '../../../src/store/authStore';
-import { authRepository } from '../../../src/repositories/authRepository';
 
 // El Header lee el auth store; el logout del store llama a authRepository.
 // Lo mockeamos para no tocar la red.
@@ -13,12 +12,12 @@ vi.mock('../../../src/repositories/authRepository', () => ({
   authRepository: {
     login: vi.fn(),
     register: vi.fn(),
-    logout: vi.fn().mockResolvedValue(undefined),
+    logout: vi.fn().mockResolvedValue({ message: 'Sesión cerrada correctamente.' }),
     me: vi.fn(),
   },
 }));
 
-const authedUser = { id: 'u1', name: 'Ada', email: 'ada@example.com' };
+const authedUser = { id: 1, name: 'Ada', email: 'ada@example.com' };
 
 function renderHeader() {
   return render(

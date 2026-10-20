@@ -1,7 +1,7 @@
 // =============================================================================
 // LandingPage (/)
 //
-// Equivalente al antiguo `index.html`: hero + grilla de cards con los 4
+// Equivalente al antiguo `index.html`: hero + grilla de cards con los 5
 // módulos. No usa el aside de historial (mantiene la decisión original).
 // =============================================================================
 
@@ -42,6 +42,13 @@ const MODULES: ModuleCard[] = [
     title: 'Dados y Números',
     description:
       'Tiradas de dados RPG con modificador y generador de números aleatorios con opciones de rango y unicidad.',
+  },
+  {
+    to: '/numbers',
+    icon: '⁂',
+    title: 'Números Aleatorios',
+    description:
+      'Genera una cantidad de números dentro de un rango, con o sin repetición. Ideal para sorteos de Lists, ordenamientos o sorteos numéricos.',
   },
 ];
 

@@ -39,15 +39,27 @@ export interface RegisterPayload {
 // Historial
 // -----------------------------------------------------------------------------
 
-export type ModuleName = 'dice' | 'numbers' | 'roulette' | 'teams' | 'weighted';
+// `ModuleName` se define en `contracts.ts` (es la clave de los mapas de
+// payload/result por módulo) y se re-exporta acá porque es donde lo
+// consumían el resto del código antes.
+export type { ModuleName } from './contracts';
+import type {
+  ModuleName,
+  ModulePayload,
+  ModulePayloads,
+  ModuleResult,
+  ModuleResults,
+} from './contracts';
 
 export interface HistoryRecord {
   id: string;
   user_id: number;
   module_name: ModuleName;
   action: string;
-  payload: Record<string, unknown>;
-  result: Record<string, unknown>;
+  /** Parámetros del sorteo, tipados según `module_name`. */
+  payload: ModulePayload;
+  /** Salida del sorteo, tipada según `module_name`. */
+  result: ModuleResult;
   created_at: string;
   updated_at: string;
 }
@@ -64,11 +76,63 @@ export interface HistoryListResponse {
   meta: HistoryMeta;
 }
 
-export interface CreateHistoryPayload {
-  module_name: ModuleName;
-  action: string;
-  payload: Record<string, unknown>;
-  result: Record<string, unknown>;
+/**
+ * Cuerpo de `POST /api/history`.
+ *
+ * Se modela como unión discriminada por `module_name`: según el módulo,
+ * `payload` y `result` tienen que ser de ese módulo. Antes ambos eran
+ * `Record<string, unknown>`, que no encontraba relación entre el módulo y
+ * sus campos y además rechazaba las `interface` del dominio.
+ */
+export type CreateHistoryPayload = {
+  [M in ModuleName]: {
+    module_name: M;
+    action: string;
+    payload: ModulePayloads[M];
+    result: ModuleResults[M];
+  };
+}[ModuleName];
+
+// -----------------------------------------------------------------------------
+// Health
+// -----------------------------------------------------------------------------
+
+/**
+ * Respuesta de `GET /api/health`.
+ *
+ * Refleja el closure de `routes/api.php`: `{ status, service, version, timestamp }`.
+ * El `service` sale de `config('app.name')` en el backend.
+ */
+export interface HealthStatus {
+  /** `ok` cuando el backend responde. */
+  status: string;
+  /** Nombre de la aplicación, de `config('app.name')`. */
+  service: string;
+  /** Versión del backend. */
+  version: string;
+  /** Momento del check en ISO-8601. */
+  timestamp: string;
+}
+
+// -----------------------------------------------------------------------------
+// Legal
+// -----------------------------------------------------------------------------
+
+/** Una sección del disclaimer (encabezado + párrafo). */
+export interface LegalDisclaimerSection {
+  heading: string;
+  body: string;
+}
+
+/**
+ * Respuesta de `GET /api/legal/disclaimer`.
+ *
+ * Refleja `LegalService::disclaimer()` del backend.
+ */
+export interface LegalDisclaimer {
+  title: string;
+  version: string;
+  sections: LegalDisclaimerSection[];
 }
 
 // -----------------------------------------------------------------------------

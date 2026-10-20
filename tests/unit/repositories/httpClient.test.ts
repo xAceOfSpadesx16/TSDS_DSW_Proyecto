@@ -1,20 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../src/domain/types';
 import { http, httpBaseUrl, request, resolveBaseUrl, setTokenProvider } from '../../../src/repositories/httpClient';
-
-type FetchResponse = { ok: boolean; status: number; json: () => Promise<unknown> };
-
-function jsonResponse(data: unknown, status = 200): FetchResponse {
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    json: async () => data,
-  };
-}
-
-function errorResponse(status: number, body: unknown): FetchResponse {
-  return { ok: false, status, json: async () => body };
-}
+import {
+  errorResponse,
+  jsonResponse,
+  noContentResponse,
+  unparsableErrorResponse,
+} from '../helpers/fetchMock';
 
 function lastFetchUrl(): string {
   const calls = vi.mocked(global.fetch).mock.calls;
@@ -81,12 +73,15 @@ describe('httpClient', () => {
     });
 
     it('omite parámetros undefined, null y vacíos', async () => {
-      await http.get('/search', {
+      // `RequestOptions.query` no admite `null`, pero el cliente lo filtra
+      // igual; el cast documenta que el test ejercita ese caso defensivo.
+      const query = {
         page: 1,
         empty: '',
         missing: undefined,
         nothing: null,
-      } as Record<string, string | number | boolean | undefined>);
+      } as unknown as Record<string, string | number | boolean | undefined>;
+      await http.get('/search', query);
       const url = lastFetchUrl();
       expect(url).toContain('page=1');
       expect(url).not.toContain('empty');
@@ -140,7 +135,7 @@ describe('httpClient', () => {
     });
 
     it('devuelve undefined ante un 204 No Content', async () => {
-      vi.mocked(global.fetch).mockResolvedValueOnce({ ok: true, status: 204, json: async () => ({}) });
+      vi.mocked(global.fetch).mockResolvedValueOnce(noContentResponse());
       const res = await http.get('/foo');
       expect(res).toBeUndefined();
     });
@@ -160,13 +155,7 @@ describe('httpClient', () => {
     });
 
     it('usa un mensaje genérico cuando el cuerpo del error no es JSON', async () => {
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        json: async () => {
-          throw new Error('no json');
-        },
-      });
+      vi.mocked(global.fetch).mockResolvedValueOnce(unparsableErrorResponse(500));
       await expect(http.get('/boom')).rejects.toMatchObject({
         status: 500,
         message: 'Error 500',

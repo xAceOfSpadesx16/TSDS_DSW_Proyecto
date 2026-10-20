@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RoulettePage } from '../../../src/pages/RoulettePage';
@@ -73,7 +72,7 @@ describe('RoulettePage — opciones', () => {
   });
 
   it('repinta el canvas cada vez que cambian las opciones', async () => {
-    const ctxSpy = HTMLCanvasElement.prototype.getContext as ReturnType<typeof vi.spyOn>;
+    const ctxSpy = vi.mocked(HTMLCanvasElement.prototype.getContext);
     const callsBefore = ctxSpy.mock.calls.length;
     await addOption('Opción B');
     expect(ctxSpy.mock.calls.length).toBeGreaterThan(callsBefore);

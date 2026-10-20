@@ -14,7 +14,7 @@ function renderLink(to: string) {
 
 describe('NavLinkButton', () => {
   it('renderiza un <a> con la ruta y la clase nav-link', () => {
-    const { container } = renderLink('/teams');
+    renderLink('/teams');
     const link = screen.getByRole('link', { name: 'Etiqueta' });
     expect(link.getAttribute('href')).toBe('/teams');
     expect(link.className).toContain('nav-link');

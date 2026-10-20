@@ -1,13 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { historyRepository } from '../../../src/repositories/historyRepository';
-
-function jsonResponse(data: unknown, status = 200) {
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    json: async () => data,
-  };
-}
+import type { CreateHistoryPayload } from '../../../src/domain/types';
+import { jsonResponse } from '../helpers/fetchMock';
 
 function lastCall() {
   const calls = vi.mocked(global.fetch).mock.calls;
@@ -29,8 +23,16 @@ describe('historyRepository', () => {
   });
 
   it('crea un registro de historia con POST /history', async () => {
-    const payload = { module: 'dice', description: 'Tirada de dados', metadata: { sides: 6 } };
-    const record = { id: 'h1', module: 'dice', description: 'Tirada de dados' };
+    // La forma es la que la unión discriminada de `CreateHistoryPayload`
+    // exige para el módulo `dice`. El assertion compara el body enviado
+    // contra este mismo objeto, así que sigue probando lo mismo.
+    const payload: CreateHistoryPayload = {
+      module_name: 'dice',
+      action: 'd6',
+      payload: { sides: 6, modifier: 0 },
+      result: { rolls: [4], modifier: 0, total: 4 },
+    };
+    const record = { id: 'h1', module_name: 'dice', action: 'd6' };
     vi.mocked(global.fetch).mockResolvedValueOnce(jsonResponse({ data: record }));
 
     const res = await historyRepository.create(payload);

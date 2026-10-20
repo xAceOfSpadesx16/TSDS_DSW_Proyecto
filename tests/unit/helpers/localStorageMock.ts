@@ -1,7 +1,9 @@
 // Polyfill mínimo de localStorage para el ambiente node de Vitest.
 // Debe estar presente en globalThis antes de importar cualquier store que
 // persista en localStorage.
-export function createLocalStorageMock(): LocalStorage {
+// `Storage` es el tipo del DOM para `localStorage` (TS 5.9 no define
+// `LocalStorage`; `window.localStorage` es de tipo `Storage`).
+export function createLocalStorageMock(): Storage {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => (key in store ? store[key] : null),
@@ -18,9 +20,9 @@ export function createLocalStorageMock(): LocalStorage {
     get length() {
       return Object.keys(store).length;
     },
-  } as unknown as LocalStorage;
+  } as unknown as Storage;
 }
 
 export function installLocalStorage(): void {
-  (globalThis as { localStorage: LocalStorage }).localStorage = createLocalStorageMock();
+  (globalThis as { localStorage: Storage }).localStorage = createLocalStorageMock();
 }

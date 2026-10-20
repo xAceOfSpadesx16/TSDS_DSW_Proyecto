@@ -14,14 +14,25 @@ import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
 import { teamsStrategy } from '../strategies/TeamsStrategy';
 import { useHistoryStore } from '../store/historyStore';
+import { clampMin, readNumeric, type NumericInput } from '../lib/numericInput';
 import type { TeamsMode, TeamsResult } from '../domain/contracts';
 
 type Exclusion = [string, string];
 
+/** Mínimo del campo `value` según el modo. */
+function valueMin(mode: TeamsMode): number {
+  return mode === 'count' ? 2 : 1;
+}
+
+/** Aplica el mínimo del modo a un input numérico. */
+function clampValue(value: NumericInput, mode: TeamsMode): number {
+  return clampMin(value, valueMin(mode));
+}
+
 export function TeamsPage() {
   const [participantsText, setParticipantsText] = useState('');
   const [mode, setMode] = useState<TeamsMode>('count');
-  const [value, setValue] = useState(2);
+  const [value, setValue] = useState<NumericInput>(2);
   const [exclusionA, setExclusionA] = useState('');
   const [exclusionB, setExclusionB] = useState('');
   const [exclusions, setExclusions] = useState<Exclusion[]>([]);
@@ -33,7 +44,6 @@ export function TeamsPage() {
     setMode(next);
     setValue(next === 'count' ? 2 : 3);
   };
-
   const onAddExclusion = () => {
     const a = exclusionA.trim();
     const b = exclusionB.trim();
@@ -51,6 +61,9 @@ export function TeamsPage() {
     e.preventDefault();
     setError(null);
     setResult(null);
+    // El mínimo según el modo se aplica al enviar, no en cada tecla.
+    const valueNum = clampValue(value, mode);
+    setValue(valueNum);
     const participants = participantsText
       .split(/\r?\n/)
       .map((p) => p.trim())
@@ -60,30 +73,16 @@ export function TeamsPage() {
       return;
     }
     try {
-      const { local, backend } = teamsStrategy.execute({
-        participants,
-        mode,
-        value,
-        exclusions,
-      });
+      const input = { participants, mode, value: valueNum, exclusions };
+      const { local, backend } = teamsStrategy.execute(input);
       setResult(local);
       void addHistory({
         module: 'teams',
         description: `${participants.length} participantes → ${backend.teams.length} equipos`,
         record: {
           module_name: 'teams',
-          action: teamsStrategy.actionLabel({
-            participants,
-            mode,
-            value,
-            exclusions,
-          }),
-          payload: teamsStrategy.buildPayload({
-            participants,
-            mode,
-            value,
-            exclusions,
-          }),
+          action: teamsStrategy.actionLabel(input),
+          payload: teamsStrategy.buildPayload(input),
           result: backend,
         },
       });
@@ -148,11 +147,10 @@ export function TeamsPage() {
             id="team-value"
             label={mode === 'count' ? 'Cantidad de grupos' : 'Tamaño de grupo'}
             type="number"
-            min={mode === 'count' ? 2 : 1}
+            min={valueMin(mode)}
             value={value}
-            onChange={(e) =>
-              setValue(Math.max(mode === 'count' ? 2 : 1, Number(e.currentTarget.value)))
-            }
+            onChange={(e) => setValue(readNumeric(e.currentTarget.value))}
+            onBlur={() => setValue(clampValue(value, mode))}
           />
 
           <details className="bg-dark-bg-alt border border-dark-border rounded-md p-3">

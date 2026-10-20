@@ -4,7 +4,12 @@
 // Si el backend agrega un campo, sumarlo acá y a la estrategia.
 // =============================================================================
 
-import type { ModuleName } from './types';
+/**
+ * Identificador de módulo. Vive acá (y no en `types.ts`) porque es la clave
+ * de los mapas de contrato de más abajo; `types.ts` lo re-exporta para no
+ * romper los imports existentes.
+ */
+export type ModuleName = 'dice' | 'numbers' | 'roulette' | 'teams' | 'weighted';
 
 // ---- dice --------------------------------------------------------------------
 export interface DiceInput {
@@ -89,6 +94,39 @@ export interface WeightedResultLocal extends WeightedResultBackend {
 }
 
 // =============================================================================
+// Mapas de contrato por módulo
+//
+// Antes `payload` y `result` eran `Record<string, unknown>`, que no
+// restringe nada y además no es asignable desde una `interface` (las
+// interfaces no tienen index signature). Estos mapas son la fuente de
+// verdad: `payload` y `result` se tipan según el módulo.
+// =============================================================================
+
+/** `payload` (parámetros de entrada) de cada módulo. */
+export interface ModulePayloads {
+  dice: DiceInput;
+  numbers: NumbersInput;
+  roulette: RouletteInput;
+  teams: TeamsInput;
+  weighted: WeightedInput;
+}
+
+/** `result` (salida normalizada al backend) de cada módulo. */
+export interface ModuleResults {
+  dice: DiceResult;
+  numbers: NumbersResult;
+  roulette: RouletteResultBackend;
+  teams: TeamsResult;
+  weighted: WeightedResultBackend;
+}
+
+/** `payload` de cualquier módulo. */
+export type ModulePayload = ModulePayloads[ModuleName];
+
+/** `result` de cualquier módulo. */
+export type ModuleResult = ModuleResults[ModuleName];
+
+// =============================================================================
 // Interfaz `DrawStrategy`
 //
 // Una estrategia por módulo. Es "autosuficiente": sabe cómo armar el payload
@@ -96,21 +134,26 @@ export interface WeightedResultLocal extends WeightedResultBackend {
 // que el endpoint POST /api/history validará.
 // =============================================================================
 
-export interface DrawExecution<TInput, TLocal, TBackend extends Record<string, unknown>> {
+export interface DrawExecution<TLocal, TBackend> {
   /** Resultado local (lo que la UI necesita para renderizar). */
   local: TLocal;
   /** Resultado normalizado al contrato del backend (lo que se enviará al repo). */
   backend: TBackend;
 }
 
-export interface DrawStrategy<TInput, TLocal, TBackend extends Record<string, unknown>> {
+export interface DrawStrategy<TInput, TLocal, TBackend> {
   readonly moduleId: ModuleName;
 
   /** Etiqueta humana del sorteo, usada para el campo `action` del historial. */
   actionLabel(input: TInput): string;
 
-  /** Construye el payload exacto que `CreateHistoryPayload` exige. */
-  buildPayload(input: TInput): Record<string, unknown>;
+  /**
+   * Construye el `payload` exacto que `CreateHistoryPayload` exige.
+   *
+   * Devuelve el tipo de entrada del módulo, no un `Record<string, unknown>`:
+   * el payload *es* la forma normalizada de los parámetros del sorteo.
+   */
+  buildPayload(input: TInput): TInput;
 
   /**
    * Ejecuta el sorteo en el cliente y produce:
@@ -119,5 +162,5 @@ export interface DrawStrategy<TInput, TLocal, TBackend extends Record<string, un
    *   reposición).
    * - `backend`: el subconjunto que cumple el contrato del backend.
    */
-  execute(input: TInput): DrawExecution<TLocal, TLocal, TBackend>;
+  execute(input: TInput): DrawExecution<TLocal, TBackend>;
 }

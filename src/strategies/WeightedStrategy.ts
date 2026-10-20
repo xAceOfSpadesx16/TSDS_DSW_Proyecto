@@ -12,7 +12,7 @@ import type {
   WeightedResultBackend,
   WeightedResultLocal,
 } from '../domain/contracts';
-import type { DrawStrategy } from '../domain/contracts';
+import type { DrawExecution, DrawStrategy } from '../domain/contracts';
 import { weightedRandom } from '../lib/mathUtils';
 
 export class WeightedStrategy
@@ -25,17 +25,14 @@ export class WeightedStrategy
     return `Sorteo entre ${input.entries.length} participantes`;
   }
 
-  buildPayload(input: WeightedInput): Record<string, unknown> {
+  buildPayload(input: WeightedInput): WeightedInput {
     return {
       entries: input.entries.map((e) => ({ name: e.name, weight: e.weight })),
       ...(input.autoRemove !== undefined ? { autoRemove: input.autoRemove } : {}),
     };
   }
 
-  execute(input: WeightedInput): {
-    local: WeightedResultLocal;
-    backend: WeightedResultBackend;
-  } {
+  execute(input: WeightedInput): DrawExecution<WeightedResultLocal, WeightedResultBackend> {
     if (input.entries.length === 0) {
       throw new Error('No hay participantes para sortear.');
     }

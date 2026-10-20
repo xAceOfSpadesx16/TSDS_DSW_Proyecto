@@ -29,4 +29,14 @@ export const historyRepository = {
       per_page: query.per_page,
     });
   },
+
+  /** Borra un registro propio. 204 si lo borró, 404 si no es suyo o no existe. */
+  remove(id: string): Promise<void> {
+    return http.delete<void>(`/history/${encodeURIComponent(id)}`);
+  },
+
+  /** Borra todos los registros del usuario autenticado. 204. */
+  clearAll(): Promise<void> {
+    return http.delete<void>('/histories');
+  },
 };

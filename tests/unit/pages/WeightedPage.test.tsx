@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WeightedPage } from '../../../src/pages/WeightedPage';
@@ -56,7 +55,9 @@ describe('WeightedPage — participantes y barras', () => {
     expect(screen.getByText('peso 3')).toBeInTheDocument();
     expect(screen.getByText('peso 7')).toBeInTheDocument();
 
-    const bars = Array.from(document.querySelectorAll('#weighted-list output'));
+    const bars = Array.from(
+      document.querySelectorAll<HTMLElement>('#weighted-list output'),
+    );
     expect(bars).toHaveLength(2);
     expect(bars[0].style.width).toBe('30%');
     expect(bars[1].style.width).toBe('70%');

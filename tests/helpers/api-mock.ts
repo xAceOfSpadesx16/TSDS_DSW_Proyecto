@@ -83,6 +83,22 @@ export function mockBackend(page: Page, user: MockUser, options: MockBackendOpti
     }),
   );
 
+  // Lectura del historial (GET /api/histories). El store la pide al entrar
+  // en una sesión (login, registro, hydrate). Sin este mock la petición sale
+  // al backend real, que rechaza el token ficticio del mock con 401 y
+  // termina cerrando la sesión recién iniciada.
+  routes.push(
+    page.route(/\/api\/histories(\?|$)/, (route) => {
+      route.fulfill({
+        status: 200,
+        json: {
+          data: [],
+          meta: { current_page: 1, last_page: 1, per_page: 20, total: 0 },
+        },
+      });
+    }),
+  );
+
   // Persistencia de historial (POST /api/history). El frontend espera
   // `{ data: HistoryRecord }`.
   routes.push(

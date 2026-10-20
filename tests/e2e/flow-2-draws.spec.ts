@@ -76,14 +76,17 @@ test.describe('Flow 2 — Anonymous vs authenticated draws', () => {
     expect(await history.latestSynced()).toBe(true);
 
     // Log out and draw again: the new draw can't sync, so it stays local-only.
+    // Al cerrar sesión, `historyBindings` detecta la transición a anónimo y
+    // vacía el historial en pantalla (decisión de producto): el sorteo
+    // autenticado anterior deja de listarse. Por eso después del logout queda
+    // solo el sorteo anónimo nuevo.
     // (El logout no redirige ni recarga la página: seguimos en /dice, así que
-    // NO volvemos a navegar con page.goto() — eso recargaría y limpiaría el
-    // store de historial en memoria.)
+    // NO volvemos a navegar con page.goto() — eso recargaría la app.)
     await auth.logout();
     await dice.rollDice(4);
     await dice.result();
 
-    expect(await history.entryCount()).toBe(2);
+    expect(await history.entryCount()).toBe(1);
     expect(
       await history.latestLocal(),
       'the new anonymous draw must be local-only',

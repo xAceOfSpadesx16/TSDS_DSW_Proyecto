@@ -10,7 +10,9 @@
 // =============================================================================
 
 import { screen } from '@testing-library/react';
-import type { API } from '@testing-library/user-event';
+// `user-event` exporta el tipo de su instancia como `UserEvent`; `API` era
+// el nombre en versiones anteriores y ya no existe en la instalada.
+import type { UserEvent } from '@testing-library/user-event';
 import userEvent from '@testing-library/user-event';
 
 import { useAuthStore } from '../../../src/store/authStore';
@@ -29,7 +31,7 @@ function escapeForRegExp(value: string): string {
  * cuyo `<label>` incluye texto adicional (hints de validación).
  */
 export async function fillByLabel(
-  eventUser: API,
+  eventUser: UserEvent,
   label: string,
   value: string,
 ): Promise<HTMLInputElement> {
@@ -60,6 +62,6 @@ export function resetAuthForTests(): void {
 }
 
 /** Instancia reutilizable de user-event para los tests de páginas. */
-export function createUserEvent(): API {
+export function createUserEvent(): UserEvent {
   return userEvent.setup();
 }

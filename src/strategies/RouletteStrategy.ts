@@ -14,7 +14,7 @@ import type {
   RouletteResultBackend,
   RouletteResultLocal,
 } from '../domain/contracts';
-import type { DrawStrategy } from '../domain/contracts';
+import type { DrawExecution, DrawStrategy } from '../domain/contracts';
 import { randomInt } from '../lib/mathUtils';
 
 export interface RouletteSegment {
@@ -70,16 +70,13 @@ export class RouletteStrategy
     return `Ruleta con ${input.options.length} opciones`;
   }
 
-  buildPayload(input: RouletteInput): Record<string, unknown> {
+  buildPayload(input: RouletteInput): RouletteInput {
     return {
       options: input.options.map((o) => ({ label: o.label, color: o.color })),
     };
   }
 
-  execute(input: RouletteInput): {
-    local: RouletteResultLocal;
-    backend: RouletteResultBackend;
-  } {
+  execute(input: RouletteInput): DrawExecution<RouletteResultLocal, RouletteResultBackend> {
     if (input.options.length === 0) {
       throw new Error('Agrega al menos una opción para girar la ruleta.');
     }

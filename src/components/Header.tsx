@@ -38,6 +38,7 @@ export function Header() {
         <NavLinkButton to="/weighted">Sorteo</NavLinkButton>
         <NavLinkButton to="/roulette">Ruleta</NavLinkButton>
         <NavLinkButton to="/dice">Dados</NavLinkButton>
+        <NavLinkButton to="/numbers">Números</NavLinkButton>
       </nav>
 
       <div className="flex items-center gap-2 whitespace-nowrap">

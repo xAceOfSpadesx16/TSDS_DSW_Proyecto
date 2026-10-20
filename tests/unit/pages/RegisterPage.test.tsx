@@ -10,7 +10,6 @@
 
 import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '../../../src/domain/types';
@@ -39,7 +38,7 @@ describe('RegisterPage', () => {
   beforeEach(() => {
     installLocalStorage();
     vi.spyOn(authRepository, 'register').mockResolvedValue({
-      user: { id: 1, name: 'Test' },
+      user: { id: 1, name: 'Test', email: 'test@example.com' },
       token: 'test-token',
       expires_in: 3600,
       token_type: 'bearer',

@@ -11,6 +11,7 @@ vi.mock('../../../src/repositories/authRepository', () => ({
     register: vi.fn(),
     logout: vi.fn(),
     me: vi.fn(),
+    refresh: vi.fn(),
   },
 }));
 
@@ -92,15 +93,16 @@ describe('authStore', () => {
     it('guarda el usuario, el token y persiste al éxito', async () => {
       const { repo, store } = await freshDeps();
       vi.mocked(repo.login).mockResolvedValue({
-        user: { id: 'u1', name: 'Ada', email: 'ada@example.com' },
+        user: { id: 1, name: 'Ada', email: 'ada@example.com' },
         token: 'new-token',
+        token_type: 'bearer',
         expires_in: 3600,
       });
 
       await store.getState().login({ email: 'ada@example.com', password: 's3cret' });
       const state = store.getState();
 
-      expect(state.user).toMatchObject({ id: 'u1' });
+      expect(state.user).toMatchObject({ id: 1 });
       expect(state.token).toBe('new-token');
       expect(state.status).toBe('idle');
       expect(JSON.parse(localStorage.getItem(STORAGE_KEY) as string).token).toBe('new-token');
@@ -110,8 +112,9 @@ describe('authStore', () => {
       vi.spyOn(Date, 'now').mockReturnValue(1_000_000);
       const { repo, store } = await freshDeps();
       vi.mocked(repo.login).mockResolvedValue({
-        user: { id: 'u1', name: 'Ada', email: 'ada@example.com' },
+        user: { id: 1, name: 'Ada', email: 'ada@example.com' },
         token: 't',
+        token_type: 'bearer',
         expires_in: 3600,
       });
 
@@ -154,14 +157,15 @@ describe('authStore', () => {
     it('guarda la sesión tras un registro exitoso', async () => {
       const { repo, store } = await freshDeps();
       vi.mocked(repo.register).mockResolvedValue({
-        user: { id: 'u2', name: 'Grace', email: 'grace@example.com' },
+        user: { id: 2, name: 'Grace', email: 'grace@example.com' },
         token: 'reg-token',
+        token_type: 'bearer',
         expires_in: 1800,
       });
 
       await store.getState().register({ name: 'Grace', email: 'grace@example.com', password: 's3cret' });
       const state = store.getState();
-      expect(state.user).toMatchObject({ id: 'u2' });
+      expect(state.user).toMatchObject({ id: 2 });
       expect(state.token).toBe('reg-token');
     });
 
@@ -201,12 +205,60 @@ describe('authStore', () => {
       const { store } = await freshDeps();
       expect(() => store.getState().hydrate()).not.toThrow();
     });
+
+    it('con el token vencido intenta refresh antes de cerrar la sesión', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          user: { id: 1, name: 'Ada', email: 'ada@example.com' },
+          token: 'vencido',
+          expires_at: Date.now() - 1000,
+        }),
+      );
+      const { repo, store } = await freshDeps();
+      vi.mocked(repo.refresh).mockResolvedValue({
+        user: { id: 1, name: 'Ada', email: 'ada@example.com' },
+        token: 'renovado',
+        token_type: 'bearer',
+        expires_in: 3600,
+      });
+
+      await store.getState().hydrate();
+
+      expect(repo.refresh).toHaveBeenCalledTimes(1);
+      const state = store.getState();
+      expect(state.token).toBe('renovado');
+      expect(state.expiresAt).toBeGreaterThan(Date.now());
+      expect(JSON.parse(localStorage.getItem(STORAGE_KEY) as string).token).toBe('renovado');
+    });
+
+    it('si el refresh del token vencido falla, cierra la sesión', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          user: { id: 1, name: 'Ada', email: 'ada@example.com' },
+          token: 'vencido',
+          expires_at: Date.now() - 1000,
+        }),
+      );
+      const { repo, store } = await freshDeps();
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.mocked(repo.refresh).mockRejectedValue(new Error('Failed to fetch'));
+
+      await store.getState().hydrate();
+
+      const state = store.getState();
+      expect(state.token).toBeNull();
+      expect(state.user).toBeNull();
+      expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+    });
   });
 
   describe('logout', () => {
     it('borra el estado y la persistencia al éxito', async () => {
       const { repo, store } = await freshDeps();
-      vi.mocked(repo.logout).mockResolvedValue(undefined);
+      // `logout` responde 200 con un mensaje; el store lo ignora.
+      vi.mocked(repo.logout).mockResolvedValue({ message: 'Sesión cerrada correctamente.' });
 
       await store.getState().logout();
       const state = store.getState();
@@ -232,8 +284,9 @@ describe('authStore', () => {
       expect(selectIsAuthenticated(store.getState())).toBe(false);
 
       vi.mocked(repo.login).mockResolvedValue({
-        user: { id: 'u1', name: 'Ada', email: 'a' },
+        user: { id: 1, name: 'Ada', email: 'a' },
         token: 't',
+        token_type: 'bearer',
         expires_in: 3600,
       });
       await store.getState().login({ email: 'a', password: 'b' });
@@ -242,11 +295,48 @@ describe('authStore', () => {
   });
 
   describe('bindAuthStoreToHttpClient', () => {
+    it('un refresh fallido no borra el token que otra pestaña renovó', async () => {
+      const user = { id: 1, name: 'Ada', email: 'ada@example.com' };
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ user, token: 'viejo', expires_at: Date.now() + 3600_000 }),
+      );
+      const { repo, store, bindAuth, http } = await freshDeps();
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      // Otra pestaña renueva mientras este tab está pidiendo el refresh, y
+      // el refresh de este tab falla.
+      vi.mocked(repo.refresh).mockImplementation(async () => {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({ user, token: 'otra-pestana', expires_at: Date.now() + 3600_000 }),
+        );
+        throw new Error('Failed to fetch');
+      });
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 401,
+          json: async () => ({ message: 'Token expirado' }),
+        }),
+      );
+
+      bindAuth();
+      await expect(http.get('/me')).rejects.toMatchObject({ status: 401 });
+
+      // La persistencia de la otra pestaña sobrevive y se adopta en memoria.
+      const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY) as string);
+      expect(persisted.token).toBe('otra-pestana');
+      expect(store.getState().token).toBe('otra-pestana');
+    });
+
     it('inyecta el token del store en las peticiones del httpClient', async () => {
       const { repo, store, bindAuth, http, setToken } = await freshDeps();
       vi.mocked(repo.login).mockResolvedValue({
-        user: { id: 'u1', name: 'Ada', email: 'a' },
+        user: { id: 1, name: 'Ada', email: 'a' },
         token: 'bound-token',
+        token_type: 'bearer',
         expires_in: 3600,
       });
       await store.getState().login({ email: 'a', password: 'b' });

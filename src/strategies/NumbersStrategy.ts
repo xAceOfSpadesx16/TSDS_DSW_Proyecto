@@ -7,7 +7,7 @@
 // =============================================================================
 
 import type { NumbersInput, NumbersResult } from '../domain/contracts';
-import type { DrawStrategy } from '../domain/contracts';
+import type { DrawExecution, DrawStrategy } from '../domain/contracts';
 import { randomInt, uniqueRandomInts } from '../lib/mathUtils';
 
 export class NumbersStrategy
@@ -20,7 +20,7 @@ export class NumbersStrategy
     return `${input.count} números [${input.min}-${input.max}] (${unique})`;
   }
 
-  buildPayload(input: NumbersInput): Record<string, unknown> {
+  buildPayload(input: NumbersInput): NumbersInput {
     return {
       count: input.count,
       min: input.min,
@@ -29,7 +29,7 @@ export class NumbersStrategy
     };
   }
 
-  execute(input: NumbersInput): { local: NumbersResult; backend: NumbersResult } {
+  execute(input: NumbersInput): DrawExecution<NumbersResult, NumbersResult> {
     if (input.count < 1) {
       throw new Error('La cantidad debe ser >= 1.');
     }
