@@ -30,13 +30,23 @@ vi.mock('../../../src/store/authStore', () => ({
 vi.mock('../../../src/repositories/historyRepository', () => ({
   historyRepository: {
     create: vi.fn(),
+    list: vi.fn(),
   },
 }));
 
 describe('historyStore', () => {
   beforeEach(() => {
     hoisted.authState = { token: null, user: null };
+    useHistoryStore.setState({
+      entries: [],
+      guestEntries: [],
+      currentPage: 1,
+      lastPage: 1,
+      loading: false,
+      error: null,
+    });
     vi.mocked(historyRepository.create).mockReset();
+    vi.mocked(historyRepository.list).mockReset();
   });
 
   afterEach(() => {
@@ -114,6 +124,34 @@ describe('historyStore', () => {
     const entries = useHistoryStore.getState().entries as Array<{ id: string; synced: boolean }>;
     expect(entries[0].synced).toBe(false);
     expect(warn).toHaveBeenCalled();
+  });
+
+  it('conserva el resultado real en una entrada del backend', async () => {
+    hoisted.authState = { token: 't', user: { id: 1 } };
+    vi.mocked(historyRepository.list).mockResolvedValue({
+      data: [
+        {
+          id: 'srv-1',
+          user_id: 1,
+          module_name: 'dice',
+          action: 'd20',
+          payload: { sides: 20, modifier: 0 },
+          result: { rolls: [15], modifier: 0, total: 15 },
+          created_at: '2026-10-20T12:00:00.000Z',
+          updated_at: '2026-10-20T12:00:00.000Z',
+        },
+      ],
+      meta: { current_page: 1, last_page: 1, per_page: 20, total: 1 },
+    });
+
+    await useHistoryStore.getState().load();
+
+    const [entry] = useHistoryStore.getState().entries;
+    expect(entry.record?.module_name).toBe('dice');
+    if (entry.record?.module_name === 'dice') {
+      expect(entry.record.result.total).toBe(15);
+      expect(entry.record.result.rolls).toEqual([15]);
+    }
   });
 
   it('limpia todas las entradas', async () => {

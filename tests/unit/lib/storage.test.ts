@@ -18,6 +18,7 @@ import {
   isStorageAvailable,
   loadDiceOptions,
   loadGuestHistory,
+  loadHistoryOpen,
   loadNumbersOptions,
   loadPendingDraws,
   loadRouletteOptions,
@@ -26,6 +27,7 @@ import {
   removePendingDraw,
   saveDiceOptions,
   saveGuestHistory,
+  saveHistoryOpen,
   saveNumbersOptions,
   savePendingDraw,
   saveRouletteOptions,
@@ -244,5 +246,13 @@ describe('storage — opciones por pantalla', () => {
     clearRouletteOptions();
     saveRouletteOptions([]);
     expect(loadRouletteOptions()).toEqual({ options: [] });
+  });
+
+  it('guarda y restaura el estado abierto del historial', () => {
+    expect(loadHistoryOpen()).toBeNull();
+    saveHistoryOpen(true);
+    expect(loadHistoryOpen()).toBe(true);
+    saveHistoryOpen(false);
+    expect(loadHistoryOpen()).toBe(false);
   });
 });

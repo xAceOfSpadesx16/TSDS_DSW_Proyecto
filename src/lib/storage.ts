@@ -20,6 +20,7 @@ const NUMBERS_OPTIONS_KEY = `${STORAGE_PREFIX}numbers_options_v1`;
 const ROULETTE_OPTIONS_KEY = `${STORAGE_PREFIX}roulette_options_v1`;
 const TEAMS_OPTIONS_KEY = `${STORAGE_PREFIX}teams_options_v1`;
 const WEIGHTED_OPTIONS_KEY = `${STORAGE_PREFIX}weighted_options_v1`;
+const HISTORY_OPEN_KEY = `${STORAGE_PREFIX}history_open_v1`;
 
 const MODULE_NAMES: readonly ModuleName[] = [
   'dice',
@@ -453,4 +454,23 @@ export function saveWeightedOptions(options: WeightedOptions): void {
 
 export function clearWeightedOptions(): void {
   removeKey(WEIGHTED_OPTIONS_KEY);
+}
+
+// -----------------------------------------------------------------------------
+// Estado del panel de historial
+// -----------------------------------------------------------------------------
+
+export function loadHistoryOpen(): boolean | null {
+  return readVersioned(
+    HISTORY_OPEN_KEY,
+    (value: unknown): value is boolean => typeof value === 'boolean',
+  );
+}
+
+export function saveHistoryOpen(open: boolean): void {
+  writeVersioned(HISTORY_OPEN_KEY, open);
+}
+
+export function clearHistoryOpen(): void {
+  removeKey(HISTORY_OPEN_KEY);
 }

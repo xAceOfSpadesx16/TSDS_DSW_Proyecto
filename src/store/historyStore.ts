@@ -45,6 +45,20 @@ function isLocalId(id: string): boolean {
   return id.startsWith('local-');
 }
 
+/**
+ * Proyecta un registro del backend al payload que consume el formateador.
+ * El backend ya validó la forma por módulo; el assertion solo recompone la
+ * unión discriminada que el contrato de `HistoryRecord` no conserva.
+ */
+function toCreatePayload(record: HistoryRecord): CreateHistoryPayload {
+  return {
+    module_name: record.module_name,
+    action: record.action,
+    payload: record.payload,
+    result: record.result,
+  } as CreateHistoryPayload;
+}
+
 /** Proyecta un registro del backend a la fila que renderiza el panel. */
 function toEntry(record: HistoryRecord): LocalHistoryEntry {
   return {
@@ -53,6 +67,7 @@ function toEntry(record: HistoryRecord): LocalHistoryEntry {
     description: record.action,
     timestamp: record.created_at,
     synced: true,
+    record: toCreatePayload(record),
   };
 }
 
