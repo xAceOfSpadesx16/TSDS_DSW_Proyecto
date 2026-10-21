@@ -145,7 +145,7 @@ export function RootLayout() {
     <>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-md focus:bg-action focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-on-action focus:shadow-high focus:outline focus:outline-focus"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-full focus:bg-action focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-on-action focus:shadow-high focus:outline focus:outline-focus"
       >
         Saltar al contenido
       </a>
@@ -166,7 +166,7 @@ export function RootLayout() {
         id="guest-import-dialog"
         ref={guestDialogRef}
         aria-labelledby="guest-import-title"
-        className="rounded-2xl bg-surface border border-control text-ink p-6 max-w-md shadow-high backdrop:bg-scrim"
+        className="panel rounded-2xl bg-surface text-ink p-6 max-w-md shadow-high backdrop:bg-scrim"
         onCancel={(event) => {
           event.preventDefault();
           if (!importingGuest) {
@@ -228,7 +228,7 @@ function ApiDownBanner({
     <div
       id="api-down-banner"
       role="status"
-      className="flex items-center justify-center gap-3 px-4 py-2 bg-surface border-b border-control text-sm text-muted"
+      className="panel flex items-center justify-center gap-3 px-4 py-2 bg-surface shadow-low text-sm text-muted"
     >
       <span>No se pudo conectar con el servidor. Los sorteos no se guardarán.</span>
       <button
@@ -236,7 +236,7 @@ function ApiDownBanner({
         type="button"
         onClick={onRetry}
         disabled={checking}
-        className="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-semibold text-action hover:text-action-hover transition-colors focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
+        className="inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-3 text-xs font-semibold text-action shadow-low transition-colors hover:bg-surface-hover hover:text-action-hover active:shadow-pressed focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none disabled:cursor-not-allowed"
       >
         {checking ? 'Reintentando…' : 'Reintentar'}
       </button>
@@ -251,7 +251,7 @@ function DisclaimerFooter({ disclaimer }: { disclaimer: LegalDisclaimer }) {
       id="legal-disclaimer"
       role="contentinfo"
       aria-label="Aviso legal"
-      className="border-t border-control bg-surface px-6 py-6 text-sm text-muted"
+      className="panel bg-surface shadow-low px-6 py-6 text-sm text-muted"
     >
       <div className="max-w-3xl mx-auto flex flex-col gap-2">
         <h2 className="text-sm font-bold text-ink">
@@ -263,7 +263,7 @@ function DisclaimerFooter({ disclaimer }: { disclaimer: LegalDisclaimer }) {
         {/* Las secciones son largas: van en un `<details>` cerrado para no
             empujar el contenido de la app al abrir la página. */}
         <details className="text-xs">
-          <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-ink focus-visible:outline focus-visible:outline-focus">
+          <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-full border border-control bg-surface px-3 font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
             Ver el aviso completo ({disclaimer.sections.length} secciones)
           </summary>
           <dl className="mt-3 flex flex-col gap-3">

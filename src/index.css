@@ -11,10 +11,10 @@
 :root {
   color-scheme: light;
 
-  --color-canvas: #f3efe6;
-  --color-surface: #fbf8f1;
-  --color-surface-hover: #f0e9dc;
-  --color-surface-sunken: #e7dfd1;
+  --color-canvas: #ece6da;
+  --color-surface: #ece6da;
+  --color-surface-hover: #e5ded0;
+  --color-surface-sunken: #e2dacb;
 
   --color-ink: #221f1a;
   --color-muted: #5b554b;
@@ -43,25 +43,26 @@
 
   --font-size-registration: 0.75rem;
 
-  --radius-card: 10px;
-  --radius-control: 8px;
-  --radius-chip: 4px;
-  --radius-stamp: 2px;
+  --radius-card: 24px;
+  --radius-control: 14px;
+  --radius-chip: 8px;
+  --radius-stamp: 4px;
   --radius-pill: 999px;
 
   --shadow-low:
-    -3px -3px 8px rgba(255, 255, 255, 0.95),
-    4px 4px 10px rgba(84, 72, 55, 0.14);
+    -4px -4px 10px rgba(255, 255, 255, 0.85),
+    4px 4px 10px rgba(84, 72, 55, 0.18);
   --shadow-raised:
-    -6px -6px 14px rgba(255, 255, 255, 0.96),
-    7px 7px 16px rgba(84, 72, 55, 0.18);
+    -8px -8px 18px rgba(255, 255, 255, 0.9),
+    8px 8px 18px rgba(84, 72, 55, 0.22);
   --shadow-high:
-    -10px -10px 24px rgba(255, 255, 255, 0.98),
-    14px 14px 30px rgba(84, 72, 55, 0.22);
+    -14px -14px 28px rgba(255, 255, 255, 0.95),
+    14px 14px 30px rgba(84, 72, 55, 0.26);
   --shadow-pressed:
-    inset 4px 4px 9px rgba(84, 72, 55, 0.16),
-    inset -4px -4px 9px rgba(255, 255, 255, 0.95);
-  --shadow-arrow: 0 2px 4px rgba(34, 31, 26, 0.25);
+    inset 6px 6px 12px rgba(84, 72, 55, 0.22),
+    inset -6px -6px 12px rgba(255, 255, 255, 0.9);
+  --shadow-flat: none;
+  --shadow-arrow: 0 3px 6px rgba(34, 31, 26, 0.28);
 }
 
 html {
@@ -268,10 +269,15 @@ input[type="color"] {
     box-shadow: none;
   }
 
+  .panel {
+    border: 2px solid var(--color-ink);
+  }
+
   :root input,
   :root select,
   :root textarea,
-  :root button {
+  :root button,
+  :root summary {
     border-width: 2px;
     border-style: solid;
     border-color: var(--color-ink);

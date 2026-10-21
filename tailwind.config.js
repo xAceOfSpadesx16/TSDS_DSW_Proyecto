@@ -76,6 +76,7 @@ export default {
         full: 'var(--radius-pill)',
       },
       boxShadow: {
+        flat: 'var(--shadow-flat)',
         low: 'var(--shadow-low)',
         raised: 'var(--shadow-raised)',
         high: 'var(--shadow-high)',

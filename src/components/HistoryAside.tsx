@@ -127,7 +127,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
           }}
           aria-pressed={openMobile}
           aria-controls="history-aside"
-          className="lg:hidden fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-high hover:bg-surface-hover active:bg-surface-sunken focus-visible:outline focus-visible:outline-focus"
+          className="lg:hidden fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-high hover:bg-surface-hover active:bg-surface-sunken active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
         >
           {openMobile ? 'Cerrar' : 'Historial'}
         </button>
@@ -136,7 +136,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
       <aside
         id="history-aside"
         aria-label="Historial de operaciones"
-        className={`self-start bg-surface border border-control rounded-2xl p-4 flex flex-col gap-3 shadow-high lg:shadow-raised ${visibilityClass}`}
+        className={`panel self-start bg-surface rounded-2xl p-4 flex flex-col gap-3 shadow-high lg:shadow-raised ${visibilityClass}`}
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-base font-bold text-ink">Historial</h2>
@@ -146,7 +146,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
                 id="clear-history-btn"
                 type="button"
                 onClick={onClear}
-                className="inline-flex min-h-11 min-w-11 items-center px-2 text-xs text-muted hover:text-danger transition-colors focus-visible:outline focus-visible:outline-focus"
+                className="inline-flex min-h-11 min-w-11 items-center rounded-full border border-control bg-surface px-3 text-xs text-muted shadow-low transition-colors hover:bg-surface-hover hover:text-danger active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
               >
                 Limpiar
               </button>
@@ -157,7 +157,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
               onClick={() => setOpen((value) => !value)}
               aria-expanded={open}
               aria-controls="history-panel"
-              className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md px-2 text-xs font-semibold text-muted transition-colors hover:text-ink focus-visible:outline focus-visible:outline-focus"
+              className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-full border border-control bg-surface px-3 text-xs font-semibold text-muted shadow-low transition-colors hover:bg-surface-hover hover:text-ink active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
             >
               <ChevronIcon open={open} />
               <span>{open ? 'Ocultar historial' : 'Mostrar historial'}</span>
@@ -202,7 +202,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
                         <li
                           key={entry.id}
                           data-history-entry
-                          className="flex min-w-0 flex-col gap-1 break-words px-3 py-2 rounded-lg bg-surface border border-control shadow-low"
+                          className="panel flex min-w-0 flex-col gap-1 break-words px-3 py-2 rounded-2xl bg-surface shadow-low"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <span className="text-xs font-semibold text-action">
@@ -219,7 +219,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
                                 type="button"
                                 onClick={() => void remove(entry.id)}
                                 aria-label={`Borrar ${entry.description}`}
-                                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:text-danger focus-visible:outline focus-visible:outline-focus"
+                                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-control bg-surface text-muted shadow-low transition-colors hover:bg-surface-hover hover:text-danger active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
                               >
                                 <svg
                                   viewBox="0 0 20 20"
@@ -244,7 +244,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
 
                           {result.teams ? (
                             <details className="text-xs text-muted">
-                              <summary className="flex min-h-11 cursor-pointer select-none items-center focus-visible:outline focus-visible:outline-focus">
+                              <summary className="flex min-h-11 cursor-pointer select-none items-center rounded-full border border-control bg-surface px-2 shadow-low focus-visible:outline focus-visible:outline-focus">
                                 Ver integrantes
                               </summary>
                               <ul className="mt-1 flex flex-col gap-1">
@@ -286,7 +286,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
               type="button"
               onClick={() => void loadMore()}
               disabled={loading}
-              className="inline-flex min-h-11 items-center self-center rounded-md px-2 text-xs text-action transition-colors hover:text-action-hover focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
+              className="inline-flex min-h-11 items-center self-center rounded-full border border-control bg-surface px-3 text-xs text-action shadow-low transition-colors hover:bg-surface-hover hover:text-action-hover active:shadow-pressed focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none disabled:cursor-not-allowed"
             >
               {loading ? 'Cargando…' : 'Cargar más'}
             </button>

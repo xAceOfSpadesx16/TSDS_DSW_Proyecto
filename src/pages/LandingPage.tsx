@@ -57,7 +57,7 @@ const MODULES: ModuleCard[] = [
 export function LandingPage() {
   return (
     <main className="workspace">
-      <section className="relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border border-control bg-surface px-4 py-10 text-center shadow-raised animate-fade-in sm:py-14">
+      <section className="panel relative flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-surface px-4 py-10 text-center shadow-raised animate-fade-in sm:py-14">
         <h1 tabIndex={-1} className="mb-4 font-bold text-ink">
           Thrive Randomizer
         </h1>
@@ -68,7 +68,7 @@ export function LandingPage() {
         </p>
         <a
           href="#modulos"
-          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 py-3 text-sm font-semibold text-on-action shadow-low transition-colors hover:bg-action-hover active:bg-action-active focus-visible:outline focus-visible:outline-focus active:shadow-pressed"
+          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-action px-5 py-3 text-sm font-semibold text-on-action shadow-raised transition-[background-color,box-shadow] hover:bg-action-hover active:bg-action-active focus-visible:outline focus-visible:outline-focus active:shadow-pressed"
         >
           Empezar a sortear
         </a>
@@ -86,7 +86,7 @@ export function LandingPage() {
           <Link
             key={m.to}
             to={m.to}
-            className="flex flex-col rounded-2xl border border-control bg-surface p-6 text-ink shadow-raised transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-action hover:shadow-high focus-visible:outline focus-visible:outline-focus hover:no-underline hover:text-ink sm:last:col-span-2 lg:last:col-span-1"
+            className="panel flex flex-col rounded-2xl bg-surface p-6 text-ink shadow-raised transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-high focus-visible:outline focus-visible:outline-focus hover:no-underline hover:text-ink sm:last:col-span-2 lg:last:col-span-1"
           >
             <span className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-md bg-surface-sunken text-ink shadow-pressed">
               <ModuleIcon name={m.icon} className="h-6 w-6" />

@@ -57,7 +57,7 @@ export function Header() {
 
   return (
     <header
-      className="relative flex items-center justify-between gap-2 px-4 bg-surface border-b border-control shadow-low sticky top-0 z-50"
+      className="panel relative flex items-center justify-between gap-2 px-4 bg-surface shadow-low sticky top-0 z-50"
       role="banner"
     >
       <NavLink
@@ -73,7 +73,7 @@ export function Header() {
         ref={navRef}
         className={`${
           open ? 'flex' : 'hidden'
-        } lg:flex absolute lg:static left-0 right-0 top-full lg:top-auto z-50 lg:z-auto flex-col lg:flex-row lg:items-center gap-1 bg-surface lg:bg-transparent border-b lg:border-b-0 border-control px-4 py-3 lg:p-0 shadow-high lg:shadow-none [&>a]:min-h-11 [&>a]:w-full [&>a]:items-center [&>a]:justify-start lg:[&>a]:w-auto`}
+        } lg:flex absolute lg:static left-0 right-0 top-full lg:top-auto z-50 lg:z-auto flex-col lg:flex-row lg:items-center gap-1 panel bg-surface lg:bg-transparent px-4 py-3 lg:p-0 shadow-high lg:shadow-none [&>a]:min-h-11 [&>a]:w-full [&>a]:items-center [&>a]:justify-start lg:[&>a]:w-auto`}
         aria-label="Navegación principal"
         onClick={(event) => {
           if ((event.target as HTMLElement).closest('a')) {
@@ -89,7 +89,7 @@ export function Header() {
         <NavLinkButton to="/numbers">Números</NavLinkButton>
 
         {open ? (
-          <div className="md:hidden mt-1 flex flex-col gap-2 border-t border-control pt-3">
+          <div className="panel md:hidden mt-2 flex flex-col gap-2 rounded-2xl bg-surface p-3 shadow-low">
             {isAuthed ? (
               <>
                 <span className="break-words text-sm text-muted">
@@ -116,7 +116,7 @@ export function Header() {
                 </NavLink>
                 <NavLink
                   to="/register"
-                  className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-action text-on-action hover:bg-action-hover hover:text-on-action active:bg-action-active hover:no-underline focus-visible:outline focus-visible:outline-focus"
+                  className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-full text-sm font-semibold bg-action text-on-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed hover:no-underline focus-visible:outline focus-visible:outline-focus"
                 >
                   Registro
                 </NavLink>
@@ -146,7 +146,7 @@ export function Header() {
             </NavLink>
             <NavLink
               to="/register"
-              className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-action text-on-action hover:bg-action-hover hover:text-on-action active:bg-action-active hover:no-underline"
+              className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-full text-sm font-semibold bg-action text-on-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed hover:no-underline"
             >
               Registro
             </NavLink>
@@ -162,7 +162,7 @@ export function Header() {
         aria-expanded={open}
         aria-controls="app-nav"
         aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
-        className="lg:hidden inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-control text-ink transition-colors hover:bg-surface-hover active:bg-surface-sunken focus-visible:outline focus-visible:outline-focus"
+        className="lg:hidden inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-control text-ink shadow-low transition-colors hover:bg-surface-hover active:bg-surface-sunken active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
       >
         <svg
           viewBox="0 0 20 20"

@@ -15,13 +15,13 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANTS: Record<NonNullable<Props['variant']>, string> = {
   primary:
-    'bg-action text-on-action shadow-low hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
+    'bg-action text-on-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
   ghost:
-    'bg-transparent text-ink border border-control hover:bg-surface-hover hover:border-action active:bg-surface-sunken disabled:text-muted disabled:bg-surface-sunken',
+    'bg-transparent text-ink border border-control shadow-low hover:bg-surface-hover hover:border-action active:bg-surface-sunken active:shadow-pressed disabled:text-muted disabled:bg-surface-sunken',
   accent:
-    'bg-action text-on-action shadow-low hover:bg-action-hover active:bg-action-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
+    'bg-action text-on-action shadow-raised hover:bg-action-hover active:bg-action-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
   danger:
-    'bg-danger text-on-action shadow-low hover:bg-danger-dark active:bg-danger-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
+    'bg-danger text-on-action shadow-raised hover:bg-danger-dark active:bg-danger-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
 };
 
 export function PrimaryButton({
@@ -33,7 +33,7 @@ export function PrimaryButton({
   return (
     <button
       {...rest}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-focus disabled:cursor-not-allowed ${
+      className={`inline-flex min-h-11 items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-[background-color,color,box-shadow] focus-visible:outline focus-visible:outline-focus disabled:cursor-not-allowed disabled:border disabled:border-control ${
         VARIANTS[variant]
       } ${className}`}
     >

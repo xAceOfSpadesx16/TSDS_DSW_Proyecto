@@ -308,9 +308,9 @@ export function RoulettePage() {
           id="roulette-options-details"
           open={optionsOpen}
           onToggle={(event) => setOptionsOpen(event.currentTarget.open)}
-          className="rounded-2xl border border-control bg-surface shadow-raised"
+          className="panel rounded-2xl bg-surface shadow-raised"
         >
-          <summary className="flex min-h-11 cursor-pointer items-center justify-between rounded-2xl px-4 text-sm font-semibold text-ink focus-visible:outline focus-visible:outline-focus">
+          <summary className="flex min-h-11 cursor-pointer items-center justify-between rounded-full border border-control bg-surface px-4 text-sm font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
             Opciones de la ruleta
             <span className="flex items-center gap-2">
               <span className="font-mono text-xs text-muted">
@@ -386,7 +386,7 @@ export function RoulettePage() {
                     onClick={() => onRemoveOption(i)}
                     disabled={spinning}
                     aria-label={`Quitar opción ${opt.label}`}
-                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-danger focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-control bg-surface text-muted shadow-low transition-colors hover:bg-surface-hover hover:text-danger active:shadow-pressed focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none disabled:cursor-not-allowed"
                   >
                     ×
                   </button>
@@ -417,7 +417,7 @@ export function RoulettePage() {
               height={CANVAS_SIZE}
               role="img"
               aria-label={`Ruleta de decisiones con ${options.length} opciones`}
-              className="h-auto w-full max-w-[250px] sm:max-w-[360px] rounded-full bg-surface border-2 border-control shadow-high"
+              className="panel h-auto w-full max-w-[250px] sm:max-w-[360px] rounded-full bg-surface shadow-high"
             />
           </div>
 
@@ -443,7 +443,7 @@ export function RoulettePage() {
           ref={dialogRef}
           aria-labelledby="roulette-result-title"
           aria-describedby="roulette-result-text"
-          className="rounded-2xl bg-surface border border-control text-ink p-6 max-w-sm shadow-high backdrop:bg-scrim"
+          className="panel rounded-2xl bg-surface text-ink p-6 max-w-sm shadow-high backdrop:bg-scrim"
           onClose={() =>
             document.getElementById('roulette-spin-btn')?.focus()
           }

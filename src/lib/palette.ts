@@ -8,7 +8,7 @@
 
 /** Tinta y papel de la dirección, para fallbacks del canvas. */
 export const PAPER_INK = '#221f1a';
-export const PAPER_SURFACE = '#fbf8f1';
+export const PAPER_SURFACE = '#ece6da';
 export const PAPER_ON_ACTION = '#f8fbff';
 
 /**

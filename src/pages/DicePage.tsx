@@ -146,7 +146,7 @@ export function DicePage() {
           Dados RPG
         </h1>
 
-        <div className="bg-surface border border-control rounded-2xl shadow-raised p-6 flex flex-col gap-4">
+        <div className="panel bg-surface rounded-2xl shadow-raised p-6 flex flex-col gap-4">
           <fieldset
             className="flex min-w-0 flex-col gap-2"
             aria-describedby={diceError ? 'dice-error' : undefined}
@@ -157,7 +157,7 @@ export function DicePage() {
                 <button
                   key={sides}
                   type="button"
-                  className={`dice-btn border-2 px-4 py-3 rounded-md text-lg font-bold transition-[transform,background-color,border-color,box-shadow] shadow-low active:shadow-pressed focus-visible:outline focus-visible:outline-focus ${
+                  className={`dice-btn border-2 px-4 py-3 rounded-full text-lg font-bold transition-[transform,background-color,border-color,box-shadow] shadow-low active:shadow-pressed focus-visible:outline focus-visible:outline-focus ${
                     lastSides === sides
                       ? 'border-action bg-surface text-action shadow-pressed'
                       : 'border-control bg-surface text-ink hover:-translate-y-0.5 hover:border-action'
@@ -184,7 +184,7 @@ export function DicePage() {
           <div className="flex items-center justify-center gap-4 py-6">
             <output
               id="dice-result"
-              className={`dice-registration relative w-32 h-32 flex items-center justify-center font-mono text-[2.75rem] leading-[3rem] font-bold rounded-xl bg-surface border-2 border-action text-action shadow-pressed ${
+              className={`dice-registration panel relative w-32 h-32 flex items-center justify-center font-mono text-[2.75rem] leading-[3rem] font-bold rounded-xl bg-surface text-action shadow-pressed ${
                 shaking ? 'animate-dice-shake' : ''
               }`}
               aria-hidden="true"

@@ -56,5 +56,24 @@ test.describe('Alto contraste', () => {
       getComputedStyle(element).outlineWidth,
     );
     expect(focusedLinkOutline).toBe('3px');
+
+    await page.goto('/teams');
+    const summary = page
+      .locator('summary')
+      .filter({ hasText: 'Reglas avanzadas' })
+      .first();
+    const summaryStyles = await summary.evaluate((element) => {
+      const styles = getComputedStyle(element);
+      return {
+        shadow: styles.boxShadow,
+        borderWidth: styles.borderTopWidth,
+        borderStyle: styles.borderTopStyle,
+        borderColor: styles.borderTopColor,
+      };
+    });
+    expect(summaryStyles.shadow).toBe('none');
+    expect(summaryStyles.borderWidth).toBe('2px');
+    expect(summaryStyles.borderStyle).toBe('solid');
+    expect(summaryStyles.borderColor).toBe('rgb(34, 31, 26)');
   });
 });

@@ -192,7 +192,7 @@ export function TeamsPage() {
           id="team-form"
           onSubmit={onGenerate}
           aria-describedby={error ? 'teams-error' : undefined}
-          className="bg-surface border border-control rounded-2xl shadow-raised p-3 flex flex-col gap-4 sm:p-4"
+          className="panel bg-surface rounded-2xl shadow-raised p-3 flex flex-col gap-4 sm:p-4"
         >
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted font-medium">Participantes (uno por línea)</span>
@@ -242,8 +242,8 @@ export function TeamsPage() {
             onBlur={() => setValue(clampValue(value, mode))}
           />
 
-          <details className="bg-surface border border-control rounded-lg p-3 shadow-low">
-            <summary className="-my-2 flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink focus-visible:outline focus-visible:outline-focus">
+          <details className="panel bg-surface rounded-2xl p-3 shadow-low">
+            <summary className="flex min-h-11 cursor-pointer items-center rounded-full border border-control bg-surface px-3 text-sm font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
               Reglas avanzadas (exclusiones)
             </summary>
             <p id="teams-exclusion-hint" className="mt-2 text-xs text-muted">
@@ -319,7 +319,7 @@ export function TeamsPage() {
                   <button
                     type="button"
                     onClick={() => onRemoveExclusion(i)}
-                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-danger focus-visible:outline focus-visible:outline-focus"
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-control bg-surface text-muted shadow-low transition-colors hover:bg-surface-hover hover:text-danger active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
                     aria-label={`Quitar exclusión ${a} ${b}`}
                   >
                     ×
@@ -385,7 +385,7 @@ export function TeamsPage() {
               {result.teams.map((team, i) => (
                 <div
                   key={i}
-                  className="min-w-0 rounded-lg border border-control bg-surface p-4 shadow-low"
+                  className="panel min-w-0 rounded-2xl bg-surface p-4 shadow-raised"
                 >
                   <h3 className="mb-2 flex items-center gap-2 text-sm font-bold text-ink">
                     <span

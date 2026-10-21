@@ -133,7 +133,7 @@ export function NumbersPage() {
           id="numbers-form"
           onSubmit={onSubmit}
           aria-describedby={error ? 'numbers-error' : undefined}
-          className="bg-surface border border-control rounded-2xl shadow-raised p-6 flex flex-col gap-4"
+          className="panel bg-surface rounded-2xl shadow-raised p-6 flex flex-col gap-4"
         >
           <Field
             id="numbers-count"
@@ -174,7 +174,7 @@ export function NumbersPage() {
               checked={unique}
               onChange={(e) => setUnique(e.currentTarget.checked)}
               aria-describedby="numbers-unique-hint"
-              className="h-5 w-5 rounded border-control bg-surface text-action focus-visible:outline focus-visible:outline-focus"
+              className="h-5 w-5 rounded-md border-control bg-surface text-action focus-visible:outline focus-visible:outline-focus"
             />
             Sin repetición
           </label>
@@ -206,7 +206,7 @@ export function NumbersPage() {
         {result ? (
           <output
             id="numbers-result"
-            className="bg-surface border border-control rounded-lg p-4 font-mono text-ink text-center shadow-pressed"
+            className="panel bg-surface rounded-2xl p-4 font-mono text-ink text-center shadow-pressed"
           >
             {result.numbers.join(', ')}
           </output>

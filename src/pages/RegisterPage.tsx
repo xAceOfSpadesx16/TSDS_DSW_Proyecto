@@ -56,7 +56,7 @@ export function RegisterPage() {
         <form
           onSubmit={onSubmit}
           aria-describedby={error ? 'register-error' : undefined}
-          className="bg-surface border border-control rounded-2xl shadow-raised p-6 flex flex-col gap-4"
+          className="panel bg-surface rounded-2xl shadow-raised p-6 flex flex-col gap-4"
         >
           <Field
             label="Nombre"

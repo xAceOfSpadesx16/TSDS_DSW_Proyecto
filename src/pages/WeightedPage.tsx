@@ -331,7 +331,7 @@ export function WeightedPage() {
         <form
           id="weighted-form"
           onSubmit={onAdd}
-          className="bg-surface border border-control rounded-2xl shadow-raised p-4"
+          className="panel bg-surface rounded-2xl shadow-raised p-4"
         >
           <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
             <legend className="sr-only">Agregar participante</legend>
@@ -367,9 +367,9 @@ export function WeightedPage() {
 
         <details
           id="weighted-bulk-details"
-          className="bg-surface border border-control rounded-2xl shadow-raised"
+          className="panel bg-surface rounded-2xl shadow-raised"
         >
-          <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-semibold text-ink focus-visible:outline focus-visible:outline-focus">
+          <summary className="flex min-h-11 cursor-pointer items-center rounded-full border border-control bg-surface px-4 text-sm font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
             Carga masiva
           </summary>
           <div className="flex min-w-0 flex-col gap-2 px-4 pb-4 pt-1">
@@ -450,7 +450,7 @@ export function WeightedPage() {
               <li
                 key={`${entry.name}-${index}`}
                 data-weighted-row
-                className="flex min-w-0 flex-col gap-2 rounded-lg border border-control bg-surface p-3 shadow-low"
+                className="panel flex min-w-0 flex-col gap-2 rounded-2xl bg-surface p-3 shadow-low"
               >
                 {editingIndex === index ? (
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto] sm:items-end">
@@ -510,7 +510,7 @@ export function WeightedPage() {
                           type="button"
                           aria-label={`Editar ${entry.name}`}
                           onClick={() => onStartEdit(index)}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors hover:text-action focus-visible:outline focus-visible:outline-focus"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-control bg-surface text-muted shadow-low transition-colors hover:bg-surface-hover hover:text-action active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
                         >
                           <svg
                             viewBox="0 0 20 20"
@@ -531,7 +531,7 @@ export function WeightedPage() {
                           type="button"
                           aria-label={`Quitar ${entry.name}`}
                           onClick={() => onRemove(index)}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors hover:text-danger focus-visible:outline focus-visible:outline-focus"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-control bg-surface text-muted shadow-low transition-colors hover:bg-surface-hover hover:text-danger active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
                         >
                           <svg
                             viewBox="0 0 20 20"
@@ -585,7 +585,7 @@ export function WeightedPage() {
                   type="checkbox"
                   checked={autoRemove}
                   onChange={(event) => setAutoRemove(event.currentTarget.checked)}
-                  className="h-5 w-5 rounded border-control bg-surface text-action focus-visible:outline focus-visible:outline-focus"
+                  className="h-5 w-5 rounded-md border-control bg-surface text-action focus-visible:outline focus-visible:outline-focus"
                 />
                 Auto-eliminar ganadores
               </label>
@@ -623,7 +623,7 @@ export function WeightedPage() {
           <section
             id="weighted-result"
             aria-labelledby="weighted-result-heading"
-            className="min-w-0 break-words rounded-lg border border-control bg-surface p-4 text-center shadow-pressed"
+            className="panel min-w-0 break-words rounded-2xl bg-surface p-4 text-center shadow-pressed"
           >
             <h2
               id="weighted-result-heading"
