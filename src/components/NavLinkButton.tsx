@@ -16,8 +16,8 @@ interface Props {
 }
 
 const BASE =
-  'inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light';
-const ACTIVE = 'text-light-inverse bg-primary hover:text-light-inverse hover:bg-primary-dark';
+  'inline-flex min-h-11 items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light';
+const ACTIVE = 'text-white bg-primary hover:text-white hover:bg-primary-dark';
 const INACTIVE =
   'text-light-muted hover:text-light-text hover:bg-dark-surface hover:no-underline';
 

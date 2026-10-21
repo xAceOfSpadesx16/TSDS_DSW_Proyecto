@@ -37,8 +37,11 @@ describe('DicePage — dados', () => {
       expect(screen.getByRole('button', { name: `d${sides}` })).toBeInTheDocument();
     }
     expect(screen.getByLabelText('Modificador')).toBeInTheDocument();
-    // La cara del dado (output) se renderiza con el valor inicial displayRoll=1.
-    expect(document.querySelector('#dice-result')).toHaveTextContent('1');
+    // Antes de la primera tirada no se anuncia ni se muestra una cara.
+    const face = document.querySelector('#dice-result');
+    expect(face).toHaveAttribute('aria-hidden', 'true');
+    expect(face?.textContent).toBe('');
+    expect(screen.getByRole('group', { name: 'Dado' })).toBeInTheDocument();
   });
 
   it('no renderiza la pestaña Números ni un tablist', () => {
@@ -66,6 +69,49 @@ describe('DicePage — dados', () => {
     expect(entries[0].module).toBe('dice');
     expect(entries[0].description).toMatch(/^d20\+3 = \d+$/);
     expect(entries[0].synced).toBe(false);
+  });
+
+  it('anuncia solo el total final en la región viva', async () => {
+    mockRequestAnimationFrame();
+    renderDice();
+    rollDice(6);
+
+    await waitFor(() =>
+      expect(document.querySelector('#dice-announcement')).toHaveTextContent(
+        /^Total: \d+$/,
+      ),
+    );
+    expect(document.querySelector('#dice-announcement')).toHaveAttribute(
+      'aria-live',
+      'polite',
+    );
+    expect(document.querySelector('#dice-announcement')).toHaveAttribute(
+      'role',
+      'status',
+    );
+    expect(document.querySelector('#dice-total')).not.toHaveAttribute(
+      'aria-live',
+    );
+    expect(document.querySelector('#dice-result')).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+  });
+
+  it('con prefers-reduced-motion resuelve sin animación', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }),
+    );
+    renderDice();
+    rollDice(6);
+
+    await waitFor(() =>
+      expect(document.querySelector('#dice-total')).toBeInTheDocument(),
+    );
+    expect(document.querySelector('#dice-result')).not.toHaveClass(
+      'animate-dice-shake',
+    );
   });
 
   it('tira cada dado (d4/d6/d8/d12/d20) con modificador y registra el histórico', () => {
@@ -119,6 +165,10 @@ describe('DicePage — dados', () => {
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     expect(screen.getByRole('alert')).toHaveTextContent('Dado no válido');
+    expect(screen.getByRole('group', { name: 'Dado' })).toHaveAttribute(
+      'aria-describedby',
+      'dice-error',
+    );
   });
 
   it('despliega el desglose de tiradas múltiples en el total', async () => {

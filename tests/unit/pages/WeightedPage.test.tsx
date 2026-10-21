@@ -41,6 +41,12 @@ describe('WeightedPage — participantes y barras', () => {
     vi.unstubAllGlobals();
   });
 
+  it('agrupa los controles de alta de participante', () => {
+    expect(
+      screen.getByRole('group', { name: 'Agregar participante' }),
+    ).toBeInTheDocument();
+  });
+
   it('renderiza el form, la lista vacía y botones deshabilitados al inicio', () => {
     expect(screen.getByText(/Sin participantes cargados/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sortear' })).toBeDisabled();
@@ -138,6 +144,10 @@ describe('WeightedPage — sorteo', () => {
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     expect(screen.getByRole('alert')).toHaveTextContent('Pesos inválidos');
+    expect(document.querySelector('#weighted-draw-btn')).toHaveAttribute(
+      'aria-describedby',
+      'weighted-error',
+    );
   });
 });
 

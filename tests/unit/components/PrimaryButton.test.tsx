@@ -17,7 +17,7 @@ describe('PrimaryButton', () => {
     const { container } = render(<PrimaryButton>Guardar</PrimaryButton>);
     const button = container.querySelector('button')!;
     expect(button.className).toContain('bg-primary');
-    expect(button.className).toContain('text-light-inverse');
+    expect(button.className).toContain('text-white');
   });
 
   it.each(['primary', 'ghost', 'accent', 'danger'] as const)(

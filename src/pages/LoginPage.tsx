@@ -6,22 +6,27 @@
 // =============================================================================
 
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore, selectIsAuthenticated } from '../store/authStore';
 import { ApiError } from '../domain/types';
 
 export function LoginPage() {
   const login = useAuthStore((s) => s.login);
   const status = useAuthStore((s) => s.status);
+  const isAuthenticated = useAuthStore(selectIsAuthenticated);
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [error, setError] = useState<string | null>(null);
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -41,12 +46,15 @@ export function LoginPage() {
   };
 
   return (
-    <main className="p-6 w-full mx-auto" role="main">
+    <main className="p-6 w-full mx-auto">
       <section className="max-w-md mx-auto animate-fade-in flex flex-col gap-4">
-        <h1 className="text-3xl font-bold">Iniciar sesión</h1>
+        <h1 tabIndex={-1} className="text-3xl font-bold">
+          Iniciar sesión
+        </h1>
 
         <form
           onSubmit={onSubmit}
+          aria-describedby={error ? 'login-error' : undefined}
           className="bg-dark-surface border border-dark-border rounded-2xl p-6 flex flex-col gap-4"
         >
           <Field
@@ -68,7 +76,7 @@ export function LoginPage() {
             error={fieldErrors.password?.[0]}
           />
           {error ? (
-            <p className="text-sm text-danger" role="alert">
+            <p id="login-error" className="text-sm text-danger" role="alert">
               {error}
             </p>
           ) : null}
@@ -79,7 +87,10 @@ export function LoginPage() {
 
         <p className="text-sm text-light-muted text-center">
           ¿No tenés cuenta?{' '}
-          <Link to="/register" className="text-primary-light hover:underline">
+          <Link
+            to="/register"
+            className="inline-flex min-h-11 items-center text-primary-light underline underline-offset-2 hover:text-primary-light"
+          >
             Registrate
           </Link>
         </p>

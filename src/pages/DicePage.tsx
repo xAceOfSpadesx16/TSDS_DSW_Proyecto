@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { prefersReducedMotion } from '../lib/motion';
 import { clearDiceOptions, loadDiceOptions, saveDiceOptions } from '../lib/storage';
 import { diceStrategy } from '../strategies/DiceStrategy';
 import { useHistoryStore } from '../store/historyStore';
@@ -51,9 +52,10 @@ export function DicePage() {
     initialOptions?.lastSides ?? null,
   );
   const [shaking, setShaking] = useState(false);
-  const [displayRoll, setDisplayRoll] = useState(1);
+  const [displayRoll, setDisplayRoll] = useState<number | null>(null);
   const [diceResult, setDiceResult] = useState<DiceResult | null>(null);
   const [diceError, setDiceError] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState('');
 
   useEffect(() => {
     saveDiceOptions({ lastSides, modifier });
@@ -68,15 +70,47 @@ export function DicePage() {
     setModifier(0);
     setLastSides(null);
     setShaking(false);
-    setDisplayRoll(1);
+    setDisplayRoll(null);
     setDiceResult(null);
     setDiceError(null);
+    setAnnouncement('');
+  };
+
+  const commitRoll = (sides: number) => {
+    setShaking(false);
+    try {
+      const { local, backend } = diceStrategy.execute({ sides, modifier });
+      setDisplayRoll(local.rolls[0]);
+      setDiceResult(local);
+      setAnnouncement(`Total: ${local.total}`);
+      void addHistory({
+        module: 'dice',
+        description: describeDice(local, sides),
+        record: {
+          module_name: 'dice',
+          action: diceStrategy.actionLabel({ sides, modifier }),
+          payload: diceStrategy.buildPayload({ sides, modifier }),
+          result: backend,
+        },
+      });
+    } catch (err) {
+      setDisplayRoll(null);
+      setAnnouncement('');
+      setDiceError(err instanceof Error ? err.message : 'Tirada no válida.');
+    }
   };
 
   const onRollDice = (sides: number) => {
     setDiceError(null);
     setDiceResult(null);
+    setDisplayRoll(null);
     setLastSides(sides);
+
+    if (prefersReducedMotion()) {
+      commitRoll(sides);
+      return;
+    }
+
     setShaking(true);
 
     // Animación: alternar caras durante ~500ms, luego commitear el resultado
@@ -93,24 +127,7 @@ export function DicePage() {
         setDisplayRoll(1 + Math.floor(Math.random() * sides));
         rafIdRef.current = requestAnimationFrame(tick);
       } else {
-        setShaking(false);
-        try {
-          const { local, backend } = diceStrategy.execute({ sides, modifier });
-          setDisplayRoll(local.rolls[0]);
-          setDiceResult(local);
-          void addHistory({
-            module: 'dice',
-            description: describeDice(local, sides),
-            record: {
-              module_name: 'dice',
-              action: diceStrategy.actionLabel({ sides, modifier }),
-              payload: diceStrategy.buildPayload({ sides, modifier }),
-              result: backend,
-            },
-          });
-        } catch (err) {
-          setDiceError(err instanceof Error ? err.message : 'Tirada no válida.');
-        }
+        commitRoll(sides);
       }
     };
     rafIdRef.current = requestAnimationFrame(tick);
@@ -119,34 +136,41 @@ export function DicePage() {
   return (
     <main
       className="workspace workspace-grid"
-      role="main"
     >
       <section
         id="section-dice"
         aria-label="Dados RPG"
         className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 className="text-3xl font-bold">Dados RPG</h1>
+        <h1 tabIndex={-1} className="text-3xl font-bold">
+          Dados RPG
+        </h1>
 
         <div className="bg-dark-surface border border-dark-border rounded-2xl p-6 flex flex-col gap-4">
-          <div className="flex flex-wrap gap-2">
-            {DICE_SIDES.map((sides) => (
-              <button
-                key={sides}
-                type="button"
-                className={`dice-btn px-4 py-3 rounded-md text-lg font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light ${
-                  lastSides === sides
-                    ? 'bg-primary text-light-inverse'
-                    : 'bg-dark-bg-alt text-light-text hover:bg-primary hover:text-light-inverse'
-                }`}
-                data-sides={sides}
-                data-active={lastSides === sides}
-                onClick={() => onRollDice(sides)}
-              >
-                d{sides}
-              </button>
-            ))}
-          </div>
+          <fieldset
+            className="flex min-w-0 flex-col gap-2"
+            aria-describedby={diceError ? 'dice-error' : undefined}
+          >
+            <legend className="text-sm font-medium text-light-muted">Dado</legend>
+            <div className="flex flex-wrap gap-2">
+              {DICE_SIDES.map((sides) => (
+                <button
+                  key={sides}
+                  type="button"
+                  className={`dice-btn px-4 py-3 rounded-md text-lg font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light ${
+                    lastSides === sides
+                      ? 'bg-primary text-white'
+                      : 'bg-dark-bg-alt text-light-text hover:bg-primary hover:text-white'
+                  }`}
+                  data-sides={sides}
+                  data-active={lastSides === sides}
+                  onClick={() => onRollDice(sides)}
+                >
+                  d{sides}
+                </button>
+              ))}
+            </div>
+          </fieldset>
 
           <Field
             id="dice-modifier"
@@ -162,11 +186,21 @@ export function DicePage() {
               className={`w-32 h-32 flex items-center justify-center text-6xl font-bold rounded-xl bg-dark-bg-alt border-2 border-primary text-primary-light ${
                 shaking ? 'animate-dice-shake' : ''
               }`}
-              aria-live="polite"
+              aria-hidden="true"
             >
-              {displayRoll}
+              {displayRoll ?? ''}
             </output>
           </div>
+
+          <p
+            id="dice-announcement"
+            className="sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {announcement}
+          </p>
 
           {diceResult ? (
             <div className="text-center text-lg">
@@ -183,7 +217,7 @@ export function DicePage() {
           ) : null}
 
           {diceError ? (
-            <p className="text-sm text-danger" role="alert">
+            <p id="dice-error" className="text-sm text-danger" role="alert">
               {diceError}
             </p>
           ) : null}

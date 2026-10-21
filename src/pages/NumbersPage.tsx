@@ -119,18 +119,20 @@ export function NumbersPage() {
   return (
     <main
       className="workspace workspace-grid"
-      role="main"
     >
       <section
         id="section-numbers"
         aria-label="Generador de números"
         className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 className="text-3xl font-bold">Números aleatorios</h1>
+        <h1 tabIndex={-1} className="text-3xl font-bold">
+          Números aleatorios
+        </h1>
 
         <form
           id="numbers-form"
           onSubmit={onSubmit}
+          aria-describedby={error ? 'numbers-error' : undefined}
           className="bg-dark-surface border border-dark-border rounded-2xl p-6 flex flex-col gap-4"
         >
           <Field
@@ -143,7 +145,10 @@ export function NumbersPage() {
             onBlur={() => setCount(clampMin(count, 1))}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <fieldset className="grid grid-cols-2 gap-3">
+            <legend className="col-span-2 text-sm font-medium text-light-muted">
+              Rango
+            </legend>
             <Field
               id="numbers-min"
               label="Mínimo"
@@ -160,15 +165,15 @@ export function NumbersPage() {
               onChange={(e) => setMax(readNumeric(e.currentTarget.value))}
               onBlur={() => setMax(toNumberOr(max))}
             />
-          </div>
+          </fieldset>
 
-          <label className="inline-flex items-center gap-2 text-sm text-light-text">
+          <label className="inline-flex min-h-11 items-center gap-2 text-sm text-light-text">
             <input
               id="numbers-unique"
               type="checkbox"
               checked={unique}
               onChange={(e) => setUnique(e.currentTarget.checked)}
-              className="w-4 h-4 rounded border-dark-border bg-dark-surface text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+              className="h-5 w-5 rounded border-dark-border bg-dark-surface text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
             />
             Sin repetición
           </label>

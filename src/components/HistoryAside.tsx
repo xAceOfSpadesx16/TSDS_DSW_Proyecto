@@ -127,7 +127,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
           }}
           aria-pressed={openMobile}
           aria-controls="history-aside"
-          className="lg:hidden fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-light-inverse shadow-lg hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+          className="lg:hidden fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
         >
           {openMobile ? 'Cerrar' : 'Historial'}
         </button>

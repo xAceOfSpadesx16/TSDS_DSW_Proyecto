@@ -2,11 +2,11 @@
 // Field
 //
 // Wrapper para inputs con label asociado. Aísla la accesibilidad (`htmlFor`,
-// `aria-required`, mensajes de error) para que cada página lo consuma sin
-// repetir boilerplate.
+// `aria-required`, `aria-invalid`, `aria-describedby` y mensajes de error)
+// para que cada página lo consuma sin repetir boilerplate.
 // =============================================================================
 
-import type { InputHTMLAttributes, ReactNode } from 'react';
+import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -15,23 +15,38 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export function Field({ label, hint, error, id, ...rest }: Props) {
+  const generatedId = useId();
+  const fieldId = id ?? generatedId;
+  const hintId = `${fieldId}-hint`;
+  const errorId = `${fieldId}-error`;
+  const describedBy = [hint ? hintId : null, error ? errorId : null]
+    .filter((value): value is string => value !== null)
+    .join(' ');
+
   return (
-    <label className="flex flex-col gap-1 text-sm">
-      <span className="text-light-muted font-medium">{label}</span>
+    <div className="flex flex-col gap-1 text-sm">
+      <label htmlFor={fieldId} className="text-light-muted font-medium">
+        {label}
+      </label>
       <input
         {...rest}
-        id={id}
+        id={fieldId}
         aria-invalid={Boolean(error)}
-        className={`w-full min-w-0 px-3 py-2 rounded-md bg-dark-surface border ${
+        aria-describedby={describedBy || undefined}
+        className={`min-h-11 w-full min-w-0 px-3 py-2 rounded-md bg-dark-surface border ${
           error ? 'border-danger' : 'border-dark-border'
         } text-light-text placeholder:text-light-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light`}
       />
-      {hint ? <span className="text-xs text-light-muted">{hint}</span> : null}
+      {hint ? (
+        <span id={hintId} className="text-xs text-light-muted">
+          {hint}
+        </span>
+      ) : null}
       {error ? (
-        <span className="text-xs text-danger" role="alert">
+        <span id={errorId} className="text-xs text-danger" role="alert">
           {error}
         </span>
       ) : null}
-    </label>
+    </div>
   );
 }

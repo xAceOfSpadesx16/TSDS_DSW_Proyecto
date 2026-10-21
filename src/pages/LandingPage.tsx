@@ -54,9 +54,12 @@ const MODULES: ModuleCard[] = [
 
 export function LandingPage() {
   return (
-    <main className="workspace" role="main">
+    <main className="workspace">
       <section className="flex flex-col items-center justify-center px-4 py-10 text-center animate-fade-in sm:py-12">
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent mb-4 leading-tight">
+        <h1
+          tabIndex={-1}
+          className="text-4xl md:text-5xl font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent mb-4 leading-tight"
+        >
           Thrive Randomizer
         </h1>
         <p className="text-lg text-light-muted max-w-2xl leading-relaxed">
@@ -66,7 +69,7 @@ export function LandingPage() {
         </p>
         <a
           href="#modulos"
-          className="mt-6 inline-flex items-center justify-center rounded-md bg-primary px-5 py-3 text-sm font-semibold text-light-inverse transition-colors hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+          className="mt-6 inline-flex items-center justify-center rounded-md bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
         >
           Empezar a sortear
         </a>
@@ -75,8 +78,11 @@ export function LandingPage() {
       <section
         id="modulos"
         className="grid w-full scroll-mt-24 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in"
-        aria-label="Módulos disponibles"
+        aria-labelledby="modulos-heading"
       >
+        <h2 id="modulos-heading" className="sr-only">
+          Módulos disponibles
+        </h2>
         {MODULES.map((m) => (
           <Link
             key={m.to}
@@ -86,7 +92,7 @@ export function LandingPage() {
             <i className="text-4xl mb-4 not-italic" aria-hidden="true">
               {m.icon}
             </i>
-            <h2 className="text-xl font-bold mb-2">{m.title}</h2>
+            <h3 className="text-xl font-bold mb-2">{m.title}</h3>
             <p className="text-sm text-light-muted leading-relaxed">{m.description}</p>
             <i className="mt-auto pt-4 text-sm font-semibold text-primary-light not-italic" aria-hidden="true">
               Abrir →

@@ -25,7 +25,7 @@ describe('NavLinkButton', () => {
     const link = screen.getByRole('link', { name: 'Etiqueta' });
     // La ruta actual es /teams, así que el enlace está activo.
     expect(link.className).toContain('bg-primary');
-    expect(link.className).toContain('text-light-inverse');
+    expect(link.className).toContain('text-white');
   });
 
   it('no resalta el enlace cuando la ruta no es active', () => {

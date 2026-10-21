@@ -15,7 +15,7 @@
 // =============================================================================
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 import { Header } from './Header';
 import { PrimaryButton } from './PrimaryButton';
@@ -24,7 +24,41 @@ import { healthRepository } from '../repositories/healthRepository';
 import { retryPendingDraws, useHistoryStore } from '../store/historyStore';
 import type { LegalDisclaimer } from '../domain/types';
 
+const ROUTE_TITLES: Record<string, string> = {
+  '/': 'Thrive Randomizer',
+  '/dice': 'Dados RPG · Thrive Randomizer',
+  '/numbers': 'Números aleatorios · Thrive Randomizer',
+  '/teams': 'Generador de Equipos · Thrive Randomizer',
+  '/weighted': 'Sorteo con Pesos · Thrive Randomizer',
+  '/roulette': 'Ruleta de Decisiones · Thrive Randomizer',
+  '/login': 'Iniciar sesión · Thrive Randomizer',
+  '/register': 'Registro · Thrive Randomizer',
+};
+
 export function RootLayout() {
+  const location = useLocation();
+  // Normaliza mayúsculas y barra final: `/DICE` y `/dice/` son la misma
+  // pantalla para React Router y deben compartir título.
+  const normalizedPath =
+    location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  const lastPathRef = useRef(normalizedPath);
+
+  useEffect(() => {
+    document.title =
+      ROUTE_TITLES[normalizedPath] ??
+      'Página no encontrada · Thrive Randomizer';
+
+    // En el primer render (y en la doble ejecución de StrictMode) no robamos
+    // el foco: el enlace de salto debe ser el primero con Tab. Solo enfocamos
+    // el h1 cuando la ruta normalizada cambió de verdad.
+    const previousPath = lastPathRef.current;
+    lastPathRef.current = normalizedPath;
+    if (previousPath === normalizedPath) {
+      return;
+    }
+    document.querySelector<HTMLElement>('main h1')?.focus();
+  }, [normalizedPath]);
+
   // `null` = todavía no llegó (o falló). No se renderiza nada hasta entonces.
   const [disclaimer, setDisclaimer] = useState<LegalDisclaimer | null>(null);
   // `false` = backend disponible (o aún sin respuesta). `true` = caído.
@@ -108,15 +142,25 @@ export function RootLayout() {
   };
 
   return (
-    <div className="min-h-screen grid grid-rows-[3.5rem_1fr] bg-dark-bg text-light-text font-sans antialiased">
-      <Header />
-      <div className="flex flex-col">
-        {apiDown ? <ApiDownBanner checking={checking} onRetry={checkHealth} /> : null}
-        <div className="flex-1">
-          <Outlet />
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:outline focus:outline-2 focus:outline-primary-light"
+      >
+        Saltar al contenido
+      </a>
+
+      <div className="min-h-screen grid grid-rows-[3.5rem_1fr] bg-dark-bg text-light-text font-sans antialiased">
+        <Header />
+        <div className="flex flex-col">
+          {apiDown ? (
+            <ApiDownBanner checking={checking} onRetry={checkHealth} />
+          ) : null}
+          <div id="main-content" tabIndex={-1} className="flex-1">
+            <Outlet />
+          </div>
+          {disclaimer ? <DisclaimerFooter disclaimer={disclaimer} /> : null}
         </div>
-        {disclaimer ? <DisclaimerFooter disclaimer={disclaimer} /> : null}
-      </div>
 
       <dialog
         id="guest-import-dialog"
@@ -161,8 +205,9 @@ export function RootLayout() {
             {importingGuest ? 'Importando…' : 'Importar a mi cuenta'}
           </PrimaryButton>
         </div>
-      </dialog>
-    </div>
+        </dialog>
+      </div>
+    </>
   );
 }
 
@@ -218,7 +263,7 @@ function DisclaimerFooter({ disclaimer }: { disclaimer: LegalDisclaimer }) {
         {/* Las secciones son largas: van en un `<details>` cerrado para no
             empujar el contenido de la app al abrir la página. */}
         <details className="text-xs">
-          <summary className="cursor-pointer font-semibold text-light-text">
+          <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-light-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light">
             Ver el aviso completo ({disclaimer.sections.length} secciones)
           </summary>
           <dl className="mt-3 flex flex-col gap-3">

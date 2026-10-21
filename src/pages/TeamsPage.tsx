@@ -165,19 +165,21 @@ export function TeamsPage() {
   return (
     <main
       className="workspace workspace-grid"
-      role="main"
     >
       <section
         id="section-teams"
         aria-label="Generador de equipos"
         className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 className="text-3xl font-bold">Generador de Equipos</h1>
+        <h1 tabIndex={-1} className="text-3xl font-bold">
+          Generador de Equipos
+        </h1>
 
         <form
           id="team-form"
           onSubmit={onGenerate}
-          className="bg-dark-surface border border-dark-border rounded-2xl p-4 flex flex-col gap-4"
+          aria-describedby={error ? 'teams-error' : undefined}
+          className="bg-dark-surface border border-dark-border rounded-2xl p-3 flex flex-col gap-4 sm:p-4"
         >
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-light-muted font-medium">Participantes (uno por línea)</span>
@@ -185,7 +187,7 @@ export function TeamsPage() {
               id="team-participants"
               required
               aria-required="true"
-              rows={6}
+              rows={4}
               value={participantsText}
               onChange={(e) => onChangeParticipants(e.currentTarget.value)}
               placeholder={'Ana\nBruno\nCarla\nDiego'}
@@ -193,26 +195,29 @@ export function TeamsPage() {
             />
           </label>
 
-          <div className="flex gap-2">
-            <PrimaryButton
-              id="mode-group-count"
-              type="button"
-              variant={mode === 'count' ? 'primary' : 'ghost'}
-              aria-pressed={mode === 'count'}
-              onClick={() => onChangeMode('count')}
-            >
-              Cantidad de grupos
-            </PrimaryButton>
-            <PrimaryButton
-              id="mode-group-size"
-              type="button"
-              variant={mode === 'size' ? 'primary' : 'ghost'}
-              aria-pressed={mode === 'size'}
-              onClick={() => onChangeMode('size')}
-            >
-              Tamaño de grupo
-            </PrimaryButton>
-          </div>
+          <fieldset className="flex flex-col gap-2">
+            <legend className="sr-only">Modo de reparto</legend>
+            <div className="flex flex-wrap gap-2">
+              <PrimaryButton
+                id="mode-group-count"
+                type="button"
+                variant={mode === 'count' ? 'primary' : 'ghost'}
+                aria-pressed={mode === 'count'}
+                onClick={() => onChangeMode('count')}
+              >
+                Cantidad de grupos
+              </PrimaryButton>
+              <PrimaryButton
+                id="mode-group-size"
+                type="button"
+                variant={mode === 'size' ? 'primary' : 'ghost'}
+                aria-pressed={mode === 'size'}
+                onClick={() => onChangeMode('size')}
+              >
+                Tamaño de grupo
+              </PrimaryButton>
+            </div>
+          </fieldset>
 
           <Field
             id="team-value"
@@ -225,7 +230,7 @@ export function TeamsPage() {
           />
 
           <details className="bg-dark-bg-alt border border-dark-border rounded-md p-3">
-            <summary className="text-sm font-semibold text-light-text cursor-pointer">
+            <summary className="-my-2 flex min-h-11 cursor-pointer items-center text-sm font-semibold text-light-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light">
               Reglas avanzadas (exclusiones)
             </summary>
             {participantOptions.length < 2 ? (
@@ -233,7 +238,8 @@ export function TeamsPage() {
                 Cargá al menos dos participantes para elegir exclusiones.
               </p>
             ) : (
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+              <fieldset className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                <legend className="sr-only">Agregar exclusión</legend>
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="text-light-muted font-medium">Persona A</span>
                   <select
@@ -276,7 +282,7 @@ export function TeamsPage() {
                 >
                   Agregar
                 </PrimaryButton>
-              </div>
+              </fieldset>
             )}
             <ul
               id="exclusion-list"
@@ -321,6 +327,7 @@ export function TeamsPage() {
 
         {error ? (
           <p
+            id="teams-error"
             className="break-words text-sm text-danger [overflow-wrap:anywhere]"
             role="alert"
           >
@@ -329,33 +336,41 @@ export function TeamsPage() {
         ) : null}
 
         {result ? (
-          <output
-            id="team-results"
-            className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3"
+          <section
+            aria-labelledby="team-results-heading"
+            className="flex flex-col gap-3"
           >
-            {result.teams.map((team, i) => (
-              <div
-                key={i}
-                className="min-w-0 rounded-md border border-dark-border bg-dark-surface p-4"
-                style={{ borderLeft: `4px solid ${result.colors[i]}` }}
-              >
-                <h3 className="text-sm font-bold mb-2" style={{ color: result.colors[i] }}>
-                  Equipo {i + 1}
-                </h3>
-                <ul className="flex min-w-0 flex-col gap-1 text-sm text-light-text">
-                  {team.length === 0 ? (
-                    <li className="text-light-muted italic">(vacío)</li>
-                  ) : (
-                    team.map((member, j) => (
-                      <li key={j} className="break-words">
-                        {member}
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </div>
-            ))}
-          </output>
+            <h2 id="team-results-heading" className="sr-only">
+              Resultados
+            </h2>
+            <output
+              id="team-results"
+              className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3"
+            >
+              {result.teams.map((team, i) => (
+                <div
+                  key={i}
+                  className="min-w-0 rounded-md border border-dark-border bg-dark-surface p-4"
+                  style={{ borderLeft: `4px solid ${result.colors[i]}` }}
+                >
+                  <h3 className="mb-2 text-sm font-bold text-light-text">
+                    Equipo {i + 1}
+                  </h3>
+                  <ul className="flex min-w-0 flex-col gap-1 text-sm text-light-text">
+                    {team.length === 0 ? (
+                      <li className="text-light-muted italic">(vacío)</li>
+                    ) : (
+                      team.map((member, j) => (
+                        <li key={j} className="break-words">
+                          {member}
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
+              ))}
+            </output>
+          </section>
         ) : null}
       </section>
 

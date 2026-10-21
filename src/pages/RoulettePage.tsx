@@ -14,6 +14,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
+import { prefersReducedMotion } from '../lib/motion';
 import {
   clearRouletteOptions,
   loadRouletteOptions,
@@ -173,6 +174,29 @@ export function RoulettePage() {
 
       const startRotation = rotationRef.current;
       const endRotation = startRotation + local.finalAngle;
+
+      const finishSpin = () => {
+        rotationRef.current = endRotation;
+        drawRoulette(canvas, options, endRotation);
+        setSpinning(false);
+        dialogRef.current?.showModal();
+        void addHistory({
+          module: 'roulette',
+          description: `Ganador: ${local.winner.label}`,
+          record: {
+            module_name: 'roulette',
+            action: rouletteStrategy.actionLabel({ options }),
+            payload: rouletteStrategy.buildPayload({ options }),
+            result: backend,
+          },
+        });
+      };
+
+      if (prefersReducedMotion()) {
+        finishSpin();
+        return;
+      }
+
       const startTime = performance.now();
       const duration = 4500;
 
@@ -186,18 +210,7 @@ export function RoulettePage() {
         if (progress < 1) {
           rafIdRef.current = requestAnimationFrame(tick);
         } else {
-          setSpinning(false);
-          dialogRef.current?.showModal();
-          void addHistory({
-            module: 'roulette',
-            description: `Ganador: ${local.winner.label}`,
-            record: {
-              module_name: 'roulette',
-              action: rouletteStrategy.actionLabel({ options }),
-              payload: rouletteStrategy.buildPayload({ options }),
-              result: backend,
-            },
-          });
+          finishSpin();
         }
       };
       rafIdRef.current = requestAnimationFrame(tick);
@@ -209,26 +222,29 @@ export function RoulettePage() {
   return (
     <main
       className="workspace workspace-grid"
-      role="main"
     >
       <section
         id="section-roulette"
         aria-label="Ruleta de decisiones"
         className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 className="text-3xl font-bold">Ruleta de Decisiones</h1>
+        <h1 tabIndex={-1} className="text-3xl font-bold">
+          Ruleta de Decisiones
+        </h1>
 
         <form
           id="roulette-options-form"
           onSubmit={onAddOption}
           className="bg-dark-surface border border-dark-border rounded-2xl p-4 flex flex-col gap-3"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
+          <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+            <legend className="sr-only">Nueva opción</legend>
             <Field
               id="roulette-label"
               label="Opción"
               type="text"
               required
+              disabled={spinning}
               value={label}
               onChange={(e) => setLabel(e.currentTarget.value)}
               placeholder="Ej: Opción A"
@@ -238,13 +254,14 @@ export function RoulettePage() {
               <input
                 id="roulette-color"
                 type="color"
+                disabled={spinning}
                 value={color}
                 onChange={(e) => setColor(e.currentTarget.value)}
-                className="w-12 h-10 rounded-md border border-dark-border bg-dark-surface"
+                className="h-11 w-12 rounded-md border border-dark-border bg-dark-surface disabled:cursor-not-allowed disabled:opacity-50"
               />
             </label>
-          </div>
-          <PrimaryButton type="submit" variant="primary">
+          </fieldset>
+          <PrimaryButton type="submit" variant="primary" disabled={spinning}>
             Agregar opción
           </PrimaryButton>
         </form>
@@ -268,8 +285,9 @@ export function RoulettePage() {
               <button
                 type="button"
                 onClick={() => onRemoveOption(i)}
+                disabled={spinning}
                 aria-label={`Quitar opción ${opt.label}`}
-                className="shrink-0 text-light-muted hover:text-danger"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-light-muted hover:text-danger focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light disabled:cursor-not-allowed disabled:opacity-50"
               >
                 ×
               </button>
@@ -290,13 +308,15 @@ export function RoulettePage() {
         </div>
 
         <div className="flex flex-col items-center gap-4 py-4">
-          <div className="roulette-wrapper relative w-full max-w-[280px] sm:max-w-[360px]">
+          <div className="roulette-wrapper relative w-full max-w-[250px] sm:max-w-[360px]">
             <canvas
               id="roulette-canvas"
               ref={canvasRef}
               width={CANVAS_SIZE}
               height={CANVAS_SIZE}
-              className="h-auto w-full max-w-[280px] sm:max-w-[360px] rounded-full bg-dark-bg-alt border-2 border-dark-border shadow-2xl"
+              role="img"
+              aria-label={`Ruleta de decisiones con ${options.length} opciones`}
+              className="h-auto w-full max-w-[250px] sm:max-w-[360px] rounded-full bg-dark-bg-alt border-2 border-dark-border shadow-2xl"
             />
           </div>
 
@@ -305,13 +325,14 @@ export function RoulettePage() {
             variant="accent"
             onClick={onSpin}
             disabled={spinning || options.length < 2}
+            aria-describedby={error ? 'roulette-error' : undefined}
           >
             {spinning ? 'Girando...' : 'Girar ruleta'}
           </PrimaryButton>
         </div>
 
         {error ? (
-          <p className="text-sm text-danger" role="alert">
+          <p id="roulette-error" className="text-sm text-danger" role="alert">
             {error}
           </p>
         ) : null}
@@ -319,13 +340,19 @@ export function RoulettePage() {
         <dialog
           id="roulette-result-overlay"
           ref={dialogRef}
+          aria-labelledby="roulette-result-title"
+          aria-describedby="roulette-result-text"
           className="rounded-2xl bg-dark-surface border border-dark-border text-light-text p-6 max-w-sm backdrop:bg-black/70"
+          onClose={() =>
+            document.getElementById('roulette-spin-btn')?.focus()
+          }
         >
-          <h2 className="text-xl font-bold mb-2">¡Ganador!</h2>
+          <h2 id="roulette-result-title" className="text-xl font-bold mb-2">
+            ¡Ganador!
+          </h2>
           <p
             id="roulette-result-text"
-            className="break-words text-center text-3xl font-bold my-4"
-            style={{ color: result?.winner.color }}
+            className="my-4 break-words text-center text-3xl font-bold text-light-text"
           >
             {result?.winner.label}
           </p>

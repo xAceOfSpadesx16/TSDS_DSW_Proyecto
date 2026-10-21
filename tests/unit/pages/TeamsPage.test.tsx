@@ -97,6 +97,13 @@ describe('TeamsPage — exclusiones', () => {
   it('ofrece solo participantes en los selects de exclusión, sin texto libre', async () => {
     await fillParticipants('Ana\nBruno\nCarla');
 
+    expect(
+      screen.getByRole('group', { name: 'Modo de reparto' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: 'Agregar exclusión' }),
+    ).toBeInTheDocument();
+
     const selectA = screen.getByLabelText('Persona A') as HTMLSelectElement;
     const selectB = screen.getByLabelText('Persona B') as HTMLSelectElement;
     expect(Array.from(selectA.options).map((option) => option.value)).toEqual([
@@ -162,6 +169,16 @@ describe('TeamsPage — exclusiones', () => {
     generate();
 
     await waitFor(() => expect(document.querySelector('#team-results')).toBeInTheDocument());
+
+    expect(
+      screen.getByRole('heading', { name: 'Resultados', level: 2 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Equipo 1', level: 3 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Equipo 2', level: 3 }),
+    ).toBeInTheDocument();
 
     const cards = Array.from(document.querySelectorAll('#team-results > div'));
     expect(cards).toHaveLength(2);
@@ -297,6 +314,10 @@ describe('TeamsPage — restricciones imposibles', () => {
       ),
     );
     expect(screen.getByRole('alert')).toHaveTextContent('Ana ↔ Bruno');
+    expect(document.querySelector('#team-form')).toHaveAttribute(
+      'aria-describedby',
+      'teams-error',
+    );
     expect(document.querySelector('#team-results')).not.toBeInTheDocument();
     expect(addSpy).not.toHaveBeenCalled();
     expect(useHistoryStore.getState().entries).toHaveLength(0);

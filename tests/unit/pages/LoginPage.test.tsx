@@ -152,4 +152,29 @@ describe('LoginPage', () => {
     });
     await waitFor(() => expect(screen.getByTestId('home')).toBeInTheDocument());
   });
+
+  it('redirige al inicio si ya hay sesión', async () => {
+    installLocalStorage();
+    useAuthStore.setState({
+      user: { id: 1, name: 'Ada', email: 'ada@example.com' },
+      token: 'jwt',
+      expiresAt: null,
+      status: 'idle',
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<p data-testid="home">Inicio</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId('home')).toBeInTheDocument());
+    expect(
+      screen.queryByRole('heading', { name: 'Iniciar sesión' }),
+    ).not.toBeInTheDocument();
+  });
 });

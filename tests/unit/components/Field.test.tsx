@@ -10,8 +10,12 @@ describe('Field', () => {
     expect(screen.getByText('Email')).toBeInTheDocument();
     const input = container.querySelector('input');
     expect(input).toBeInTheDocument();
-    // El input está envuelto por el <label> (asociación nativa de accesibilidad).
-    expect(input?.closest('label')).toBeInTheDocument();
+    // El <label> usa htmlFor para asociarse con el input.
+    expect(container.querySelector('label')).toHaveAttribute(
+      'for',
+      input?.id,
+    );
+    expect(screen.getByLabelText('Email')).toBe(input);
   });
 
   it('propaga el id y atributos del input al elemento nativo', () => {
@@ -38,6 +42,29 @@ describe('Field', () => {
     expect(input.getAttribute('aria-invalid')).toBe('true');
     const alert = screen.getByRole('alert');
     expect(alert).toHaveTextContent('Requerido');
+  });
+
+  it('asocia hint y error con aria-describedby', () => {
+    render(
+      <Field
+        label="Email"
+        id="email"
+        hint="Nunca lo compartimos"
+        error="Requerido"
+      />,
+    );
+    const input = document.getElementById('email') as HTMLInputElement;
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAttribute(
+      'aria-describedby',
+      'email-hint email-error',
+    );
+    expect(document.getElementById('email-hint')).toHaveTextContent(
+      'Nunca lo compartimos',
+    );
+    expect(document.getElementById('email-error')).toHaveTextContent(
+      'Requerido',
+    );
   });
 
   it('no expresa alerta cuando no hay error', () => {

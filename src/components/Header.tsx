@@ -63,7 +63,7 @@ export function Header() {
       <NavLink
         to="/"
         end
-        className="min-w-0 truncate text-lg font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent hover:no-underline"
+        className="inline-flex min-h-11 min-w-0 items-center truncate text-lg font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent hover:no-underline"
       >
         Thrive Randomizer
       </NavLink>
@@ -116,7 +116,7 @@ export function Header() {
                 </NavLink>
                 <NavLink
                   to="/register"
-                  className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-primary text-light-inverse hover:bg-primary-dark hover:text-light-inverse hover:no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                  className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-primary text-white hover:bg-primary-dark hover:text-white hover:no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
                 >
                   Registro
                 </NavLink>
@@ -140,13 +140,13 @@ export function Header() {
           <>
             <NavLink
               to="/login"
-              className="text-sm font-semibold text-light-muted hover:text-light-text hover:no-underline"
+              className="inline-flex min-h-11 items-center text-sm font-semibold text-light-muted hover:text-light-text hover:no-underline"
             >
               Entrar
             </NavLink>
             <NavLink
               to="/register"
-              className="inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-primary text-light-inverse hover:bg-primary-dark hover:text-light-inverse hover:no-underline"
+              className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-primary text-white hover:bg-primary-dark hover:text-white hover:no-underline"
             >
               Registro
             </NavLink>

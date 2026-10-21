@@ -11,9 +11,12 @@ import { PrimaryButton } from '../components/PrimaryButton';
 
 export function NotFoundPage() {
   return (
-    <main className="p-6 w-full mx-auto" role="main">
+    <main className="p-6 w-full mx-auto">
       <section className="max-w-md mx-auto animate-fade-in flex flex-col items-center gap-4 py-12 text-center">
-        <h1 className="text-5xl font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent">
+        <h1
+          tabIndex={-1}
+          className="text-5xl font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent"
+        >
           404
         </h1>
         <p className="text-lg text-light-muted">La ruta solicitada no existe.</p>

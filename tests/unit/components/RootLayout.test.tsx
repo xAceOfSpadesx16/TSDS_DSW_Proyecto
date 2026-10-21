@@ -4,7 +4,7 @@
 // =============================================================================
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -82,6 +82,80 @@ describe('RootLayout', () => {
     // No coincide ninguna ruta hija, así que el Outlet queda vacío.
     expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
   });
+
+  it('expone el salto como primer foco, actualiza el título y enfoca el h1', async () => {
+    vi.mocked(legalRepository.getDisclaimer).mockResolvedValue(DISCLAIMER);
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<RootLayout />}>
+            <Route
+              index
+              element={
+                <main>
+                  <h1 tabIndex={-1}>Inicio</h1>
+                  <Link to="/dice">Ir a dados</Link>
+                </main>
+              }
+            />
+            <Route
+              path="dice"
+              element={
+                <main>
+                  <h1 tabIndex={-1}>Dados</h1>
+                </main>
+              }
+            />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const skip = screen.getByRole('link', { name: 'Saltar al contenido' });
+    expect(skip).toHaveAttribute('href', '#main-content');
+    const focusables = document.querySelectorAll<HTMLElement>(
+      'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    expect(focusables[0]).toBe(skip);
+    expect(document.title).toBe('Thrive Randomizer');
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('link', { name: 'Ir a dados' }));
+
+    await waitFor(() =>
+      expect(document.title).toBe('Dados RPG · Thrive Randomizer'),
+    );
+    expect(document.activeElement).toBe(
+      screen.getByRole('heading', { name: 'Dados' }),
+    );
+  });
+
+  it.each(['/dice', '/dice/', '/DICE'])(
+    'normaliza el título para la ruta %s',
+    async (entry) => {
+      vi.mocked(legalRepository.getDisclaimer).mockResolvedValue(DISCLAIMER);
+      render(
+        <MemoryRouter initialEntries={[entry]}>
+          <Routes>
+            <Route path="/" element={<RootLayout />}>
+              <Route
+                path="dice"
+                element={
+                  <main>
+                    <h1 tabIndex={-1}>Dados</h1>
+                  </main>
+                }
+              />
+            </Route>
+          </Routes>
+        </MemoryRouter>,
+      );
+
+      await waitFor(() =>
+        expect(document.title).toBe('Dados RPG · Thrive Randomizer'),
+      );
+    },
+  );
 });
 
 describe('RootLayout — disclaimer', () => {

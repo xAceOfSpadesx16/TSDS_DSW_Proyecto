@@ -20,6 +20,13 @@
 .animate-fade-in      { animation: fadeIn 0.25s ease; }
 .animate-dice-shake   { animation: diceShake 0.1s infinite; }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-dice-shake {
+    animation: none;
+  }
+}
+
 /*
  * Ancho único del área de trabajo. Todas las pantallas de sorteo usan
  * `.workspace` + `.workspace-grid`, y el historial ocupa la segunda columna.

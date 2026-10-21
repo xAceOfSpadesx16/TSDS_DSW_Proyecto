@@ -36,10 +36,16 @@ describe('accesibilidad (roles WAI-ARIA)', () => {
     vi.restoreAllMocks();
   });
 
-  it('ya no expone el tablist de Números y conserva aria-live en el resultado', () => {
+  it('no expone el tablist de Números y separa la animación del anuncio final', () => {
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
     expect(screen.queryByRole('tab')).not.toBeInTheDocument();
-    expect(document.querySelector('#dice-result')).toHaveAttribute('aria-live', 'polite');
+    expect(document.querySelector('#dice-result')).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+    expect(document.querySelector('#dice-result')).not.toHaveAttribute(
+      'aria-live',
+    );
   });
 });
 

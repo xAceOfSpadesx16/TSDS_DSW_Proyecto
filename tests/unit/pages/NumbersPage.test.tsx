@@ -51,6 +51,7 @@ describe('NumbersPage — formulario', () => {
     expect(screen.getByLabelText('Mínimo')).toBeInTheDocument();
     expect(screen.getByLabelText('Máximo')).toBeInTheDocument();
     expect(screen.getByLabelText('Sin repetición')).toBeChecked();
+    expect(screen.getByRole('group', { name: 'Rango' })).toBeInTheDocument();
   });
 
   it('genera la cantidad pedida dentro del rango y lo registra en el historial', async () => {
@@ -151,6 +152,10 @@ describe('NumbersPage — formulario', () => {
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('debe ser mayor o igual');
+    expect(document.querySelector('#numbers-form')).toHaveAttribute(
+      'aria-describedby',
+      'numbers-error',
+    );
     expect(useHistoryStore.getState().entries).toHaveLength(0);
   });
 

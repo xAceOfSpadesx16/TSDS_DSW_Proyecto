@@ -92,6 +92,16 @@ describe('RoulettePage — opciones', () => {
     expect(ctxSpy.mock.calls.length).toBeGreaterThan(callsBefore);
   });
 
+  it('expone el canvas como imagen, la lista de opciones y el grupo del formulario', () => {
+    expect(
+      screen.getByRole('img', { name: /Ruleta de decisiones con 2 opciones/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('list', { name: 'Opciones cargadas' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Nueva opción' })).toBeInTheDocument();
+  });
+
   it('restaura las opciones y las restablece', async () => {
     cleanup();
     const first = renderRoulette();
@@ -139,6 +149,10 @@ describe('RoulettePage — giro', () => {
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     expect(screen.getByRole('alert')).toHaveTextContent('Fallo al girar');
+    expect(document.querySelector('#roulette-spin-btn')).toHaveAttribute(
+      'aria-describedby',
+      'roulette-error',
+    );
   });
 
   it('gira, anima, abre el modal con el ganador y lo cierra', async () => {
@@ -153,9 +167,17 @@ describe('RoulettePage — giro', () => {
     const spin = screen.getByRole('button', { name: 'Girar ruleta' });
     fireEvent.click(spin);
 
-    // Estado intermedio: todavía girando.
+    // Estado intermedio: todavía girando y con las opciones bloqueadas.
     expect(screen.getByRole('button', { name: 'Girando...' })).toBeInTheDocument();
     expect(spin).toBeDisabled();
+    expect(screen.getByLabelText('Opción')).toBeDisabled();
+    expect(screen.getByLabelText('Color')).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Agregar opción' }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Quitar opción Sí' }),
+    ).toBeDisabled();
 
     act(() => {
       rafCalls[0](1); // delta < duración → sigue girando (spinning=true)
@@ -165,6 +187,16 @@ describe('RoulettePage — giro', () => {
     });
 
     await waitFor(() => expect(showModal).toHaveBeenCalled());
+    const dialog = document.getElementById(
+      'roulette-result-overlay',
+    ) as HTMLDialogElement;
+    expect(dialog).toHaveAttribute(
+      'aria-labelledby',
+      'roulette-result-title',
+    );
+    expect(document.getElementById('roulette-result-title')).toHaveTextContent(
+      '¡Ganador!',
+    );
 
     const winner = document.querySelector('#roulette-result-text')!.textContent!;
     expect(['Sí', 'No']).toContain(winner);
@@ -173,8 +205,27 @@ describe('RoulettePage — giro', () => {
     expect(entries[0].module).toBe('roulette');
     expect(entries[0].description).toMatch(/^Ganador: (Sí|No)$/);
 
-    // Cerrar el modal.
+    // Cerrar el modal: el foco vuelve al botón de girar.
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
     await waitFor(() => expect(close).toHaveBeenCalled());
+    dialog.dispatchEvent(new Event('close'));
+    await waitFor(() => expect(document.activeElement).toBe(spin));
+  });
+
+  it('con prefers-reduced-motion muestra el ganador sin animación', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }),
+    );
+    const { showModal } = mockNativeDialog();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Girar ruleta' }));
+
+    await waitFor(() => expect(showModal).toHaveBeenCalled());
+    expect(screen.getByRole('dialog')).toHaveAttribute(
+      'aria-labelledby',
+      'roulette-result-title',
+    );
+    expect(screen.getByRole('button', { name: 'Girar ruleta' })).not.toBeDisabled();
   });
 });

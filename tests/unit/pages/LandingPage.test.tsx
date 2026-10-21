@@ -39,9 +39,15 @@ describe('LandingPage', () => {
 
   it('renderiza las 5 tarjetas de módulos con título, ícono y destino correctos', () => {
     renderLanding();
+    expect(
+      screen.getByRole('heading', { name: 'Módulos disponibles', level: 2 }),
+    ).toBeInTheDocument();
     for (const { title, href } of MODULES) {
       const card = screen.getByRole('link', { name: title });
       expect(card).toHaveAttribute('href', href);
+      expect(
+        screen.getByRole('heading', { name: title, level: 3 }),
+      ).toBeInTheDocument();
     }
     // Las 5 cards están presentes.
     expect(

@@ -113,42 +113,46 @@ export function WeightedPage() {
   return (
     <main
       className="workspace workspace-grid"
-      role="main"
     >
       <section
         id="section-weighted"
         aria-label="Sorteo con pesos"
         className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 className="text-3xl font-bold">Sorteo con Pesos</h1>
+        <h1 tabIndex={-1} className="text-3xl font-bold">
+          Sorteo con Pesos
+        </h1>
 
         <form
           id="weighted-form"
           onSubmit={onAdd}
-          className="bg-dark-surface border border-dark-border rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-3 items-end"
+          className="bg-dark-surface border border-dark-border rounded-2xl p-4"
         >
-          <Field
-            id="weighted-name"
-            label="Nombre"
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.currentTarget.value)}
-            placeholder="Ej: Ana"
-          />
-          <Field
-            id="weighted-weight"
-            label="Peso"
-            type="number"
-            min={1}
-            max={100}
-            value={weight}
-            onChange={(e) => setWeight(readNumeric(e.currentTarget.value))}
-            onBlur={() => setWeight(clampWeight(weight))}
-          />
-          <PrimaryButton type="submit" variant="primary">
-            + Agregar
-          </PrimaryButton>
+          <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+            <legend className="sr-only">Agregar participante</legend>
+            <Field
+              id="weighted-name"
+              label="Nombre"
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.currentTarget.value)}
+              placeholder="Ej: Ana"
+            />
+            <Field
+              id="weighted-weight"
+              label="Peso"
+              type="number"
+              min={1}
+              max={100}
+              value={weight}
+              onChange={(e) => setWeight(readNumeric(e.currentTarget.value))}
+              onBlur={() => setWeight(clampWeight(weight))}
+            />
+            <PrimaryButton type="submit" variant="primary">
+              + Agregar
+            </PrimaryButton>
+          </fieldset>
         </form>
 
         <ul
@@ -182,13 +186,13 @@ export function WeightedPage() {
           })}
         </ul>
 
-        <label className="inline-flex items-center gap-2 text-sm text-light-text">
+        <label className="inline-flex min-h-11 items-center gap-2 text-sm text-light-text">
           <input
             id="weighted-auto-remove"
             type="checkbox"
             checked={autoRemove}
             onChange={(e) => setAutoRemove(e.currentTarget.checked)}
-            className="w-4 h-4 rounded border-dark-border bg-dark-surface text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+            className="h-5 w-5 rounded border-dark-border bg-dark-surface text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
           />
           Auto-eliminar ganadores
         </label>
@@ -199,6 +203,7 @@ export function WeightedPage() {
             variant="accent"
             onClick={onDraw}
             disabled={entries.length === 0}
+            aria-describedby={error ? 'weighted-error' : undefined}
           >
             Sortear
           </PrimaryButton>
@@ -220,7 +225,7 @@ export function WeightedPage() {
         </div>
 
         {error ? (
-          <p className="text-sm text-danger" role="alert">
+          <p id="weighted-error" className="text-sm text-danger" role="alert">
             {error}
           </p>
         ) : null}
