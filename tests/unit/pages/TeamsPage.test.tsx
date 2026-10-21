@@ -263,6 +263,31 @@ describe('TeamsPage — generación y errores', () => {
     expect(useHistoryStore.getState().entries[0].description).toBe('4 participantes → 2 equipos');
   });
 
+  it('al generar desplaza el resultado completo a la vista', async () => {
+    const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    const calls: Array<{ element: HTMLElement }> = [];
+    const scrollIntoView = vi.fn(function (this: HTMLElement) {
+      calls.push({ element: this });
+    });
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    try {
+      await fillParticipants('Ana\nBruno\nCarla\nDiego');
+      generate();
+
+      await waitFor(() =>
+        expect(document.querySelector('#team-results')).toBeInTheDocument(),
+      );
+      expect(calls[0]?.element.id).toBe('team-results-section');
+      expect(scrollIntoView).toHaveBeenCalledWith({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    } finally {
+      HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+    }
+  });
+
   it('muestra un error si hay menos de 2 participantes', async () => {
     await fillParticipants('Ana');
     generate();

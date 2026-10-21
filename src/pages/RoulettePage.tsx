@@ -163,6 +163,9 @@ export function RoulettePage() {
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<RouletteResultLocal | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [optionsOpen, setOptionsOpen] = useState(
+    () => typeof window === 'undefined' || window.innerWidth >= 640,
+  );
   const addHistory = useHistoryStore((s) => s.add);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -301,80 +304,109 @@ export function RoulettePage() {
           Ruleta de Decisiones
         </h1>
 
-        <form
-          id="roulette-options-form"
-          onSubmit={onAddOption}
-          className="bg-surface border border-control rounded-2xl shadow-raised p-4 flex flex-col gap-3"
+        <details
+          id="roulette-options-details"
+          open={optionsOpen}
+          onToggle={(event) => setOptionsOpen(event.currentTarget.open)}
+          className="rounded-2xl border border-control bg-surface shadow-raised"
         >
-          <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-            <legend className="sr-only">Nueva opción</legend>
-            <Field
-              id="roulette-label"
-              label="Opción"
-              type="text"
-              required
-              disabled={spinning}
-              value={label}
-              onChange={(e) => setLabel(e.currentTarget.value)}
-              placeholder="Ej: Opción A"
-            />
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-muted font-medium">Color</span>
-              <input
-                id="roulette-color"
-                type="color"
-                disabled={spinning}
-                value={color}
-                onChange={(e) => setColor(e.currentTarget.value)}
-                className="h-11 w-12 rounded-md border border-control bg-surface disabled:bg-surface-sunken disabled:cursor-not-allowed"
-              />
-            </label>
-          </fieldset>
-          <PrimaryButton type="submit" variant="primary" disabled={spinning}>
-            Agregar opción
-          </PrimaryButton>
-        </form>
-
-        <ul
-          id="roulette-options-list"
-          className="flex flex-wrap gap-2"
-          aria-label="Opciones cargadas"
-        >
-          {options.map((opt, i) => (
-            <li
-              key={`${opt.label}-${i}`}
-              className="inline-flex max-w-full min-w-0 items-center gap-2 px-3 py-1 rounded bg-surface border border-control text-sm text-ink shadow-low"
-            >
-              <span
-                className="inline-block h-3 w-3 shrink-0 rounded-full"
-                style={{ backgroundColor: opt.color }}
+          <summary className="flex min-h-11 cursor-pointer items-center justify-between rounded-2xl px-4 text-sm font-semibold text-ink focus-visible:outline focus-visible:outline-focus">
+            Opciones de la ruleta
+            <span className="flex items-center gap-2">
+              <span className="font-mono text-xs text-muted">
+                {options.length}
+              </span>
+              <svg
+                viewBox="0 0 24 24"
+                className={`h-4 w-4 transition-transform ${optionsOpen ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 aria-hidden="true"
-              />
-              <span className="min-w-0 break-words">{opt.label}</span>
-              <button
-                type="button"
-                onClick={() => onRemoveOption(i)}
-                disabled={spinning}
-                aria-label={`Quitar opción ${opt.label}`}
-                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-danger focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
               >
-                ×
-              </button>
-            </li>
-          ))}
-        </ul>
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </span>
+          </summary>
+          <div className="flex flex-col gap-3 px-4 pb-4 pt-3">
+            <form
+              id="roulette-options-form"
+              onSubmit={onAddOption}
+              className="flex flex-col gap-3"
+            >
+              <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                <legend className="sr-only">Nueva opción</legend>
+                <Field
+                  id="roulette-label"
+                  label="Opción"
+                  type="text"
+                  required
+                  disabled={spinning}
+                  value={label}
+                  onChange={(e) => setLabel(e.currentTarget.value)}
+                  placeholder="Ej: Opción A"
+                />
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-muted font-medium">Color</span>
+                  <input
+                    id="roulette-color"
+                    type="color"
+                    disabled={spinning}
+                    value={color}
+                    onChange={(e) => setColor(e.currentTarget.value)}
+                    className="h-11 w-12 rounded-md border border-control bg-surface disabled:bg-surface-sunken disabled:cursor-not-allowed"
+                  />
+                </label>
+              </fieldset>
+              <PrimaryButton type="submit" variant="primary" disabled={spinning}>
+                Agregar opción
+              </PrimaryButton>
+            </form>
 
-        <div className="flex justify-end">
-          <PrimaryButton
-            id="roulette-reset-btn"
-            type="button"
-            variant="ghost"
-            onClick={onReset}
-            disabled={spinning}
-          >
-            Restablecer
-          </PrimaryButton>
-        </div>
+            <ul
+              id="roulette-options-list"
+              className="flex flex-wrap gap-2"
+              aria-label="Opciones cargadas"
+            >
+              {options.map((opt, i) => (
+                <li
+                  key={`${opt.label}-${i}`}
+                  className="inline-flex max-w-full min-w-0 items-center gap-2 px-3 py-1 rounded bg-surface border border-control text-sm text-ink shadow-low"
+                >
+                  <span
+                    className="inline-block h-3 w-3 shrink-0 rounded-full"
+                    style={{ backgroundColor: opt.color }}
+                    aria-hidden="true"
+                  />
+                  <span className="min-w-0 break-words">{opt.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveOption(i)}
+                    disabled={spinning}
+                    aria-label={`Quitar opción ${opt.label}`}
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-danger focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            <div className="flex justify-end">
+              <PrimaryButton
+                id="roulette-reset-btn"
+                type="button"
+                variant="ghost"
+                onClick={onReset}
+                disabled={spinning}
+              >
+                Restablecer
+              </PrimaryButton>
+            </div>
+          </div>
+        </details>
 
         <div className="flex flex-col items-center gap-4 py-4">
           <div className="roulette-wrapper relative w-full max-w-[250px] sm:max-w-[360px]">

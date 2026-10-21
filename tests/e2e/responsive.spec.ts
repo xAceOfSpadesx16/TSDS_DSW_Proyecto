@@ -37,56 +37,78 @@ test.describe('Responsive', () => {
     }
   });
 
-  test('en 390 el botón principal y el resultado de cada sorteo quedan a la vista', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    const viewport = page.viewportSize()!;
+  for (const viewport of [
+    { width: 320, height: 667 },
+    { width: 390, height: 667 },
+    { width: 390, height: 844 },
+  ]) {
+    test(`en ${viewport.width}×${viewport.height} el botón principal y el resultado de cada sorteo quedan a la vista`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(viewport);
+      await page.emulateMedia({ reducedMotion: 'reduce' });
 
-    const inViewport = async (locator: ReturnType<typeof page.locator>) => {
-      const box = await locator.boundingBox();
-      expect(box, 'el elemento debe tener caja').not.toBeNull();
-      expect(box!.y, 'no debe quedar arriba del viewport').toBeGreaterThanOrEqual(0);
-      expect(
-        box!.y + box!.height,
-        'no debe quedar debajo del viewport',
-      ).toBeLessThanOrEqual(viewport.height);
-      expect(box!.x, 'no debe quedar a la izquierda').toBeGreaterThanOrEqual(0);
-      expect(box!.x + box!.width, 'no debe desbordar a la derecha').toBeLessThanOrEqual(
-        viewport.width,
-      );
-    };
+      const inViewport = async (
+        locator: ReturnType<typeof page.locator>,
+        label: string,
+      ) => {
+        const box = await locator.boundingBox();
+        expect(box, `${label}: el elemento debe tener caja`).not.toBeNull();
+        expect(box!.y, `${label}: no debe quedar arriba`).toBeGreaterThanOrEqual(0);
+        expect(
+          box!.y + box!.height,
+          `${label}: no debe quedar debajo`,
+        ).toBeLessThanOrEqual(viewport.height);
+        expect(box!.x, `${label}: no debe quedar a la izquierda`).toBeGreaterThanOrEqual(0);
+        expect(
+          box!.x + box!.width,
+          `${label}: no debe desbordar a la derecha`,
+        ).toBeLessThanOrEqual(viewport.width);
+      };
 
-    await page.goto('/dice');
-    await page.locator('[data-sides="6"]').click();
-    await page.locator('#dice-total').waitFor();
-    await inViewport(page.locator('#dice-total'));
+      await page.goto('/dice');
+      await inViewport(page.locator('[data-sides="6"]'), 'dado d6');
+      await page.locator('[data-sides="6"]').click();
+      await expect(page.locator('#dice-total')).toBeVisible();
+      await inViewport(page.locator('#dice-total'), 'resultado de dados');
 
-    await page.goto('/numbers');
-    await page.locator('#generate-numbers-btn').click();
-    await page.locator('#numbers-result').waitFor();
-    await inViewport(page.locator('#generate-numbers-btn'));
-    await inViewport(page.locator('#numbers-result'));
+      await page.goto('/numbers');
+      await inViewport(page.locator('#generate-numbers-btn'), 'botón de números');
+      await page.locator('#generate-numbers-btn').click();
+      await expect(page.locator('#numbers-result')).toBeVisible();
+      await inViewport(page.locator('#numbers-result'), 'resultado de números');
+      await inViewport(page.locator('#generate-numbers-btn'), 'botón de números tras el resultado');
 
-    await page.goto('/teams');
-    await page.locator('#team-participants').fill('Ana\nBruno\nCarla\nDiego');
-    await page.locator('#generate-teams-btn').click();
-    await page.locator('#team-results').waitFor();
-    await inViewport(page.locator('#generate-teams-btn'));
-    await inViewport(page.locator('#team-results'));
+      await page.goto('/teams');
+      await page.locator('#team-participants').fill('Ana\nBruno\nCarla\nDiego');
+      await inViewport(page.locator('#generate-teams-btn'), 'botón de equipos');
+      await page.locator('#generate-teams-btn').click();
+      await expect(page.locator('#team-results')).toBeVisible();
+      await inViewport(page.locator('#team-results'), 'resultado de equipos');
+      await inViewport(page.locator('#generate-teams-btn'), 'botón de equipos tras el resultado');
 
-    await page.goto('/weighted');
-    await page.locator('#weighted-name').fill('Ana');
-    await page.locator('#weighted-form button[type="submit"]').click();
-    await page.locator('#weighted-draw-btn').click();
-    await page.locator('#weighted-result').waitFor();
-    await inViewport(page.locator('#weighted-draw-btn'));
-    await inViewport(page.locator('#weighted-result'));
+      await page.goto('/weighted');
+      await page.locator('#weighted-name').fill('Ana');
+      await page.locator('#weighted-form button[type="submit"]').click();
+      await inViewport(page.locator('#weighted-draw-btn'), 'botón de ponderado');
+      await page.locator('#weighted-draw-btn').click();
+      await expect(page.locator('#weighted-result')).toBeVisible();
+      await expect(page.locator('#weighted-result-heading')).toBeFocused();
+      await inViewport(page.locator('#weighted-result'), 'resultado de ponderado');
+      await inViewport(page.locator('#weighted-draw-btn'), 'botón de ponderado tras el resultado');
+      if (viewport.height < 844) {
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+      }
 
-    await page.goto('/roulette');
-    await inViewport(page.locator('#roulette-spin-btn'));
-    await inViewport(page.locator('#roulette-canvas'));
-  });
+      await page.goto('/roulette');
+      await inViewport(page.locator('#roulette-spin-btn'), 'botón de ruleta');
+      await inViewport(page.locator('#roulette-canvas'), 'ruleta');
+      await page.locator('#roulette-spin-btn').click();
+      const dialog = page.locator('#roulette-result-overlay');
+      await expect(dialog).toBeVisible();
+      await inViewport(dialog, 'resultado de ruleta');
+    });
+  }
 
   test('no hay scroll horizontal con contenido largo', async ({ page }) => {
     const long = 'A'.repeat(120);
@@ -108,6 +130,10 @@ test.describe('Responsive', () => {
       await page.evaluate(() => localStorage.clear());
 
       await page.goto('/roulette');
+      const optionsDetails = page.locator('#roulette-options-details');
+      if ((await optionsDetails.getAttribute('open')) === null) {
+        await optionsDetails.locator('summary').click();
+      }
       await page.locator('#roulette-label').fill(long);
       await page.getByRole('button', { name: 'Agregar opción' }).click();
       await expectNoOverflow(`/roulette @ ${width}`);

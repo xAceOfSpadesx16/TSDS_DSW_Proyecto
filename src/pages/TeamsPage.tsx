@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
+import { prefersReducedMotion } from '../lib/motion';
 import { clearTeamsOptions, loadTeamsOptions, saveTeamsOptions } from '../lib/storage';
 import { teamsStrategy } from '../strategies/TeamsStrategy';
 import { useHistoryStore } from '../store/historyStore';
@@ -68,6 +69,18 @@ export function TeamsPage() {
       exclusions,
     });
   }, [participantsText, mode, value, exclusions]);
+
+  // Al generar, el resultado completo se acerca al viewport; el botón de
+  // generar sigue visible porque el desplazamiento es el mínimo necesario.
+  useEffect(() => {
+    if (!result) return;
+    const section = document.getElementById('team-results-section');
+    if (!section || typeof section.scrollIntoView !== 'function') return;
+    section.scrollIntoView({
+      block: 'nearest',
+      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    });
+  }, [result]);
 
   const participants = useMemo(() => parseParticipants(participantsText), [participantsText]);
   const participantOptions = useMemo(
@@ -343,6 +356,7 @@ export function TeamsPage() {
 
         {result ? (
           <section
+            id="team-results-section"
             aria-labelledby="team-results-heading"
             className="flex flex-col gap-3"
           >

@@ -14,6 +14,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
+import { prefersReducedMotion } from '../lib/motion';
 import {
   clearWeightedOptions,
   loadWeightedOptions,
@@ -100,6 +101,21 @@ export function WeightedPage() {
   useEffect(() => {
     saveWeightedOptions({ entries, originalEntries, autoRemove });
   }, [entries, originalEntries, autoRemove]);
+
+  // Al sortear, el resultado se hace visible y el encabezado recibe el foco.
+  useEffect(() => {
+    if (!result) return;
+    const heading = document.getElementById('weighted-result-heading');
+    const resultElement = document.getElementById('weighted-result');
+    if (!heading || !resultElement) return;
+    if (typeof resultElement.scrollIntoView === 'function') {
+      resultElement.scrollIntoView({
+        block: 'nearest',
+        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+      });
+    }
+    heading.focus({ preventScroll: true });
+  }, [result]);
 
   const totalWeight = entries.reduce((acc, entry) => acc + entry.weight, 0);
   const percentages = computeWeightedPercentages(entries);
@@ -306,7 +322,7 @@ export function WeightedPage() {
       <section
         id="section-weighted"
         aria-label="Sorteo con pesos"
-        className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
+        className="w-full min-w-0 animate-fade-in flex flex-col gap-3 sm:gap-4"
       >
         <h1 tabIndex={-1} className="font-bold">
           Sorteo con Pesos
@@ -611,6 +627,7 @@ export function WeightedPage() {
           >
             <h2
               id="weighted-result-heading"
+              tabIndex={-1}
               className="font-sans text-sm font-semibold text-muted"
             >
               Ganador

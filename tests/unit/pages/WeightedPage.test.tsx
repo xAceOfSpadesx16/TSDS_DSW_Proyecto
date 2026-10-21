@@ -251,6 +251,40 @@ describe('WeightedPage — sorteo', () => {
     expect(useHistoryStore.getState().entries[0].description).toBe('Ganador: Ana (100%)');
   });
 
+  it('al sortear enfoca el encabezado del resultado y desplaza el resultado completo', async () => {
+    const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    const calls: Array<{
+      element: HTMLElement;
+      options?: ScrollIntoViewOptions;
+    }> = [];
+    const scrollIntoView = vi.fn(function (
+      this: HTMLElement,
+      options?: boolean | ScrollIntoViewOptions,
+    ) {
+      calls.push({
+        element: this,
+        options: typeof options === 'object' ? options : undefined,
+      });
+    });
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    try {
+      await addParticipant('Ana', 5);
+      draw();
+
+      await waitFor(() =>
+        expect(screen.getByRole('heading', { name: 'Ganador' })).toHaveFocus(),
+      );
+      expect(calls[0]?.element.id).toBe('weighted-result');
+      expect(calls[0]?.options).toEqual({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    } finally {
+      HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+    }
+  });
+
   it('mantiene la lista intacta sin auto-eliminación', async () => {
     await addParticipant('Ana', 1);
     await addParticipant('Juan', 1);
