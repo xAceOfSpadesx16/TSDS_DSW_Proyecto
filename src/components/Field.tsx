@@ -35,7 +35,7 @@ export function Field({ label, hint, error, id, ...rest }: Props) {
         aria-describedby={describedBy || undefined}
         className={`min-h-11 w-full min-w-0 px-3 py-2 rounded-md bg-surface border shadow-pressed ${
           error ? 'border-danger' : 'border-control'
-        } text-ink placeholder:text-muted focus-visible:outline focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted`}
+        } text-ink placeholder:text-muted focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted`}
       />
       {hint ? (
         <span id={hintId} className="text-xs text-muted">

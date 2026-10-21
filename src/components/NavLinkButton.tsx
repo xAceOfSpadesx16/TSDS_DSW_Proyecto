@@ -16,7 +16,7 @@ interface Props {
 }
 
 const BASE =
-  'inline-flex min-h-11 items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline focus-visible:outline-focus';
+  'inline-flex min-h-11 items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-focus';
 const ACTIVE =
   'text-on-action bg-action shadow-low hover:text-on-action hover:bg-action-hover active:bg-action-active active:shadow-pressed';
 const INACTIVE =

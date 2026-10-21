@@ -25,6 +25,18 @@ typography:
     fontWeight: 700
     lineHeight: 1.095
     letterSpacing: "-0.02em"
+  display-mobile:
+    fontFamily: "Bricolage Grotesque, Segoe UI, system-ui, sans-serif"
+    fontSize: "2rem"
+    fontWeight: 700
+    lineHeight: 1.125
+    letterSpacing: "-0.02em"
+  headline:
+    fontFamily: "Bricolage Grotesque, Segoe UI, system-ui, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 700
+    lineHeight: 1.1667
+    letterSpacing: "normal"
   body:
     fontFamily: "Segoe UI, system-ui, -apple-system, sans-serif"
     fontSize: "1rem"
@@ -40,6 +52,11 @@ typography:
     fontSize: "0.8125rem"
     fontWeight: 600
     lineHeight: 1.46
+  registration:
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+    fontSize: "0.75rem"
+    fontWeight: 400
+    lineHeight: 1.4
 rounded:
   card: "10px"
   control: "8px"

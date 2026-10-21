@@ -110,13 +110,13 @@ export function Header() {
               <>
                 <NavLink
                   to="/login"
-                  className="inline-flex min-h-11 items-center text-sm font-semibold text-muted hover:text-ink hover:no-underline focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+                  className="inline-flex min-h-11 items-center text-sm font-semibold text-muted hover:text-ink hover:no-underline focus-visible:outline focus-visible:outline-focus"
                 >
                   Entrar
                 </NavLink>
                 <NavLink
                   to="/register"
-                  className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-action text-on-action hover:bg-action-hover hover:text-on-action active:bg-action-active hover:no-underline focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+                  className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-action text-on-action hover:bg-action-hover hover:text-on-action active:bg-action-active hover:no-underline focus-visible:outline focus-visible:outline-focus"
                 >
                   Registro
                 </NavLink>
@@ -162,7 +162,7 @@ export function Header() {
         aria-expanded={open}
         aria-controls="app-nav"
         aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
-        className="lg:hidden inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-control text-ink transition-colors hover:bg-surface-hover active:bg-surface-sunken focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+        className="lg:hidden inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-control text-ink transition-colors hover:bg-surface-hover active:bg-surface-sunken focus-visible:outline focus-visible:outline-focus"
       >
         <svg
           viewBox="0 0 20 20"

@@ -251,8 +251,10 @@ describe('TeamsPage — generación y errores', () => {
 
     const cards = Array.from(document.querySelectorAll('#team-results > div'));
     expect(cards).toHaveLength(2);
-    // Cada tarjeta tiene borde de color distinto y un encabezado "Equipo N".
-    const colors = cards.map((c) => getComputedStyle(c).borderLeftColor);
+    // Cada tarjeta tiene un punto de color distinto y un encabezado "Equipo N".
+    const colors = cards.map((card) =>
+      getComputedStyle(card.querySelector('[data-team-color]')!).backgroundColor,
+    );
     expect(colors[0]).not.toBe('');
     expect(colors[0]).not.toBe(colors[1]);
     expect(screen.getByText('Equipo 1')).toBeInTheDocument();

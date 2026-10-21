@@ -43,7 +43,7 @@ describe('DicePage — dados', () => {
     // Antes de la primera tirada no se anuncia ni se muestra una cara.
     const face = document.querySelector('#dice-result');
     expect(face).toHaveAttribute('aria-hidden', 'true');
-    expect(face?.textContent).toBe('');
+    expect(face?.textContent).toBe('—');
     expect(screen.getByRole('group', { name: 'Dado' })).toBeInTheDocument();
   });
 

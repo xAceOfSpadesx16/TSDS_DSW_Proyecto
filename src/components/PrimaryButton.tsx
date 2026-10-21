@@ -33,7 +33,7 @@ export function PrimaryButton({
   return (
     <button
       {...rest}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline focus-visible:outline-focus disabled:cursor-not-allowed ${
+      className={`inline-flex min-h-11 items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-focus disabled:cursor-not-allowed ${
         VARIANTS[variant]
       } ${className}`}
     >

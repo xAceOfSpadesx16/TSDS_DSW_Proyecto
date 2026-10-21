@@ -157,7 +157,7 @@ export function DicePage() {
                 <button
                   key={sides}
                   type="button"
-                  className={`dice-btn border-2 px-4 py-3 rounded-md text-lg font-bold transition-[transform,background-color,border-color,box-shadow] shadow-low active:shadow-pressed focus-visible:outline focus-visible:outline focus-visible:outline-focus ${
+                  className={`dice-btn border-2 px-4 py-3 rounded-md text-lg font-bold transition-[transform,background-color,border-color,box-shadow] shadow-low active:shadow-pressed focus-visible:outline focus-visible:outline-focus ${
                     lastSides === sides
                       ? 'border-action bg-surface text-action shadow-pressed'
                       : 'border-control bg-surface text-ink hover:-translate-y-0.5 hover:border-action'
@@ -189,7 +189,7 @@ export function DicePage() {
               }`}
               aria-hidden="true"
             >
-              {displayRoll ?? ''}
+              {displayRoll ?? <span className="text-2xl text-muted">—</span>}
             </output>
           </div>
 

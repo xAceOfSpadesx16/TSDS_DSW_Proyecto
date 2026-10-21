@@ -356,7 +356,7 @@ export function RoulettePage() {
                 onClick={() => onRemoveOption(i)}
                 disabled={spinning}
                 aria-label={`Quitar opción ${opt.label}`}
-                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-danger focus-visible:outline focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-danger focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
               >
                 ×
               </button>
@@ -396,7 +396,7 @@ export function RoulettePage() {
             disabled={spinning || options.length < 2}
             aria-describedby={error ? 'roulette-error' : undefined}
           >
-            {spinning ? 'Girando...' : 'Girar ruleta'}
+            {spinning ? 'Girando…' : 'Girar ruleta'}
           </PrimaryButton>
         </div>
 

@@ -190,7 +190,7 @@ describe('RoulettePage — giro', () => {
   });
 
   it('gira, anima, abre el modal con el ganador y lo cierra', async () => {
-    // rAF controlado: observamos el estado "Girando..." y luego commiteamos.
+    // rAF controlado: observamos el estado "Girando…" y luego commiteamos.
     const rafCalls: FrameRequestCallback[] = [];
     vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
       rafCalls.push(cb);
@@ -202,7 +202,7 @@ describe('RoulettePage — giro', () => {
     fireEvent.click(spin);
 
     // Estado intermedio: todavía girando y con las opciones bloqueadas.
-    expect(screen.getByRole('button', { name: 'Girando...' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Girando…' })).toBeInTheDocument();
     expect(spin).toBeDisabled();
     expect(screen.getByLabelText('Opción')).toBeDisabled();
     expect(screen.getByLabelText('Color')).toBeDisabled();

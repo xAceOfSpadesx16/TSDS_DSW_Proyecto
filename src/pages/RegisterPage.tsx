@@ -41,7 +41,7 @@ export function RegisterPage() {
         setError(err.message);
         if (err.errors) setFieldErrors(err.errors);
       } else {
-        setError('Error desconocido.');
+        setError('Ocurrió un error inesperado. Probá de nuevo.');
       }
     }
   };
@@ -93,7 +93,7 @@ export function RegisterPage() {
             </p>
           ) : null}
           <PrimaryButton type="submit" variant="primary" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Creando cuenta...' : 'Crear cuenta'}
+            {status === 'loading' ? 'Creando cuenta…' : 'Crear cuenta'}
           </PrimaryButton>
         </form>
 

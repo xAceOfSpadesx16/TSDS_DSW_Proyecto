@@ -40,7 +40,7 @@ export function LoginPage() {
         setError(err.message);
         if (err.errors) setFieldErrors(err.errors);
       } else {
-        setError('Error desconocido.');
+        setError('Ocurrió un error inesperado. Probá de nuevo.');
       }
     }
   };
@@ -81,7 +81,7 @@ export function LoginPage() {
             </p>
           ) : null}
           <PrimaryButton type="submit" variant="primary" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Entrando...' : 'Entrar'}
+            {status === 'loading' ? 'Entrando…' : 'Entrar'}
           </PrimaryButton>
         </form>
 

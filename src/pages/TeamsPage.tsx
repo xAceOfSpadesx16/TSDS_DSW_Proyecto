@@ -191,13 +191,13 @@ export function TeamsPage() {
               value={participantsText}
               onChange={(e) => onChangeParticipants(e.currentTarget.value)}
               placeholder={'Ana\nBruno\nCarla\nDiego'}
-              className="w-full min-w-0 px-3 py-2 rounded-md bg-surface border border-control text-ink placeholder:text-muted focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+              className="w-full min-w-0 px-3 py-2 rounded-md bg-surface border border-control text-ink placeholder:text-muted focus-visible:outline focus-visible:outline-focus"
             />
           </label>
 
           <fieldset className="flex flex-col gap-2">
             <legend className="sr-only">Modo de reparto</legend>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               <PrimaryButton
                 id="mode-group-count"
                 type="button"
@@ -230,7 +230,7 @@ export function TeamsPage() {
           />
 
           <details className="bg-surface border border-control rounded-lg p-3 shadow-low">
-            <summary className="-my-2 flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink focus-visible:outline focus-visible:outline focus-visible:outline-focus">
+            <summary className="-my-2 flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink focus-visible:outline focus-visible:outline-focus">
               Reglas avanzadas (exclusiones)
             </summary>
             <p id="teams-exclusion-hint" className="mt-2 text-xs text-muted">
@@ -252,7 +252,7 @@ export function TeamsPage() {
                     id="exclusion-a"
                     value={exclusionA}
                     onChange={(e) => setExclusionA(e.currentTarget.value)}
-                    className="min-h-[44px] w-full min-w-0 px-3 py-2 rounded-md bg-surface border border-control text-ink focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+                    className="min-h-[44px] w-full min-w-0 px-3 py-2 rounded-md bg-surface border border-control text-ink focus-visible:outline focus-visible:outline-focus"
                   >
                     <option value="">Elegí una persona</option>
                     {participantOptions.map((participant) => (
@@ -268,7 +268,7 @@ export function TeamsPage() {
                     id="exclusion-b"
                     value={exclusionB}
                     onChange={(e) => setExclusionB(e.currentTarget.value)}
-                    className="min-h-[44px] w-full min-w-0 px-3 py-2 rounded-md bg-surface border border-control text-ink focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+                    className="min-h-[44px] w-full min-w-0 px-3 py-2 rounded-md bg-surface border border-control text-ink focus-visible:outline focus-visible:outline-focus"
                   >
                     <option value="">Elegí una persona</option>
                     {participantOptions.map((participant) => (
@@ -306,7 +306,7 @@ export function TeamsPage() {
                   <button
                     type="button"
                     onClick={() => onRemoveExclusion(i)}
-                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-danger focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-danger focus-visible:outline focus-visible:outline-focus"
                     aria-label={`Quitar exclusión ${a} ${b}`}
                   >
                     ×
@@ -356,10 +356,15 @@ export function TeamsPage() {
               {result.teams.map((team, i) => (
                 <div
                   key={i}
-                  className="min-w-0 rounded-lg border border-l-4 border-control bg-surface p-4 shadow-low"
-                  style={{ borderLeftColor: result.colors[i] }}
+                  className="min-w-0 rounded-lg border border-control bg-surface p-4 shadow-low"
                 >
-                  <h3 className="mb-2 text-sm font-bold text-ink">
+                  <h3 className="mb-2 flex items-center gap-2 text-sm font-bold text-ink">
+                    <span
+                      data-team-color
+                      aria-hidden="true"
+                      className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: result.colors[i] }}
+                    />
                     Equipo {i + 1}
                   </h3>
                   <ul className="flex min-w-0 flex-col gap-1 text-sm text-ink">

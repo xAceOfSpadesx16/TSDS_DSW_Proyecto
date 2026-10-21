@@ -174,7 +174,7 @@ export function NumbersPage() {
               checked={unique}
               onChange={(e) => setUnique(e.currentTarget.checked)}
               aria-describedby="numbers-unique-hint"
-              className="h-5 w-5 rounded border-control bg-surface text-action focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+              className="h-5 w-5 rounded border-control bg-surface text-action focus-visible:outline focus-visible:outline-focus"
             />
             Sin repetición
           </label>

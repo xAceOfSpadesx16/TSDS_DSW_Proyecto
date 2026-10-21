@@ -121,10 +121,10 @@ describe('LoginPage', () => {
     await fillByLabel(user, 'Contraseña', 's3cret');
     await user.click(screen.getByRole('button', { name: 'Entrar' }));
 
-    expect(await screen.findByText('Error desconocido.')).toBeInTheDocument();
+    expect(await screen.findByText('Ocurrió un error inesperado. Probá de nuevo.')).toBeInTheDocument();
   });
 
-  it('muestra estado de carga (botón deshabilitado y "Entrando...") y luego completa', async () => {
+  it('muestra estado de carga (botón deshabilitado y "Entrando…") y luego completa', async () => {
     let resolveFetch: (v: unknown) => void = () => {};
     const pending = new Promise((r) => {
       resolveFetch = r;
@@ -137,7 +137,7 @@ describe('LoginPage', () => {
     await fillByLabel(user, 'Contraseña', 's3cret');
     await user.click(screen.getByRole('button', { name: 'Entrar' }));
 
-    const loadingBtn = await screen.findByRole('button', { name: 'Entrando...' });
+    const loadingBtn = await screen.findByRole('button', { name: 'Entrando…' });
     expect(loadingBtn).toBeDisabled();
 
     resolveFetch({

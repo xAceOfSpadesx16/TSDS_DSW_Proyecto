@@ -353,7 +353,7 @@ export function WeightedPage() {
           id="weighted-bulk-details"
           className="bg-surface border border-control rounded-2xl shadow-raised"
         >
-          <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-semibold text-ink focus-visible:outline focus-visible:outline focus-visible:outline-focus">
+          <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-semibold text-ink focus-visible:outline focus-visible:outline-focus">
             Carga masiva
           </summary>
           <div className="flex min-w-0 flex-col gap-2 px-4 pb-4 pt-1">
@@ -378,7 +378,7 @@ export function WeightedPage() {
                   : 'weighted-bulk-hint'
               }
               placeholder={'Ana, 3\nBruno, 5\nCarla'}
-              className="w-full min-w-0 rounded-md border border-control bg-surface px-3 py-2 text-ink placeholder:text-muted focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+              className="w-full min-w-0 rounded-md border border-control bg-surface px-3 py-2 text-ink placeholder:text-muted focus-visible:outline focus-visible:outline-focus"
             />
             <p id="weighted-bulk-hint" className="text-xs text-muted">
               Formato: <code>Ana</code> o <code>Ana, 3</code>. El peso es
@@ -494,7 +494,7 @@ export function WeightedPage() {
                           type="button"
                           aria-label={`Editar ${entry.name}`}
                           onClick={() => onStartEdit(index)}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors hover:text-action focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors hover:text-action focus-visible:outline focus-visible:outline-focus"
                         >
                           <svg
                             viewBox="0 0 20 20"
@@ -515,7 +515,7 @@ export function WeightedPage() {
                           type="button"
                           aria-label={`Quitar ${entry.name}`}
                           onClick={() => onRemove(index)}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors hover:text-danger focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors hover:text-danger focus-visible:outline focus-visible:outline-focus"
                         >
                           <svg
                             viewBox="0 0 20 20"
@@ -569,7 +569,7 @@ export function WeightedPage() {
                   type="checkbox"
                   checked={autoRemove}
                   onChange={(event) => setAutoRemove(event.currentTarget.checked)}
-                  className="h-5 w-5 rounded border-control bg-surface text-action focus-visible:outline focus-visible:outline focus-visible:outline-focus"
+                  className="h-5 w-5 rounded border-control bg-surface text-action focus-visible:outline focus-visible:outline-focus"
                 />
                 Auto-eliminar ganadores
               </label>
@@ -613,7 +613,7 @@ export function WeightedPage() {
               {result.winner.name}
             </div>
             <div className="text-sm text-muted mt-1">
-              Probabilidad: {result.probability}%
+              Probabilidad: <span className="font-mono">{result.probability}%</span>
             </div>
           </output>
         ) : null}

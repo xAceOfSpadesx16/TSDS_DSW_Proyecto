@@ -236,9 +236,9 @@ function ApiDownBanner({
         type="button"
         onClick={onRetry}
         disabled={checking}
-        className="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-semibold text-action hover:text-action-hover transition-colors focus-visible:outline focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
+        className="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-semibold text-action hover:text-action-hover transition-colors focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
       >
-        {checking ? 'Reintentando...' : 'Reintentar'}
+        {checking ? 'Reintentando…' : 'Reintentar'}
       </button>
     </div>
   );
@@ -263,7 +263,7 @@ function DisclaimerFooter({ disclaimer }: { disclaimer: LegalDisclaimer }) {
         {/* Las secciones son largas: van en un `<details>` cerrado para no
             empujar el contenido de la app al abrir la página. */}
         <details className="text-xs">
-          <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-ink focus-visible:outline focus-visible:outline focus-visible:outline-focus">
+          <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-ink focus-visible:outline focus-visible:outline-focus">
             Ver el aviso completo ({disclaimer.sections.length} secciones)
           </summary>
           <dl className="mt-3 flex flex-col gap-3">
