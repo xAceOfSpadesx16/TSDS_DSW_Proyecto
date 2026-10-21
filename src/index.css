@@ -20,6 +20,38 @@
 .animate-fade-in      { animation: fadeIn 0.25s ease; }
 .animate-dice-shake   { animation: diceShake 0.1s infinite; }
 
+/*
+ * Ancho único del área de trabajo. Todas las pantallas de sorteo usan
+ * `.workspace` + `.workspace-grid`, y el historial ocupa la segunda columna.
+ * Cambiar el ancho acá lo cambia en toda la app.
+ */
+@layer components {
+  .workspace {
+    width: 100%;
+    max-width: 1120px;
+    margin-inline: auto;
+    padding: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .workspace {
+      padding: 1.5rem;
+    }
+  }
+
+  .workspace-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .workspace-grid {
+      grid-template-columns: minmax(0, 1fr) 280px;
+    }
+  }
+}
+
 /* Flecha indicadora sobre la ruleta. */
 .roulette-wrapper::before {
   content: '';

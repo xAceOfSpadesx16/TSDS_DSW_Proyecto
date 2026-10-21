@@ -118,13 +118,13 @@ export function DicePage() {
 
   return (
     <main
-      className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 p-6 w-full mx-auto"
+      className="workspace workspace-grid"
       role="main"
     >
       <section
         id="section-dice"
         aria-label="Dados RPG"
-        className="w-full min-w-0 animate-fade-in max-w-3xl mx-auto flex flex-col gap-4"
+        className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
         <h1 className="text-3xl font-bold">Dados RPG</h1>
 

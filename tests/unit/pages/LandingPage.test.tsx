@@ -31,6 +31,12 @@ describe('LandingPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('tiene un llamado principal que lleva a los módulos', () => {
+    renderLanding();
+    const cta = screen.getByRole('link', { name: 'Empezar a sortear' });
+    expect(cta).toHaveAttribute('href', '#modulos');
+  });
+
   it('renderiza las 5 tarjetas de módulos con título, ícono y destino correctos', () => {
     renderLanding();
     for (const { title, href } of MODULES) {

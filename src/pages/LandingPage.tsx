@@ -54,8 +54,8 @@ const MODULES: ModuleCard[] = [
 
 export function LandingPage() {
   return (
-    <main className="p-6 w-full mx-auto" role="main">
-      <section className="flex flex-col items-center justify-center text-center py-12 px-4 min-h-[40vh] animate-fade-in">
+    <main className="workspace" role="main">
+      <section className="flex flex-col items-center justify-center px-4 py-10 text-center animate-fade-in sm:py-12">
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent mb-4 leading-tight">
           Thrive Randomizer
         </h1>
@@ -64,17 +64,24 @@ export function LandingPage() {
           ponderados, ruletas interactivas y tiradas de dados. Selecciona un
           módulo para comenzar.
         </p>
+        <a
+          href="#modulos"
+          className="mt-6 inline-flex items-center justify-center rounded-md bg-primary px-5 py-3 text-sm font-semibold text-light-inverse transition-colors hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+        >
+          Empezar a sortear
+        </a>
       </section>
 
       <section
-        className="grid grid-cols-1 gap-6 max-w-[1200px] mx-auto p-6 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in"
+        id="modulos"
+        className="grid w-full scroll-mt-24 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in"
         aria-label="Módulos disponibles"
       >
         {MODULES.map((m) => (
           <Link
             key={m.to}
             to={m.to}
-            className="flex flex-col bg-dark-surface border border-dark-border rounded-2xl p-8 text-light-text transition-all duration-250 hover:border-primary hover:-translate-y-1 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light hover:no-underline hover:text-light-text"
+            className="flex flex-col bg-dark-surface border border-dark-border rounded-2xl p-8 text-light-text transition-all duration-250 hover:border-primary hover:-translate-y-1 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light hover:no-underline hover:text-light-text sm:last:col-span-2 lg:last:col-span-1"
           >
             <i className="text-4xl mb-4 not-italic" aria-hidden="true">
               {m.icon}
