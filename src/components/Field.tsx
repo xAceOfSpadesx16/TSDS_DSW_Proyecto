@@ -22,7 +22,7 @@ export function Field({ label, hint, error, id, ...rest }: Props) {
         {...rest}
         id={id}
         aria-invalid={Boolean(error)}
-        className={`px-3 py-2 rounded-md bg-dark-surface border ${
+        className={`w-full min-w-0 px-3 py-2 rounded-md bg-dark-surface border ${
           error ? 'border-danger' : 'border-dark-border'
         } text-light-text placeholder:text-light-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light`}
       />

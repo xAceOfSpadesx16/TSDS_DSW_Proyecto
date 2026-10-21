@@ -49,11 +49,11 @@ function ChevronIcon({ open }: { open: boolean }) {
 }
 
 interface Props {
-  /** Si true, ocupa toda la columna; si false, columna fija 280px. */
-  variant?: 'sidebar' | 'mobile';
+  /** `responsive` elige sidebar/hoja inferior; los otros modos son explícitos. */
+  variant?: 'responsive' | 'sidebar' | 'mobile';
 }
 
-export function HistoryAside({ variant = 'sidebar' }: Props) {
+export function HistoryAside({ variant = 'responsive' }: Props) {
   const entries = useHistoryStore((s) => s.entries);
   const currentPage = useHistoryStore((s) => s.currentPage);
   const lastPage = useHistoryStore((s) => s.lastPage);
@@ -94,25 +94,40 @@ export function HistoryAside({ variant = 'sidebar' }: Props) {
     void clear();
   };
 
-  const isMobile = variant === 'mobile';
-  // En modo `mobile` el panel es un bottom sheet flotante — solo se muestra
-  // si `openMobile` es true.
-  const visibilityClass = isMobile
+  const isMobileSheet = variant === 'mobile';
+  const isResponsive = variant === 'responsive';
+  const showFloating = isMobileSheet || isResponsive;
+
+  // En `mobile` el panel es una hoja inferior no modal. En `responsive`
+  // además se comporta como sidebar estático desde `lg`.
+  const visibilityClass = isMobileSheet
     ? openMobile
-      ? '!block !fixed !bottom-0 !left-0 !right-0 !max-h-[60vh] z-40'
-      : 'hidden'
-    : '';
+      ? '!flex !fixed !bottom-0 !left-0 !right-0 !max-h-[60vh] z-40 overflow-y-auto'
+      : '!hidden'
+    : isResponsive
+      ? openMobile
+        ? '!flex !fixed !bottom-0 !left-0 !right-0 !max-h-[60vh] z-40 overflow-y-auto lg:!static lg:!max-h-none lg:!w-auto lg:overflow-visible lg:z-auto'
+        : '!hidden lg:!flex lg:!static lg:!w-auto'
+      : '';
 
   return (
     <>
-      {isMobile ? (
+      {showFloating ? (
         <button
           id="history-toggle-btn"
           type="button"
-          onClick={() => setOpenMobile((v) => !v)}
+          onClick={() => {
+            setOpenMobile((value) => {
+              const next = !value;
+              if (next) {
+                setOpen(true);
+              }
+              return next;
+            });
+          }}
           aria-pressed={openMobile}
           aria-controls="history-aside"
-          className="lg:hidden fixed bottom-4 right-4 z-50 px-4 py-2 rounded-full bg-primary text-light-inverse text-sm font-semibold shadow-lg hover:bg-primary-dark"
+          className="lg:hidden fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-light-inverse shadow-lg hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
         >
           {openMobile ? 'Cerrar' : 'Historial'}
         </button>
@@ -131,7 +146,7 @@ export function HistoryAside({ variant = 'sidebar' }: Props) {
                 id="clear-history-btn"
                 type="button"
                 onClick={onClear}
-                className="text-xs text-light-muted hover:text-danger transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                className="inline-flex min-h-11 items-center text-xs text-light-muted hover:text-danger transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
               >
                 Limpiar
               </button>
@@ -162,7 +177,7 @@ export function HistoryAside({ variant = 'sidebar' }: Props) {
               Sin operaciones registradas.
             </p>
           ) : open ? (
-            <div id="history-list" className="flex flex-col gap-3 overflow-y-auto">
+            <div id="history-list" className="flex min-w-0 flex-col gap-3 overflow-y-auto">
               {groups.map((group) => (
                 <section
                   key={group.dateKey}
@@ -187,7 +202,7 @@ export function HistoryAside({ variant = 'sidebar' }: Props) {
                         <li
                           key={entry.id}
                           data-history-entry
-                          className="flex flex-col gap-1 px-3 py-2 rounded-md bg-dark-surface border border-dark-border"
+                          className="flex min-w-0 flex-col gap-1 break-words px-3 py-2 rounded-md bg-dark-surface border border-dark-border"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <span className="text-xs font-semibold text-primary-light">
@@ -212,7 +227,7 @@ export function HistoryAside({ variant = 'sidebar' }: Props) {
                           </div>
 
                           <span
-                            className="text-sm text-light-text"
+                            className="break-words text-sm text-light-text"
                             title={entry.description}
                           >
                             {result.summary}
@@ -220,12 +235,12 @@ export function HistoryAside({ variant = 'sidebar' }: Props) {
 
                           {result.teams ? (
                             <details className="text-xs text-light-muted">
-                              <summary className="flex min-h-11 cursor-pointer select-none items-center">
+                              <summary className="flex min-h-11 cursor-pointer select-none items-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light">
                                 Ver integrantes
                               </summary>
                               <ul className="mt-1 flex flex-col gap-1">
                                 {result.teams.map((team) => (
-                                  <li key={team.name}>
+                                  <li key={team.name} className="break-words">
                                     <span className="font-semibold text-light-text">
                                       {team.name}:
                                     </span>{' '}
@@ -262,7 +277,7 @@ export function HistoryAside({ variant = 'sidebar' }: Props) {
               type="button"
               onClick={() => void loadMore()}
               disabled={loading}
-              className="self-center text-xs text-primary-light hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex min-h-11 items-center self-center text-xs text-primary-light hover:text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Cargando…' : 'Cargar más'}
             </button>

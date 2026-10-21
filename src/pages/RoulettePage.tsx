@@ -214,7 +214,7 @@ export function RoulettePage() {
       <section
         id="section-roulette"
         aria-label="Ruleta de decisiones"
-        className="min-w-0 animate-fade-in max-w-3xl mx-auto flex flex-col gap-4"
+        className="w-full min-w-0 animate-fade-in max-w-3xl mx-auto flex flex-col gap-4"
       >
         <h1 className="text-3xl font-bold">Ruleta de Decisiones</h1>
 
@@ -223,7 +223,7 @@ export function RoulettePage() {
           onSubmit={onAddOption}
           className="bg-dark-surface border border-dark-border rounded-2xl p-4 flex flex-col gap-3"
         >
-          <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
             <Field
               id="roulette-label"
               label="Opción"
@@ -257,19 +257,19 @@ export function RoulettePage() {
           {options.map((opt, i) => (
             <li
               key={`${opt.label}-${i}`}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-dark-surface border border-dark-border text-sm text-light-text"
+              className="inline-flex max-w-full min-w-0 items-center gap-2 px-3 py-1 rounded-md bg-dark-surface border border-dark-border text-sm text-light-text"
             >
               <span
-                className="inline-block w-3 h-3 rounded-full"
+                className="inline-block h-3 w-3 shrink-0 rounded-full"
                 style={{ backgroundColor: opt.color }}
                 aria-hidden="true"
               />
-              <span>{opt.label}</span>
+              <span className="min-w-0 break-words">{opt.label}</span>
               <button
                 type="button"
                 onClick={() => onRemoveOption(i)}
                 aria-label={`Quitar opción ${opt.label}`}
-                className="text-light-muted hover:text-danger"
+                className="shrink-0 text-light-muted hover:text-danger"
               >
                 ×
               </button>
@@ -290,13 +290,13 @@ export function RoulettePage() {
         </div>
 
         <div className="flex flex-col items-center gap-4 py-4">
-          <div className="roulette-wrapper relative">
+          <div className="roulette-wrapper relative w-full max-w-[280px] sm:max-w-[360px]">
             <canvas
               id="roulette-canvas"
               ref={canvasRef}
               width={CANVAS_SIZE}
               height={CANVAS_SIZE}
-              className="rounded-full bg-dark-bg-alt border-2 border-dark-border shadow-2xl"
+              className="h-auto w-full max-w-[280px] sm:max-w-[360px] rounded-full bg-dark-bg-alt border-2 border-dark-border shadow-2xl"
             />
           </div>
 
@@ -324,7 +324,7 @@ export function RoulettePage() {
           <h2 className="text-xl font-bold mb-2">¡Ganador!</h2>
           <p
             id="roulette-result-text"
-            className="text-3xl font-bold text-center my-4"
+            className="break-words text-center text-3xl font-bold my-4"
             style={{ color: result?.winner.color }}
           >
             {result?.winner.label}

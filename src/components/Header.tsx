@@ -1,10 +1,14 @@
 // =============================================================================
 // Header
 //
-// Barra superior con marca + nav principal + acciones de auth. Replica
-// `index.html` original: gradiente en la marca, `nav-link` en cada botón,
-// botón de logout que reemplaza a "Iniciar sesión" cuando hay sesión.
+// Barra superior con marca, navegación responsive y acciones de auth.
+// Debajo de `lg` la navegación se colapsa en un botón con `aria-expanded`;
+// se cierra con Escape, al navegar o al elegir una opción. En pantallas
+// chicas las acciones de auth se ofrecen dentro del mismo panel.
 // =============================================================================
+
+import { useEffect, useRef, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 
 import { NavLinkButton } from './NavLinkButton';
 import { PrimaryButton } from './PrimaryButton';
@@ -15,23 +19,67 @@ export function Header() {
   const token = useAuthStore((s) => s.token);
   const logout = useAuthStore((s) => s.logout);
   const isAuthed = selectIsAuthenticated({ user, token } as never);
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  // Al cambiar de ruta el panel móvil no debe quedar abierto.
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
+  // Escape cierra el panel y devuelve el foco al botón que lo abrió.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open]);
+
+  // Al abrir, el foco entra al primer enlace del panel.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const firstLink = navRef.current?.querySelector<HTMLAnchorElement>('a');
+    firstLink?.focus();
+  }, [open]);
+
+  const closeMenu = () => setOpen(false);
 
   return (
     <header
-      className="flex items-center justify-between gap-2 px-4 bg-dark-bg-alt border-b border-dark-border sticky top-0 z-50"
+      className="relative flex items-center justify-between gap-2 px-4 bg-dark-bg-alt border-b border-dark-border sticky top-0 z-50"
       role="banner"
     >
       <NavLink
         to="/"
         end
-        className="text-lg font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent hover:no-underline whitespace-nowrap"
+        className="min-w-0 truncate text-lg font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent hover:no-underline"
       >
         Thrive Randomizer
       </NavLink>
 
       <nav
-        className="app-nav flex items-center gap-1 overflow-x-auto"
+        id="app-nav"
+        ref={navRef}
+        className={`${
+          open ? 'flex' : 'hidden'
+        } lg:flex absolute lg:static left-0 right-0 top-full lg:top-auto z-50 lg:z-auto flex-col lg:flex-row lg:items-center gap-1 bg-dark-bg-alt lg:bg-transparent border-b lg:border-b-0 border-dark-border px-4 py-3 lg:p-0 shadow-lg lg:shadow-none [&>a]:min-h-11 [&>a]:w-full [&>a]:items-center [&>a]:justify-start lg:[&>a]:w-auto`}
         aria-label="Navegación principal"
+        onClick={(event) => {
+          if ((event.target as HTMLElement).closest('a')) {
+            closeMenu();
+          }
+        }}
       >
         <NavLinkButton to="/">Inicio</NavLinkButton>
         <NavLinkButton to="/teams">Equipos</NavLinkButton>
@@ -39,12 +87,49 @@ export function Header() {
         <NavLinkButton to="/roulette">Ruleta</NavLinkButton>
         <NavLinkButton to="/dice">Dados</NavLinkButton>
         <NavLinkButton to="/numbers">Números</NavLinkButton>
+
+        {open ? (
+          <div className="md:hidden mt-1 flex flex-col gap-2 border-t border-dark-border pt-3">
+            {isAuthed ? (
+              <>
+                <span className="break-words text-sm text-light-muted">
+                  {user?.name}
+                </span>
+                <PrimaryButton
+                  variant="ghost"
+                  className="min-h-11 w-full !justify-start"
+                  onClick={() => {
+                    closeMenu();
+                    void logout();
+                  }}
+                >
+                  Salir
+                </PrimaryButton>
+              </>
+            ) : (
+              <>
+                <NavLink
+                  to="/login"
+                  className="inline-flex min-h-11 items-center text-sm font-semibold text-light-muted hover:text-light-text hover:no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                >
+                  Entrar
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-primary text-light-inverse hover:bg-primary-dark hover:text-light-inverse hover:no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                >
+                  Registro
+                </NavLink>
+              </>
+            )}
+          </div>
+        ) : null}
       </nav>
 
-      <div className="flex items-center gap-2 whitespace-nowrap">
+      <div className="hidden md:flex items-center gap-2 whitespace-nowrap">
         {isAuthed ? (
           <>
-            <span className="hidden sm:inline text-sm text-light-muted">
+            <span className="hidden max-w-[12rem] truncate text-sm text-light-muted sm:inline">
               {user?.name}
             </span>
             <PrimaryButton variant="ghost" onClick={() => void logout()}>
@@ -53,7 +138,10 @@ export function Header() {
           </>
         ) : (
           <>
-            <NavLink to="/login" className="text-sm font-semibold text-light-muted hover:text-light-text hover:no-underline">
+            <NavLink
+              to="/login"
+              className="text-sm font-semibold text-light-muted hover:text-light-text hover:no-underline"
+            >
               Entrar
             </NavLink>
             <NavLink
@@ -65,10 +153,32 @@ export function Header() {
           </>
         )}
       </div>
+
+      <button
+        id="mobile-nav-btn"
+        ref={menuButtonRef}
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-controls="app-nav"
+        aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+        className="lg:hidden inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-dark-border text-light-text transition-colors hover:bg-dark-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+      >
+        <svg
+          viewBox="0 0 20 20"
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          aria-hidden="true"
+        >
+          {open ? (
+            <path d="m5 5 10 10M15 5 5 15" strokeLinecap="round" />
+          ) : (
+            <path d="M3 5h14M3 10h14M3 15h14" strokeLinecap="round" />
+          )}
+        </svg>
+      </button>
     </header>
   );
 }
-
-// `NavLink` se usa dos veces: como botón aislado en el brand y dentro de
-// `NavLinkButton`. Import local para mantener este archivo autocontenido.
-import { NavLink } from 'react-router-dom';

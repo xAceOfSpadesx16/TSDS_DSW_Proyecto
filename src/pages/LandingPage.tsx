@@ -67,7 +67,7 @@ export function LandingPage() {
       </section>
 
       <section
-        className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6 max-w-[1200px] mx-auto p-6 sm:grid-cols-1 md:grid-cols-2 animate-fade-in"
+        className="grid grid-cols-1 gap-6 max-w-[1200px] mx-auto p-6 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in"
         aria-label="Módulos disponibles"
       >
         {MODULES.map((m) => (

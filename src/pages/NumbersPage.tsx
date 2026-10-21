@@ -124,7 +124,7 @@ export function NumbersPage() {
       <section
         id="section-numbers"
         aria-label="Generador de números"
-        className="min-w-0 animate-fade-in max-w-3xl mx-auto flex flex-col gap-4"
+        className="w-full min-w-0 animate-fade-in max-w-3xl mx-auto flex flex-col gap-4"
       >
         <h1 className="text-3xl font-bold">Números aleatorios</h1>
 

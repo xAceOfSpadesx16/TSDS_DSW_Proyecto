@@ -118,14 +118,14 @@ export function WeightedPage() {
       <section
         id="section-weighted"
         aria-label="Sorteo con pesos"
-        className="min-w-0 animate-fade-in max-w-3xl mx-auto flex flex-col gap-4"
+        className="w-full min-w-0 animate-fade-in max-w-3xl mx-auto flex flex-col gap-4"
       >
         <h1 className="text-3xl font-bold">Sorteo con Pesos</h1>
 
         <form
           id="weighted-form"
           onSubmit={onAdd}
-          className="bg-dark-surface border border-dark-border rounded-2xl p-4 grid grid-cols-[1fr_auto_auto] gap-3 items-end"
+          className="bg-dark-surface border border-dark-border rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-3 items-end"
         >
           <Field
             id="weighted-name"
@@ -153,7 +153,7 @@ export function WeightedPage() {
 
         <ul
           id="weighted-list"
-          className="flex flex-col gap-2"
+          className="flex min-w-0 flex-col gap-2"
           aria-label="Participantes cargados"
         >
           {entries.length === 0 ? (
@@ -166,9 +166,11 @@ export function WeightedPage() {
                 key={`${entry.name}-${i}`}
                 className="bg-dark-surface border border-dark-border rounded-md p-3 flex flex-col gap-2"
               >
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-light-text">{entry.name}</span>
-                  <span className="text-light-muted">peso {entry.weight}</span>
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <span className="min-w-0 break-words font-semibold text-light-text">
+                    {entry.name}
+                  </span>
+                  <span className="shrink-0 text-light-muted">peso {entry.weight}</span>
                 </div>
                 <output
                   className="block h-2 rounded bg-primary/20"
@@ -226,10 +228,12 @@ export function WeightedPage() {
         {result ? (
           <output
             id="weighted-result"
-            className="bg-dark-surface border border-dark-border rounded-md p-4 text-center"
+            className="min-w-0 break-words rounded-md border border-dark-border bg-dark-surface p-4 text-center"
           >
             <div className="text-sm text-light-muted">Ganador</div>
-            <div className="text-2xl font-bold text-primary-light">{result.winner.name}</div>
+            <div className="break-words text-2xl font-bold text-primary-light">
+              {result.winner.name}
+            </div>
             <div className="text-sm text-light-muted mt-1">
               Probabilidad: {result.probability}%
             </div>
