@@ -7,8 +7,6 @@
 
 import { Link } from 'react-router-dom';
 
-import { PrimaryButton } from '../components/PrimaryButton';
-
 export function NotFoundPage() {
   return (
     <main className="p-6 w-full mx-auto">
@@ -20,8 +18,11 @@ export function NotFoundPage() {
           404
         </h1>
         <p className="text-lg text-muted">La ruta solicitada no existe.</p>
-        <Link to="/" className="no-underline">
-          <PrimaryButton variant="primary">Volver al inicio</PrimaryButton>
+        <Link
+          to="/"
+          className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-4 py-2 text-sm font-semibold text-on-action no-underline shadow-low transition-colors hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
+        >
+          Volver al inicio
         </Link>
       </section>
     </main>

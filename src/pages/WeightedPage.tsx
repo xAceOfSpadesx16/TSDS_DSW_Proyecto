@@ -604,18 +604,35 @@ export function WeightedPage() {
         ) : null}
 
         {result ? (
-          <output
+          <section
             id="weighted-result"
+            aria-labelledby="weighted-result-heading"
             className="min-w-0 break-words rounded-lg border border-control bg-surface p-4 text-center shadow-pressed"
           >
-            <div className="text-sm text-muted">Ganador</div>
-            <div className="break-words text-2xl font-bold text-action">
+            <h2
+              id="weighted-result-heading"
+              className="font-sans text-sm font-semibold text-muted"
+            >
+              Ganador
+            </h2>
+            <p
+              id="weighted-winner"
+              className="break-words text-2xl font-bold text-action"
+            >
               {result.winner.name}
-            </div>
-            <div className="text-sm text-muted mt-1">
+            </p>
+            <p id="weighted-probability" className="mt-1 text-sm text-muted">
               Probabilidad: <span className="font-mono">{result.probability}%</span>
-            </div>
-          </output>
+            </p>
+            <output
+              id="weighted-result-announcement"
+              className="sr-only"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {`Ganador: ${result.winner.name}. Probabilidad: ${result.probability}%.`}
+            </output>
+          </section>
         ) : null}
       </section>
 

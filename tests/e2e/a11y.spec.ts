@@ -52,6 +52,20 @@ test.describe('Navegación y título', () => {
   });
 });
 
+test.describe('404', () => {
+  test('el enlace de vuelta es una sola parada de tabulación', async ({ page }) => {
+    await page.goto('/ruta-inexistente');
+
+    const back = page.getByRole('link', { name: 'Volver al inicio' });
+    await expect(back).toHaveCount(1);
+    await expect(page.locator('main a, main button')).toHaveCount(1);
+    await expect(page.locator('main button')).toHaveCount(0);
+
+    await back.focus();
+    await expect(back).toBeFocused();
+  });
+});
+
 test.describe('Accesibilidad (axe)', () => {
   for (const route of ROUTES) {
     test(`${route} sin violaciones serious ni critical`, async ({ page }) => {

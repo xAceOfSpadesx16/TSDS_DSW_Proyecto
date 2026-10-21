@@ -350,6 +350,21 @@ export function TeamsPage() {
               Resultados
             </h2>
             <output
+              id="team-results-announcement"
+              className="sr-only"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {result.teams
+                .map(
+                  (team, index) =>
+                    `Equipo ${index + 1}: ${
+                      team.length === 0 ? 'vacío' : team.join(', ')
+                    }.`,
+                )
+                .join(' ')}
+            </output>
+            <div
               id="team-results"
               className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3"
             >
@@ -380,7 +395,7 @@ export function TeamsPage() {
                   </ul>
                 </div>
               ))}
-            </output>
+            </div>
           </section>
         ) : null}
       </section>
