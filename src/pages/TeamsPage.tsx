@@ -233,12 +233,18 @@ export function TeamsPage() {
             <summary className="-my-2 flex min-h-11 cursor-pointer items-center text-sm font-semibold text-light-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light">
               Reglas avanzadas (exclusiones)
             </summary>
+            <p id="teams-exclusion-hint" className="mt-2 text-xs text-light-muted">
+              Elegí dos personas que no deban quedar en el mismo equipo.
+            </p>
             {participantOptions.length < 2 ? (
               <p className="mt-3 text-xs text-light-muted">
                 Cargá al menos dos participantes para elegir exclusiones.
               </p>
             ) : (
-              <fieldset className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+              <fieldset
+                className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+                aria-describedby="teams-exclusion-hint"
+              >
                 <legend className="sr-only">Agregar exclusión</legend>
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="text-light-muted font-medium">Persona A</span>

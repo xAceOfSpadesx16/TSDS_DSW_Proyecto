@@ -1,7 +1,7 @@
 // =============================================================================
 // NumbersPage (/numbers)
 //
-// Formulario con `count`, `min`, `max` y el toggle de unicidad. Usa la
+// Formulario con `count`, `min`, `max` y el toggle de unicidad. Se usa la
 // `numbersStrategy` que ya existía (estaba registrada en la fábrica de
 // estrategias pero sin pantalla) y registra el resultado con `addHistory`,
 // igual que el resto de las páginas.
@@ -173,10 +173,14 @@ export function NumbersPage() {
               type="checkbox"
               checked={unique}
               onChange={(e) => setUnique(e.currentTarget.checked)}
+              aria-describedby="numbers-unique-hint"
               className="h-5 w-5 rounded border-dark-border bg-dark-surface text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
             />
             Sin repetición
           </label>
+          <p id="numbers-unique-hint" className="text-xs text-light-muted">
+            Los números no se repiten dentro del mismo sorteo.
+          </p>
 
           <div className="flex flex-wrap gap-2">
             <PrimaryButton id="generate-numbers-btn" type="submit" variant="primary">

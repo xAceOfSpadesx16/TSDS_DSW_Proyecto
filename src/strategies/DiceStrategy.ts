@@ -22,7 +22,7 @@ function rollOnce(sides: number): number {
 function rollWithFormula(formula: string): DiceResult {
   const match = FORMULA_REGEX.exec(formula.trim());
   if (!match) {
-    throw new Error(`Fórmula inválida: "${formula}". Usa formato NdS (ej. 2d6+3).`);
+    throw new Error(`Fórmula inválida: "${formula}". Usá formato NdS (ej. 2d6+3).`);
   }
   const count = Number.parseInt(match[1], 10);
   const sides = Number.parseInt(match[2], 10);

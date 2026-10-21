@@ -36,7 +36,7 @@ export function DicePage() {
   const addHistory = useHistoryStore((s) => s.add);
   const rafIdRef = useRef<number>(0);
 
-  // Cancela la animación de tirada si la página se desmonta en medio del
+  // Cancelar la animación de tirada si la página se desmonta en medio del
   // "shake" (evita un setState sobre un componente desmontado / fuga de rAF).
   useEffect(() => {
     return () => {
@@ -175,6 +175,7 @@ export function DicePage() {
           <Field
             id="dice-modifier"
             label="Modificador"
+            hint="Se suma al resultado de la tirada."
             type="number"
             value={modifier}
             onChange={(e) => setModifier(Number(e.currentTarget.value))}

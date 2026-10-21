@@ -20,21 +20,21 @@ const MODULES: ModuleCard[] = [
     icon: '♘',
     title: 'Generador de Equipos',
     description:
-      'Ingresa participantes y divide automáticamente en equipos equilibrados. Configura cantidad de grupos o tamaño deseado.',
+      'Ingresá participantes y dividí automáticamente en equipos equilibrados. Configurá cantidad de grupos o tamaño deseado.',
   },
   {
     to: '/weighted',
     icon: '♙',
     title: 'Sorteo con Pesos',
     description:
-      'Realiza sorteos donde cada participante tiene una probabilidad proporcional a su peso asignado.',
+      'Realizá sorteos donde cada participante tiene una probabilidad proporcional a su peso asignado.',
   },
   {
     to: '/roulette',
     icon: '⚙',
     title: 'Ruleta de Decisiones',
     description:
-      'Agrega opciones personalizadas y gira la ruleta para tomar decisiones al azar de forma visual.',
+      'Agregá opciones personalizadas y girá la ruleta para tomar decisiones al azar de forma visual.',
   },
   {
     to: '/dice',
@@ -48,7 +48,7 @@ const MODULES: ModuleCard[] = [
     icon: '⁂',
     title: 'Números Aleatorios',
     description:
-      'Genera una cantidad de números dentro de un rango, con o sin repetición. Ideal para sorteos de Lists, ordenamientos o sorteos numéricos.',
+      'Generá una cantidad de números dentro de un rango, con o sin repetición. Ideal para sorteos, ordenamientos o elecciones numéricas.',
   },
 ];
 
@@ -64,7 +64,7 @@ export function LandingPage() {
         </h1>
         <p className="text-lg text-light-muted max-w-2xl leading-relaxed">
           Suite de herramientas de aleatorización para equipos, sorteos
-          ponderados, ruletas interactivas y tiradas de dados. Selecciona un
+          ponderados, ruletas interactivas y tiradas de dados. Seleccioná un
           módulo para comenzar.
         </p>
         <a

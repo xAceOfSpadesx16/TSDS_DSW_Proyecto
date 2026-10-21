@@ -1,7 +1,7 @@
 // =============================================================================
 // RouletteStrategy — módulo `roulette`.
 //
-// - Elige ganador uniformemente entre las opciones provistas.
+// - Elegir ganador uniformemente entre las opciones provistas.
 // - Calcula el ángulo final para la animación del canvas (suma de 4–8
 //   vueltas completas + alineación al centro del segmento ganador).
 // - El backend solo recibe `{ winner: { label, color } }`; el `finalAngle`
@@ -78,7 +78,7 @@ export class RouletteStrategy
 
   execute(input: RouletteInput): DrawExecution<RouletteResultLocal, RouletteResultBackend> {
     if (input.options.length === 0) {
-      throw new Error('Agrega al menos una opción para girar la ruleta.');
+      throw new Error('Agregá al menos una opción para girar la ruleta.');
     }
     const targetIndex = randomInt(0, input.options.length - 1);
     const winner = input.options[targetIndex];

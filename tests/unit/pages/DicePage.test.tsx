@@ -37,6 +37,9 @@ describe('DicePage — dados', () => {
       expect(screen.getByRole('button', { name: `d${sides}` })).toBeInTheDocument();
     }
     expect(screen.getByLabelText('Modificador')).toBeInTheDocument();
+    expect(
+      screen.getByText('Se suma al resultado de la tirada.'),
+    ).toBeInTheDocument();
     // Antes de la primera tirada no se anuncia ni se muestra una cara.
     const face = document.querySelector('#dice-result');
     expect(face).toHaveAttribute('aria-hidden', 'true');

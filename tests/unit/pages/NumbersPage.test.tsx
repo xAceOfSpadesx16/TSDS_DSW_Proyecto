@@ -51,6 +51,9 @@ describe('NumbersPage — formulario', () => {
     expect(screen.getByLabelText('Mínimo')).toBeInTheDocument();
     expect(screen.getByLabelText('Máximo')).toBeInTheDocument();
     expect(screen.getByLabelText('Sin repetición')).toBeChecked();
+    expect(
+      screen.getByText('Los números no se repiten dentro del mismo sorteo.'),
+    ).toBeInTheDocument();
     expect(screen.getByRole('group', { name: 'Rango' })).toBeInTheDocument();
   });
 

@@ -3,7 +3,11 @@
 // =============================================================================
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { WeightedStrategy } from '../../../src/strategies/WeightedStrategy';
+import {
+  WeightedStrategy,
+  computeWeightedPercentages,
+  parseWeightedBulk,
+} from '../../../src/strategies/WeightedStrategy';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -119,6 +123,54 @@ describe('WeightedStrategy', () => {
         autoRemove: false,
       });
       expect(local.remainingEntries).toEqual(entries);
+    });
+  });
+
+  describe('carga masiva', () => {
+    it('parsea nombre y peso opcional, e informa líneas inválidas', () => {
+      const result = parseWeightedBulk(
+        'Ana, 3\n\nBruno, mal\nCarla\nDiego, 200\nEva, 5',
+      );
+      expect(result.entries).toEqual([
+        { name: 'Ana', weight: 3 },
+        { name: 'Carla', weight: 1 },
+        { name: 'Eva', weight: 5 },
+      ]);
+      expect(result.invalid.map((item) => item.line)).toEqual([
+        'Bruno, mal',
+        'Diego, 200',
+      ]);
+    });
+
+    it('ignora líneas vacías y acepta nombres con coma', () => {
+      const result = parseWeightedBulk('  \nAna, María, 4\n\n');
+      expect(result.entries).toEqual([{ name: 'Ana, María', weight: 4 }]);
+      expect(result.invalid).toEqual([]);
+    });
+  });
+
+  describe('porcentajes por fila', () => {
+    it('reparte 30/70 y suma 100', () => {
+      const percentages = computeWeightedPercentages([
+        { name: 'a', weight: 3 },
+        { name: 'b', weight: 7 },
+      ]);
+      expect(percentages).toEqual([30, 70]);
+      expect(percentages.reduce((acc, value) => acc + value, 0)).toBeCloseTo(100, 5);
+    });
+
+    it('reparte el resto para que tres pesos iguales sumen 100', () => {
+      const percentages = computeWeightedPercentages([
+        { name: 'a', weight: 1 },
+        { name: 'b', weight: 1 },
+        { name: 'c', weight: 1 },
+      ]);
+      expect(percentages.reduce((acc, value) => acc + value, 0)).toBeCloseTo(100, 5);
+      expect(percentages[0]).toBe(33.4);
+    });
+
+    it('devuelve ceros sin participantes', () => {
+      expect(computeWeightedPercentages([])).toEqual([]);
     });
   });
 

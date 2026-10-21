@@ -201,8 +201,9 @@ describe('seguridad — XSS', () => {
     fill('#weighted-weight', '1');
     fireEvent.click(screen.getByRole('button', { name: '+ Agregar' }));
 
-    const html = document.querySelector('#weighted-list')!.innerHTML;
-    expect(html).toContain('&lt;img');
-    expect(html).not.toContain('<img src=x onerror');
+    const list = document.querySelector('#weighted-list')!;
+    expect(list.innerHTML).toContain('&lt;img');
+    expect(document.querySelector('#weighted-list img')).toBeNull();
+    expect(list.textContent).toContain(malicious);
   });
 });

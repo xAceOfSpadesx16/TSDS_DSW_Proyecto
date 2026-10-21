@@ -103,6 +103,9 @@ describe('TeamsPage — exclusiones', () => {
     expect(
       screen.getByRole('group', { name: 'Agregar exclusión' }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText('Elegí dos personas que no deban quedar en el mismo equipo.'),
+    ).toBeInTheDocument();
 
     const selectA = screen.getByLabelText('Persona A') as HTMLSelectElement;
     const selectB = screen.getByLabelText('Persona B') as HTMLSelectElement;
