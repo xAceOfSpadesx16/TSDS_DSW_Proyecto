@@ -49,14 +49,14 @@ export function RegisterPage() {
   return (
     <main className="p-6 w-full mx-auto">
       <section className="max-w-md mx-auto animate-fade-in flex flex-col gap-4">
-        <h1 tabIndex={-1} className="text-3xl font-bold">
+        <h1 tabIndex={-1} className="font-bold">
           Registro
         </h1>
 
         <form
           onSubmit={onSubmit}
           aria-describedby={error ? 'register-error' : undefined}
-          className="bg-dark-surface border border-dark-border rounded-2xl p-6 flex flex-col gap-4"
+          className="bg-surface border border-control rounded-2xl shadow-raised p-6 flex flex-col gap-4"
         >
           <Field
             label="Nombre"
@@ -97,11 +97,11 @@ export function RegisterPage() {
           </PrimaryButton>
         </form>
 
-        <p className="text-sm text-light-muted text-center">
+        <p className="text-sm text-muted text-center">
           ¿Ya tenés cuenta?{' '}
           <Link
             to="/login"
-            className="inline-flex min-h-11 items-center text-primary-light underline underline-offset-2 hover:text-primary-light"
+            className="inline-flex min-h-11 items-center text-action underline underline-offset-2 hover:text-action"
           >
             Iniciar sesión
           </Link>

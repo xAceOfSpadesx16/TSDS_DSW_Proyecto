@@ -15,11 +15,11 @@ export function NotFoundPage() {
       <section className="max-w-md mx-auto animate-fade-in flex flex-col items-center gap-4 py-12 text-center">
         <h1
           tabIndex={-1}
-          className="text-5xl font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent"
+          className="font-bold text-ink"
         >
           404
         </h1>
-        <p className="text-lg text-light-muted">La ruta solicitada no existe.</p>
+        <p className="text-lg text-muted">La ruta solicitada no existe.</p>
         <Link to="/" className="no-underline">
           <PrimaryButton variant="primary">Volver al inicio</PrimaryButton>
         </Link>

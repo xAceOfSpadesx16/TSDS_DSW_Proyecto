@@ -142,25 +142,25 @@ export function DicePage() {
         aria-label="Dados RPG"
         className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 tabIndex={-1} className="text-3xl font-bold">
+        <h1 tabIndex={-1} className="font-bold">
           Dados RPG
         </h1>
 
-        <div className="bg-dark-surface border border-dark-border rounded-2xl p-6 flex flex-col gap-4">
+        <div className="bg-surface border border-control rounded-2xl shadow-raised p-6 flex flex-col gap-4">
           <fieldset
             className="flex min-w-0 flex-col gap-2"
             aria-describedby={diceError ? 'dice-error' : undefined}
           >
-            <legend className="text-sm font-medium text-light-muted">Dado</legend>
+            <legend className="text-sm font-medium text-muted">Dado</legend>
             <div className="flex flex-wrap gap-2">
               {DICE_SIDES.map((sides) => (
                 <button
                   key={sides}
                   type="button"
-                  className={`dice-btn px-4 py-3 rounded-md text-lg font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light ${
+                  className={`dice-btn border-2 px-4 py-3 rounded-md text-lg font-bold transition-[transform,background-color,border-color,box-shadow] shadow-low active:shadow-pressed focus-visible:outline focus-visible:outline focus-visible:outline-focus ${
                     lastSides === sides
-                      ? 'bg-primary text-white'
-                      : 'bg-dark-bg-alt text-light-text hover:bg-primary hover:text-white'
+                      ? 'border-action bg-surface text-action shadow-pressed'
+                      : 'border-control bg-surface text-ink hover:-translate-y-0.5 hover:border-action'
                   }`}
                   data-sides={sides}
                   data-active={lastSides === sides}
@@ -184,7 +184,7 @@ export function DicePage() {
           <div className="flex items-center justify-center gap-4 py-6">
             <output
               id="dice-result"
-              className={`w-32 h-32 flex items-center justify-center text-6xl font-bold rounded-xl bg-dark-bg-alt border-2 border-primary text-primary-light ${
+              className={`dice-registration relative w-32 h-32 flex items-center justify-center font-mono text-[2.75rem] leading-[3rem] font-bold rounded-xl bg-surface border-2 border-action text-action shadow-pressed ${
                 shaking ? 'animate-dice-shake' : ''
               }`}
               aria-hidden="true"
@@ -205,7 +205,7 @@ export function DicePage() {
 
           {diceResult ? (
             <div className="text-center text-lg">
-              <output id="dice-total" className="font-bold text-light-text">
+              <output id="dice-total" className="font-mono font-bold text-ink">
                 {diceResult.rolls.length === 1
                   ? `Total: ${diceResult.total}${
                       diceResult.modifier !== 0

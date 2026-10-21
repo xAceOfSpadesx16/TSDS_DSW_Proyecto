@@ -4,6 +4,160 @@
 @tailwind utilities;
 
 /*
+ * Tokens de la dirección "Papel de goma" (claro). Los componentes consumen
+ * estas variables a través de Tailwind o de utilidades semánticas; no hay
+ * hexadecimales sueltos en JSX.
+ */
+:root {
+  color-scheme: light;
+
+  --color-canvas: #f3efe6;
+  --color-surface: #fbf8f1;
+  --color-surface-hover: #f0e9dc;
+  --color-surface-sunken: #e7dfd1;
+
+  --color-ink: #221f1a;
+  --color-muted: #5b554b;
+
+  --color-action: #1f4fb5;
+  --color-action-hover: #173e8f;
+  --color-action-active: #102e6b;
+  --color-action-soft: #e3e8f6;
+  --color-on-action: #f8fbff;
+
+  --color-control-border: #807669;
+  --color-focus: #b45309;
+  --color-error: #a32121;
+  --color-error-strong: #7f1d1d;
+  --color-error-active: #5c1111;
+  --color-success: #1f6b47;
+  --color-warning: #92400e;
+  --color-scrim: rgba(34, 31, 26, 0.45);
+
+  --focus-width: 2px;
+  --focus-offset: 2px;
+
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --radius-card: 10px;
+  --radius-control: 8px;
+  --radius-chip: 4px;
+  --radius-stamp: 2px;
+  --radius-pill: 999px;
+
+  --shadow-low:
+    -3px -3px 8px rgba(255, 255, 255, 0.95),
+    4px 4px 10px rgba(84, 72, 55, 0.14);
+  --shadow-raised:
+    -6px -6px 14px rgba(255, 255, 255, 0.96),
+    7px 7px 16px rgba(84, 72, 55, 0.18);
+  --shadow-high:
+    -10px -10px 24px rgba(255, 255, 255, 0.98),
+    14px 14px 30px rgba(84, 72, 55, 0.22);
+  --shadow-pressed:
+    inset 4px 4px 9px rgba(84, 72, 55, 0.16),
+    inset -4px -4px 9px rgba(255, 255, 255, 0.95);
+  --shadow-arrow: 0 2px 4px rgba(34, 31, 26, 0.25);
+}
+
+html {
+  background-color: var(--color-canvas);
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: 2rem;
+  line-height: 2.25rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  line-height: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 2.625rem;
+    line-height: 2.875rem;
+  }
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background-color: var(--color-action);
+  color: var(--color-on-action);
+}
+
+/* Controles nativos: misma piel de papel, sin perder semántica. */
+input,
+select,
+textarea {
+  color: var(--color-ink);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-pressed);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled,
+button:disabled {
+  color: var(--color-muted);
+  background-color: var(--color-surface-sunken);
+  border-color: var(--color-control-border);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--color-action);
+  box-shadow: none;
+}
+
+input[type="color"] {
+  padding: 0.25rem;
+}
+
+/*
  * Estilos globales preservados literalmente del antiguo `css/globals.css`.
  * Si hay que ajustar keyframes o la flecha de la ruleta, este archivo es
  * la única fuente de verdad.
@@ -60,6 +214,16 @@
 }
 
 /* Flecha indicadora sobre la ruleta. */
+.dice-registration::after {
+  content: '+';
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
 .roulette-wrapper::before {
   content: '';
   position: absolute;
@@ -67,7 +231,50 @@
   width: 0; height: 0;
   border-left: 12px solid transparent;
   border-right: 12px solid transparent;
-  border-top: 24px solid #ff7675;
+  border-top: 24px solid var(--color-action);
   z-index: 10;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(var(--shadow-arrow));
+}
+
+/*
+ * Alternativa de alto contraste: sin sombras, bordes sólidos y foco más
+ * grueso. La geometría y la jerarquía no cambian.
+ */
+@media (prefers-contrast: more) {
+  :root {
+    --color-muted: #221f1a;
+    --color-control-border: #221f1a;
+    --color-focus: #221f1a;
+    --focus-width: 3px;
+    --shadow-arrow: 0 0 0 transparent;
+    --shadow-low: none;
+    --shadow-raised: none;
+    --shadow-high: none;
+    --shadow-pressed: none;
+  }
+
+  .shadow-low,
+  .shadow-raised,
+  .shadow-high,
+  .shadow-pressed {
+    box-shadow: none;
+  }
+
+  :root input,
+  :root select,
+  :root textarea,
+  :root button {
+    border-width: 2px;
+    border-style: solid;
+    border-color: var(--color-ink);
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  button:focus-visible,
+  a:focus-visible,
+  summary:focus-visible {
+    outline-width: var(--focus-width);
+  }
 }

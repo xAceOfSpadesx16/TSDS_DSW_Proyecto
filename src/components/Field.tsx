@@ -25,7 +25,7 @@ export function Field({ label, hint, error, id, ...rest }: Props) {
 
   return (
     <div className="flex flex-col gap-1 text-sm">
-      <label htmlFor={fieldId} className="text-light-muted font-medium">
+      <label htmlFor={fieldId} className="text-muted font-medium">
         {label}
       </label>
       <input
@@ -33,12 +33,12 @@ export function Field({ label, hint, error, id, ...rest }: Props) {
         id={fieldId}
         aria-invalid={Boolean(error)}
         aria-describedby={describedBy || undefined}
-        className={`min-h-11 w-full min-w-0 px-3 py-2 rounded-md bg-dark-surface border ${
-          error ? 'border-danger' : 'border-dark-border'
-        } text-light-text placeholder:text-light-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light`}
+        className={`min-h-11 w-full min-w-0 px-3 py-2 rounded-md bg-surface border shadow-pressed ${
+          error ? 'border-danger' : 'border-control'
+        } text-ink placeholder:text-muted focus-visible:outline focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted`}
       />
       {hint ? (
-        <span id={hintId} className="text-xs text-light-muted">
+        <span id={hintId} className="text-xs text-muted">
           {hint}
         </span>
       ) : null}

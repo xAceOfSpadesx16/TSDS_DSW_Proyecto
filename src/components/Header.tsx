@@ -57,13 +57,13 @@ export function Header() {
 
   return (
     <header
-      className="relative flex items-center justify-between gap-2 px-4 bg-dark-bg-alt border-b border-dark-border sticky top-0 z-50"
+      className="relative flex items-center justify-between gap-2 px-4 bg-surface border-b border-control shadow-low sticky top-0 z-50"
       role="banner"
     >
       <NavLink
         to="/"
         end
-        className="inline-flex min-h-11 min-w-0 items-center truncate text-lg font-bold bg-gradient-to-br from-primary-light to-secondary bg-clip-text text-transparent hover:no-underline"
+        className="inline-flex min-h-11 min-w-0 items-center gap-2 truncate font-display text-lg font-bold text-ink hover:text-action hover:no-underline"
       >
         Thrive Randomizer
       </NavLink>
@@ -73,7 +73,7 @@ export function Header() {
         ref={navRef}
         className={`${
           open ? 'flex' : 'hidden'
-        } lg:flex absolute lg:static left-0 right-0 top-full lg:top-auto z-50 lg:z-auto flex-col lg:flex-row lg:items-center gap-1 bg-dark-bg-alt lg:bg-transparent border-b lg:border-b-0 border-dark-border px-4 py-3 lg:p-0 shadow-lg lg:shadow-none [&>a]:min-h-11 [&>a]:w-full [&>a]:items-center [&>a]:justify-start lg:[&>a]:w-auto`}
+        } lg:flex absolute lg:static left-0 right-0 top-full lg:top-auto z-50 lg:z-auto flex-col lg:flex-row lg:items-center gap-1 bg-surface lg:bg-transparent border-b lg:border-b-0 border-control px-4 py-3 lg:p-0 shadow-high lg:shadow-none [&>a]:min-h-11 [&>a]:w-full [&>a]:items-center [&>a]:justify-start lg:[&>a]:w-auto`}
         aria-label="Navegación principal"
         onClick={(event) => {
           if ((event.target as HTMLElement).closest('a')) {
@@ -89,10 +89,10 @@ export function Header() {
         <NavLinkButton to="/numbers">Números</NavLinkButton>
 
         {open ? (
-          <div className="md:hidden mt-1 flex flex-col gap-2 border-t border-dark-border pt-3">
+          <div className="md:hidden mt-1 flex flex-col gap-2 border-t border-control pt-3">
             {isAuthed ? (
               <>
-                <span className="break-words text-sm text-light-muted">
+                <span className="break-words text-sm text-muted">
                   {user?.name}
                 </span>
                 <PrimaryButton
@@ -110,13 +110,13 @@ export function Header() {
               <>
                 <NavLink
                   to="/login"
-                  className="inline-flex min-h-11 items-center text-sm font-semibold text-light-muted hover:text-light-text hover:no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                  className="inline-flex min-h-11 items-center text-sm font-semibold text-muted hover:text-ink hover:no-underline focus-visible:outline focus-visible:outline focus-visible:outline-focus"
                 >
                   Entrar
                 </NavLink>
                 <NavLink
                   to="/register"
-                  className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-primary text-white hover:bg-primary-dark hover:text-white hover:no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                  className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-action text-on-action hover:bg-action-hover hover:text-on-action active:bg-action-active hover:no-underline focus-visible:outline focus-visible:outline focus-visible:outline-focus"
                 >
                   Registro
                 </NavLink>
@@ -129,7 +129,7 @@ export function Header() {
       <div className="hidden md:flex items-center gap-2 whitespace-nowrap">
         {isAuthed ? (
           <>
-            <span className="hidden max-w-[12rem] truncate text-sm text-light-muted sm:inline">
+            <span className="hidden max-w-[12rem] truncate text-sm text-muted sm:inline">
               {user?.name}
             </span>
             <PrimaryButton variant="ghost" onClick={() => void logout()}>
@@ -140,13 +140,13 @@ export function Header() {
           <>
             <NavLink
               to="/login"
-              className="inline-flex min-h-11 items-center text-sm font-semibold text-light-muted hover:text-light-text hover:no-underline"
+              className="inline-flex min-h-11 items-center text-sm font-semibold text-muted hover:text-ink hover:no-underline"
             >
               Entrar
             </NavLink>
             <NavLink
               to="/register"
-              className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-primary text-white hover:bg-primary-dark hover:text-white hover:no-underline"
+              className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-md text-sm font-semibold bg-action text-on-action hover:bg-action-hover hover:text-on-action active:bg-action-active hover:no-underline"
             >
               Registro
             </NavLink>
@@ -162,7 +162,7 @@ export function Header() {
         aria-expanded={open}
         aria-controls="app-nav"
         aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
-        className="lg:hidden inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-dark-border text-light-text transition-colors hover:bg-dark-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+        className="lg:hidden inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-control text-ink transition-colors hover:bg-surface-hover active:bg-surface-sunken focus-visible:outline focus-visible:outline focus-visible:outline-focus"
       >
         <svg
           viewBox="0 0 20 20"

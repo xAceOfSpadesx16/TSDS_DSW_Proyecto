@@ -145,12 +145,12 @@ export function RootLayout() {
     <>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:outline focus:outline-2 focus:outline-primary-light"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-md focus:bg-action focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-on-action focus:shadow-high focus:outline focus:outline-focus"
       >
         Saltar al contenido
       </a>
 
-      <div className="min-h-screen grid grid-rows-[3.5rem_1fr] bg-dark-bg text-light-text font-sans antialiased">
+      <div className="min-h-dvh grid grid-rows-[3.5rem_1fr] bg-canvas text-ink font-sans antialiased">
         <Header />
         <div className="flex flex-col">
           {apiDown ? (
@@ -166,7 +166,7 @@ export function RootLayout() {
         id="guest-import-dialog"
         ref={guestDialogRef}
         aria-labelledby="guest-import-title"
-        className="rounded-2xl bg-dark-surface border border-dark-border text-light-text p-6 max-w-md backdrop:bg-black/70"
+        className="rounded-2xl bg-surface border border-control text-ink p-6 max-w-md shadow-high backdrop:bg-scrim"
         onCancel={(event) => {
           event.preventDefault();
           if (!importingGuest) {
@@ -177,7 +177,7 @@ export function RootLayout() {
         <h2 id="guest-import-title" className="text-xl font-bold mb-2">
           Importar historial de invitado
         </h2>
-        <p className="text-sm text-light-muted mb-4">
+        <p className="text-sm text-muted mb-4">
           Tenés {guestEntries.length}{' '}
           {guestEntries.length === 1 ? 'sorteo guardado' : 'sorteos guardados'} en
           este navegador. ¿Querés pasarlos a tu cuenta?
@@ -228,7 +228,7 @@ function ApiDownBanner({
     <div
       id="api-down-banner"
       role="status"
-      className="flex items-center justify-center gap-3 px-4 py-2 bg-dark-bg-alt border-b border-dark-border text-sm text-light-muted"
+      className="flex items-center justify-center gap-3 px-4 py-2 bg-surface border-b border-control text-sm text-muted"
     >
       <span>No se pudo conectar con el servidor. Los sorteos no se guardarán.</span>
       <button
@@ -236,7 +236,7 @@ function ApiDownBanner({
         type="button"
         onClick={onRetry}
         disabled={checking}
-        className="text-xs font-semibold text-primary-light hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-semibold text-action hover:text-action-hover transition-colors focus-visible:outline focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
       >
         {checking ? 'Reintentando...' : 'Reintentar'}
       </button>
@@ -251,25 +251,25 @@ function DisclaimerFooter({ disclaimer }: { disclaimer: LegalDisclaimer }) {
       id="legal-disclaimer"
       role="contentinfo"
       aria-label="Aviso legal"
-      className="border-t border-dark-border bg-dark-bg-alt px-6 py-6 text-sm text-light-muted"
+      className="border-t border-control bg-surface px-6 py-6 text-sm text-muted"
     >
       <div className="max-w-3xl mx-auto flex flex-col gap-2">
-        <h2 className="text-sm font-bold text-light-text">
+        <h2 className="text-sm font-bold text-ink">
           {disclaimer.title}{' '}
-          <span className="text-xs font-normal text-light-muted">
+          <span className="text-xs font-normal text-muted">
             v{disclaimer.version}
           </span>
         </h2>
         {/* Las secciones son largas: van en un `<details>` cerrado para no
             empujar el contenido de la app al abrir la página. */}
         <details className="text-xs">
-          <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-light-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light">
+          <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-ink focus-visible:outline focus-visible:outline focus-visible:outline-focus">
             Ver el aviso completo ({disclaimer.sections.length} secciones)
           </summary>
           <dl className="mt-3 flex flex-col gap-3">
             {disclaimer.sections.map((section) => (
               <div key={section.heading}>
-                <dt className="font-semibold text-light-text">{section.heading}</dt>
+                <dt className="font-semibold text-ink">{section.heading}</dt>
                 <dd className="leading-relaxed">{section.body}</dd>
               </div>
             ))}

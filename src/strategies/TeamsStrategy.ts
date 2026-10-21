@@ -13,23 +13,11 @@ import type {
 } from '../domain/contracts';
 import type { DrawExecution, DrawStrategy } from '../domain/contracts';
 import { fisherYatesShuffle } from '../lib/mathUtils';
+import { TEAM_PALETTE } from '../lib/palette';
 
-// Paleta compartida para los bordes de las tarjetas de equipo.
-// Equivalente al antiguo `TEAM_COLORS` de `TeamSplitterService.js`.
-export const TEAM_COLORS: readonly string[] = [
-  '#6c5ce7',
-  '#00cec9',
-  '#fd79a8',
-  '#e17055',
-  '#00b894',
-  '#fdcb6e',
-  '#0984e3',
-  '#e84393',
-  '#55efc4',
-  '#fab1a0',
-  '#74b9ff',
-  '#a29bfe',
-];
+// Paleta compartida para los bordes de las tarjetas de equipo. Los colores
+// viven en `palette.ts` porque también los usa la ruleta y el canvas.
+export const TEAM_COLORS: readonly string[] = TEAM_PALETTE;
 
 function pickColor(index: number): string {
   return TEAM_COLORS[index % TEAM_COLORS.length];

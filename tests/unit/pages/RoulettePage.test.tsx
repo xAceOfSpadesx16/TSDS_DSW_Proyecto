@@ -4,12 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RoulettePage } from '../../../src/pages/RoulettePage';
 import { rouletteStrategy } from '../../../src/strategies/RouletteStrategy';
+import { saveRouletteOptions } from '../../../src/lib/storage';
 import { useHistoryStore } from '../../../src/store/historyStore';
 import { createUserEvent, fillByLabel } from '../helpers/pageUtils';
 import { installLocalStorage } from '../helpers/localStorageMock';
 import { mockCanvasContext, mockNativeDialog } from '../helpers/domMocks';
 
-const DEFAULT_COLOR = '#6c5ce7';
+const DEFAULT_COLOR = '#1f4fb5';
 const resetHistory = () => useHistoryStore.setState({ entries: [] });
 
 function renderRoulette() {
@@ -57,6 +58,39 @@ describe('RoulettePage — opciones', () => {
     expect(screen.getByText('Opción A')).toBeInTheDocument();
     expect(screen.getByLabelText('Opción')).toHaveValue('');
     expect(screen.getByLabelText('Color')).toHaveValue(DEFAULT_COLOR);
+  });
+
+  it('mantiene un color distinto por opción al superar la paleta', async () => {
+    for (let index = 0; index < 7; index += 1) {
+      await addOption(`Extra ${index + 1}`);
+    }
+    const dots = Array.from(
+      document.querySelectorAll(
+        '#roulette-options-list li > span[aria-hidden="true"]',
+      ),
+    );
+    const colors = dots.map((dot) => dot.getAttribute('style'));
+    expect(colors).toHaveLength(9);
+    expect(new Set(colors).size).toBe(colors.length);
+  });
+
+  it('normaliza colores duplicados al restaurar opciones', () => {
+    cleanup();
+    saveRouletteOptions(
+      Array.from({ length: 10 }, (_, index) => ({
+        label: `Restaurada ${index + 1}`,
+        color: DEFAULT_COLOR,
+      })),
+    );
+    renderRoulette();
+    const dots = Array.from(
+      document.querySelectorAll(
+        '#roulette-options-list li > span[aria-hidden="true"]',
+      ),
+    );
+    const colors = dots.map((dot) => dot.getAttribute('style'));
+    expect(colors).toHaveLength(10);
+    expect(new Set(colors).size).toBe(colors.length);
   });
 
   it('no agrega una opción con el label en blanco', () => {

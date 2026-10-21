@@ -16,10 +16,11 @@ interface Props {
 }
 
 const BASE =
-  'inline-flex min-h-11 items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light';
-const ACTIVE = 'text-white bg-primary hover:text-white hover:bg-primary-dark';
+  'inline-flex min-h-11 items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline focus-visible:outline-focus';
+const ACTIVE =
+  'text-on-action bg-action shadow-low hover:text-on-action hover:bg-action-hover active:bg-action-active active:shadow-pressed';
 const INACTIVE =
-  'text-light-muted hover:text-light-text hover:bg-dark-surface hover:no-underline';
+  'text-muted hover:text-ink hover:bg-surface-hover active:bg-surface-sunken hover:no-underline';
 
 export function NavLinkButton({ to, children }: Props) {
   return (

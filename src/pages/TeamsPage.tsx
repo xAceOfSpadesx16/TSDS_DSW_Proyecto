@@ -171,7 +171,7 @@ export function TeamsPage() {
         aria-label="Generador de equipos"
         className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 tabIndex={-1} className="text-3xl font-bold">
+        <h1 tabIndex={-1} className="font-bold">
           Generador de Equipos
         </h1>
 
@@ -179,10 +179,10 @@ export function TeamsPage() {
           id="team-form"
           onSubmit={onGenerate}
           aria-describedby={error ? 'teams-error' : undefined}
-          className="bg-dark-surface border border-dark-border rounded-2xl p-3 flex flex-col gap-4 sm:p-4"
+          className="bg-surface border border-control rounded-2xl shadow-raised p-3 flex flex-col gap-4 sm:p-4"
         >
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-light-muted font-medium">Participantes (uno por línea)</span>
+            <span className="text-muted font-medium">Participantes (uno por línea)</span>
             <textarea
               id="team-participants"
               required
@@ -191,7 +191,7 @@ export function TeamsPage() {
               value={participantsText}
               onChange={(e) => onChangeParticipants(e.currentTarget.value)}
               placeholder={'Ana\nBruno\nCarla\nDiego'}
-              className="w-full min-w-0 px-3 py-2 rounded-md bg-dark-surface border border-dark-border text-light-text placeholder:text-light-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+              className="w-full min-w-0 px-3 py-2 rounded-md bg-surface border border-control text-ink placeholder:text-muted focus-visible:outline focus-visible:outline focus-visible:outline-focus"
             />
           </label>
 
@@ -229,15 +229,15 @@ export function TeamsPage() {
             onBlur={() => setValue(clampValue(value, mode))}
           />
 
-          <details className="bg-dark-bg-alt border border-dark-border rounded-md p-3">
-            <summary className="-my-2 flex min-h-11 cursor-pointer items-center text-sm font-semibold text-light-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light">
+          <details className="bg-surface border border-control rounded-lg p-3 shadow-low">
+            <summary className="-my-2 flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink focus-visible:outline focus-visible:outline focus-visible:outline-focus">
               Reglas avanzadas (exclusiones)
             </summary>
-            <p id="teams-exclusion-hint" className="mt-2 text-xs text-light-muted">
+            <p id="teams-exclusion-hint" className="mt-2 text-xs text-muted">
               Elegí dos personas que no deban quedar en el mismo equipo.
             </p>
             {participantOptions.length < 2 ? (
-              <p className="mt-3 text-xs text-light-muted">
+              <p className="mt-3 text-xs text-muted">
                 Cargá al menos dos participantes para elegir exclusiones.
               </p>
             ) : (
@@ -247,12 +247,12 @@ export function TeamsPage() {
               >
                 <legend className="sr-only">Agregar exclusión</legend>
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="text-light-muted font-medium">Persona A</span>
+                  <span className="text-muted font-medium">Persona A</span>
                   <select
                     id="exclusion-a"
                     value={exclusionA}
                     onChange={(e) => setExclusionA(e.currentTarget.value)}
-                    className="min-h-[44px] w-full min-w-0 px-3 py-2 rounded-md bg-dark-surface border border-dark-border text-light-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                    className="min-h-[44px] w-full min-w-0 px-3 py-2 rounded-md bg-surface border border-control text-ink focus-visible:outline focus-visible:outline focus-visible:outline-focus"
                   >
                     <option value="">Elegí una persona</option>
                     {participantOptions.map((participant) => (
@@ -263,12 +263,12 @@ export function TeamsPage() {
                   </select>
                 </label>
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="text-light-muted font-medium">Persona B</span>
+                  <span className="text-muted font-medium">Persona B</span>
                   <select
                     id="exclusion-b"
                     value={exclusionB}
                     onChange={(e) => setExclusionB(e.currentTarget.value)}
-                    className="min-h-[44px] w-full min-w-0 px-3 py-2 rounded-md bg-dark-surface border border-dark-border text-light-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                    className="min-h-[44px] w-full min-w-0 px-3 py-2 rounded-md bg-surface border border-control text-ink focus-visible:outline focus-visible:outline focus-visible:outline-focus"
                   >
                     <option value="">Elegí una persona</option>
                     {participantOptions.map((participant) => (
@@ -298,7 +298,7 @@ export function TeamsPage() {
               {exclusions.map(([a, b], i) => (
                 <li
                   key={`${a}-${b}-${i}`}
-                  className="inline-flex max-w-full min-w-0 items-center gap-2 rounded-md border border-dark-border bg-dark-surface px-2 py-1 text-sm"
+                  className="inline-flex max-w-full min-w-0 items-center gap-2 rounded border border-control bg-surface px-2 py-1 text-sm shadow-low"
                 >
                   <span className="min-w-0 break-words [overflow-wrap:anywhere]">
                     {a} ↔ {b}
@@ -306,7 +306,7 @@ export function TeamsPage() {
                   <button
                     type="button"
                     onClick={() => onRemoveExclusion(i)}
-                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-light-muted hover:text-danger focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-danger focus-visible:outline focus-visible:outline focus-visible:outline-focus"
                     aria-label={`Quitar exclusión ${a} ${b}`}
                   >
                     ×
@@ -356,15 +356,15 @@ export function TeamsPage() {
               {result.teams.map((team, i) => (
                 <div
                   key={i}
-                  className="min-w-0 rounded-md border border-dark-border bg-dark-surface p-4"
-                  style={{ borderLeft: `4px solid ${result.colors[i]}` }}
+                  className="min-w-0 rounded-lg border border-l-4 border-control bg-surface p-4 shadow-low"
+                  style={{ borderLeftColor: result.colors[i] }}
                 >
-                  <h3 className="mb-2 text-sm font-bold text-light-text">
+                  <h3 className="mb-2 text-sm font-bold text-ink">
                     Equipo {i + 1}
                   </h3>
-                  <ul className="flex min-w-0 flex-col gap-1 text-sm text-light-text">
+                  <ul className="flex min-w-0 flex-col gap-1 text-sm text-ink">
                     {team.length === 0 ? (
-                      <li className="text-light-muted italic">(vacío)</li>
+                      <li className="text-muted italic">(vacío)</li>
                     ) : (
                       team.map((member, j) => (
                         <li key={j} className="break-words">

@@ -308,14 +308,14 @@ export function WeightedPage() {
         aria-label="Sorteo con pesos"
         className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 tabIndex={-1} className="text-3xl font-bold">
+        <h1 tabIndex={-1} className="font-bold">
           Sorteo con Pesos
         </h1>
 
         <form
           id="weighted-form"
           onSubmit={onAdd}
-          className="bg-dark-surface border border-dark-border rounded-2xl p-4"
+          className="bg-surface border border-control rounded-2xl shadow-raised p-4"
         >
           <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
             <legend className="sr-only">Agregar participante</legend>
@@ -351,15 +351,15 @@ export function WeightedPage() {
 
         <details
           id="weighted-bulk-details"
-          className="bg-dark-surface border border-dark-border rounded-2xl"
+          className="bg-surface border border-control rounded-2xl shadow-raised"
         >
-          <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-semibold text-light-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light">
+          <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-semibold text-ink focus-visible:outline focus-visible:outline focus-visible:outline-focus">
             Carga masiva
           </summary>
           <div className="flex min-w-0 flex-col gap-2 px-4 pb-4 pt-1">
             <label
               htmlFor="weighted-bulk"
-              className="text-sm font-medium text-light-muted"
+              className="text-sm font-medium text-muted"
             >
               Una persona por línea
             </label>
@@ -378,9 +378,9 @@ export function WeightedPage() {
                   : 'weighted-bulk-hint'
               }
               placeholder={'Ana, 3\nBruno, 5\nCarla'}
-              className="w-full min-w-0 rounded-md border border-dark-border bg-dark-surface px-3 py-2 text-light-text placeholder:text-light-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+              className="w-full min-w-0 rounded-md border border-control bg-surface px-3 py-2 text-ink placeholder:text-muted focus-visible:outline focus-visible:outline focus-visible:outline-focus"
             />
-            <p id="weighted-bulk-hint" className="text-xs text-light-muted">
+            <p id="weighted-bulk-hint" className="text-xs text-muted">
               Formato: <code>Ana</code> o <code>Ana, 3</code>. El peso es
               opcional y va de 1 a 100. Las líneas vacías se ignoran.
             </p>
@@ -412,7 +412,7 @@ export function WeightedPage() {
           >
             Participantes
           </h2>
-          <p id="weighted-total" className="text-sm text-light-muted">
+          <p id="weighted-total" className="text-sm text-muted">
             Peso total: {totalWeight} · {entries.length}{' '}
             {entries.length === 1 ? 'participante' : 'participantes'}
           </p>
@@ -424,7 +424,7 @@ export function WeightedPage() {
           aria-label="Participantes cargados"
         >
           {entries.length === 0 ? (
-            <li className="text-sm text-light-muted italic">
+            <li className="text-sm text-muted italic">
               Sin participantes cargados.
             </li>
           ) : null}
@@ -434,7 +434,7 @@ export function WeightedPage() {
               <li
                 key={`${entry.name}-${index}`}
                 data-weighted-row
-                className="flex min-w-0 flex-col gap-2 rounded-md border border-dark-border bg-dark-surface p-3"
+                className="flex min-w-0 flex-col gap-2 rounded-lg border border-control bg-surface p-3 shadow-low"
               >
                 {editingIndex === index ? (
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto] sm:items-end">
@@ -476,16 +476,16 @@ export function WeightedPage() {
                 ) : (
                   <>
                     <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
-                      <span className="min-w-0 flex-1 break-words font-semibold text-light-text">
+                      <span className="min-w-0 flex-1 break-words font-semibold text-ink">
                         {entry.name}
                       </span>
                       <span
                         data-weighted-percent
-                        className="shrink-0 text-light-muted"
+                        className="shrink-0 font-mono text-muted"
                       >
                         {formatPercent(percent)}%
                       </span>
-                      <span className="shrink-0 text-xs text-light-muted">
+                      <span className="shrink-0 font-mono text-xs text-muted">
                         peso {entry.weight}
                       </span>
                       <div className="ml-auto flex shrink-0 gap-1">
@@ -494,7 +494,7 @@ export function WeightedPage() {
                           type="button"
                           aria-label={`Editar ${entry.name}`}
                           onClick={() => onStartEdit(index)}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-light-muted transition-colors hover:text-primary-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors hover:text-action focus-visible:outline focus-visible:outline focus-visible:outline-focus"
                         >
                           <svg
                             viewBox="0 0 20 20"
@@ -515,7 +515,7 @@ export function WeightedPage() {
                           type="button"
                           aria-label={`Quitar ${entry.name}`}
                           onClick={() => onRemove(index)}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-light-muted transition-colors hover:text-danger focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors hover:text-danger focus-visible:outline focus-visible:outline focus-visible:outline-focus"
                         >
                           <svg
                             viewBox="0 0 20 20"
@@ -535,12 +535,12 @@ export function WeightedPage() {
                     </div>
                     <div
                       data-weighted-track
-                      className="h-2.5 w-full overflow-hidden rounded-full border border-dark-border bg-dark-bg-alt"
+                      className="h-2.5 w-full overflow-hidden rounded-full border border-control bg-surface-sunken shadow-pressed"
                       aria-hidden="true"
                     >
                       <div
                         data-weighted-bar
-                        className="h-full rounded-full bg-primary"
+                        className="h-full rounded-full bg-action"
                         style={{ width: `${percent}%` }}
                       />
                     </div>
@@ -563,13 +563,13 @@ export function WeightedPage() {
               Sortear
             </PrimaryButton>
             {entries.length > 0 ? (
-              <label className="inline-flex min-h-11 items-center gap-2 text-sm text-light-text">
+              <label className="inline-flex min-h-11 items-center gap-2 text-sm text-ink">
                 <input
                   id="weighted-auto-remove"
                   type="checkbox"
                   checked={autoRemove}
                   onChange={(event) => setAutoRemove(event.currentTarget.checked)}
-                  className="h-5 w-5 rounded border-dark-border bg-dark-surface text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+                  className="h-5 w-5 rounded border-control bg-surface text-action focus-visible:outline focus-visible:outline focus-visible:outline-focus"
                 />
                 Auto-eliminar ganadores
               </label>
@@ -591,7 +591,7 @@ export function WeightedPage() {
             </PrimaryButton>
           </div>
           {entries.length === 0 ? (
-            <p id="weighted-draw-hint" className="text-sm text-light-muted">
+            <p id="weighted-draw-hint" className="text-sm text-muted">
               Agregá al menos un participante para poder sortear.
             </p>
           ) : null}
@@ -606,13 +606,13 @@ export function WeightedPage() {
         {result ? (
           <output
             id="weighted-result"
-            className="min-w-0 break-words rounded-md border border-dark-border bg-dark-surface p-4 text-center"
+            className="min-w-0 break-words rounded-lg border border-control bg-surface p-4 text-center shadow-pressed"
           >
-            <div className="text-sm text-light-muted">Ganador</div>
-            <div className="break-words text-2xl font-bold text-primary-light">
+            <div className="text-sm text-muted">Ganador</div>
+            <div className="break-words text-2xl font-bold text-action">
               {result.winner.name}
             </div>
-            <div className="text-sm text-light-muted mt-1">
+            <div className="text-sm text-muted mt-1">
               Probabilidad: {result.probability}%
             </div>
           </output>

@@ -96,7 +96,7 @@ describe('WeightedPage — participantes y barras', () => {
     expect(bars[0].style.width).toBe('30%');
     expect(bars[1].style.width).toBe('70%');
     const track = document.querySelector<HTMLElement>('[data-weighted-track]');
-    expect(track).toHaveClass('h-2.5', 'bg-dark-bg-alt');
+    expect(track).toHaveClass('h-2.5', 'bg-surface-sunken');
   });
 
   it('reparte porcentajes que suman 100%', async () => {

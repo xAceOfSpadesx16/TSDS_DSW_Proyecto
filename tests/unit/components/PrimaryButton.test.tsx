@@ -16,8 +16,8 @@ describe('PrimaryButton', () => {
   it('aplica la variante primary por defecto', () => {
     const { container } = render(<PrimaryButton>Guardar</PrimaryButton>);
     const button = container.querySelector('button')!;
-    expect(button.className).toContain('bg-primary');
-    expect(button.className).toContain('text-white');
+    expect(button.className).toContain('bg-action');
+    expect(button.className).toContain('text-on-action');
   });
 
   it.each(['primary', 'ghost', 'accent', 'danger'] as const)(
@@ -33,11 +33,11 @@ describe('PrimaryButton', () => {
       // Clase distintiva de la variante.
       expect(button.className).toContain(
         variant === 'primary'
-          ? 'bg-primary'
+          ? 'bg-action'
           : variant === 'ghost'
-            ? 'border-dark-border'
+            ? 'border-control'
             : variant === 'accent'
-              ? 'bg-accent'
+              ? 'bg-action'
               : 'bg-danger',
       );
     },

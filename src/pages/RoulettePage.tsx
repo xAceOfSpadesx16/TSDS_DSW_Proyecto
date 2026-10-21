@@ -16,6 +16,13 @@ import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
 import { prefersReducedMotion } from '../lib/motion';
 import {
+  PAPER_INK,
+  PAPER_SURFACE,
+  ROULETTE_PALETTE,
+  accessibleSegment,
+  uniqueRouletteColor,
+} from '../lib/palette';
+import {
   clearRouletteOptions,
   loadRouletteOptions,
   saveRouletteOptions,
@@ -24,12 +31,52 @@ import { calculateSegments, rouletteStrategy } from '../strategies/RouletteStrat
 import { useHistoryStore } from '../store/historyStore';
 import type { RouletteOption, RouletteResultLocal } from '../domain/contracts';
 
-const DEFAULT_COLOR = '#6c5ce7';
+const DEFAULT_COLOR = ROULETTE_PALETTE[0];
 const CANVAS_SIZE = 360;
 const DEFAULT_OPTIONS: ReadonlyArray<RouletteOption> = [
-  { label: 'Sí', color: DEFAULT_COLOR },
-  { label: 'No', color: '#00cec9' },
+  { label: 'Sí', color: ROULETTE_PALETTE[0] },
+  { label: 'No', color: ROULETTE_PALETTE[1] },
 ];
+
+/** Normaliza opciones restauradas: todo color válido y distinto. */
+function normalizeOptionColors(
+  options: ReadonlyArray<RouletteOption>,
+): RouletteOption[] {
+  const used = new Set<string>();
+  return options.map((option) => {
+    const color = uniqueRouletteColor(used, option.color);
+    used.add(color.toLowerCase());
+    return { ...option, color };
+  });
+}
+
+function readToken(name: string, fallback: string): string {
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return value || fallback;
+}
+
+function fitLabel(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+): string {
+  const measured = ctx.measureText?.(text)?.width;
+  if (typeof measured !== 'number' || measured <= maxWidth) {
+    return text;
+  }
+  let result = text;
+  while (result.length > 1) {
+    const candidate = `${result.slice(0, -1)}…`;
+    const width = ctx.measureText?.(candidate)?.width;
+    if (typeof width !== 'number' || width <= maxWidth) {
+      return candidate;
+    }
+    result = result.slice(0, -1);
+  }
+  return result;
+}
 
 function drawRoulette(
   canvas: HTMLCanvasElement,
@@ -41,7 +88,16 @@ function drawRoulette(
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (options.length === 0) return;
 
-  const segments = calculateSegments(options);
+  const ink = readToken('--color-ink', PAPER_INK);
+  const surface = readToken('--color-surface', PAPER_SURFACE);
+  const segments = calculateSegments(options).map((segment) => {
+    const accessible = accessibleSegment(segment.color);
+    return {
+      ...segment,
+      fill: accessible.fill,
+      labelColor: accessible.label,
+    };
+  });
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
   const radius = Math.min(centerX, centerY) - 8;
@@ -56,42 +112,51 @@ function drawRoulette(
     ctx.moveTo(centerX, centerY);
     ctx.arc(centerX, centerY, radius, segment.startAngle, segment.endAngle);
     ctx.closePath();
-    ctx.fillStyle = segment.color;
+    ctx.fillStyle = segment.fill;
     ctx.fill();
-    ctx.strokeStyle = '#0f0f1a';
+    ctx.strokeStyle = surface;
     ctx.lineWidth = 2;
     ctx.stroke();
-
-    // Etiqueta.
-    ctx.save();
-    ctx.translate(centerX, centerY);
-    const midAngle = (segment.startAngle + segment.endAngle) / 2;
-    ctx.rotate(midAngle);
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
-    ctx.fillText(segment.label, radius - 12, 5);
-    ctx.restore();
   }
+
+  ctx.restore();
+
+  // Las etiquetas se dibujan siempre horizontales, fuera de la rotación del
+  // disco: así nunca quedan invertidas, ni siquiera después de un giro.
+  ctx.save();
+  ctx.fillStyle = ink;
+  ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const labelRadius = radius * 0.64;
+  const arcWidth =
+    2 * Math.sin(Math.PI / Math.max(segments.length, 1)) * labelRadius;
+  const maxWidth = Math.min(150, Math.max(48, arcWidth - 12));
+  for (const segment of segments) {
+    const midAngle = (segment.startAngle + segment.endAngle) / 2 + rotation;
+    const x = centerX + Math.cos(midAngle) * labelRadius;
+    const y = centerY + Math.sin(midAngle) * labelRadius;
+    ctx.fillStyle = segment.labelColor;
+    ctx.fillText(fitLabel(ctx, segment.label, maxWidth), x, y);
+  }
+  ctx.restore();
 
   // Hub central.
   ctx.beginPath();
   ctx.arc(centerX, centerY, 14, 0, Math.PI * 2);
-  ctx.fillStyle = '#0f0f1a';
+  ctx.fillStyle = ink;
   ctx.fill();
-  ctx.strokeStyle = '#a29bfe';
+  ctx.strokeStyle = surface;
   ctx.lineWidth = 2;
   ctx.stroke();
-
-  ctx.restore();
 }
 
 export function RoulettePage() {
   const [initialOptions] = useState(() => loadRouletteOptions());
   const [options, setOptions] = useState<RouletteOption[]>(
     initialOptions
-      ? initialOptions.options
-      : DEFAULT_OPTIONS.map((option) => ({ ...option })),
+      ? normalizeOptionColors(initialOptions.options)
+      : normalizeOptionColors(DEFAULT_OPTIONS),
   );
   const [label, setLabel] = useState('');
   const [color, setColor] = useState(DEFAULT_COLOR);
@@ -110,7 +175,7 @@ export function RoulettePage() {
 
   const onReset = () => {
     clearRouletteOptions();
-    setOptions(DEFAULT_OPTIONS.map((option) => ({ ...option })));
+    setOptions(normalizeOptionColors(DEFAULT_OPTIONS));
     setLabel('');
     setColor(DEFAULT_COLOR);
     setResult(null);
@@ -141,7 +206,11 @@ export function RoulettePage() {
     e.preventDefault();
     const trimmed = label.trim();
     if (!trimmed) return;
-    setOptions((prev) => [...prev, { label: trimmed, color }]);
+    setOptions((prev) => {
+      const used = new Set(prev.map((option) => option.color.toLowerCase()));
+      const preferred = uniqueRouletteColor(used, color);
+      return [...prev, { label: trimmed, color: preferred }];
+    });
     setLabel('');
     setColor(DEFAULT_COLOR);
   };
@@ -228,14 +297,14 @@ export function RoulettePage() {
         aria-label="Ruleta de decisiones"
         className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 tabIndex={-1} className="text-3xl font-bold">
+        <h1 tabIndex={-1} className="font-bold">
           Ruleta de Decisiones
         </h1>
 
         <form
           id="roulette-options-form"
           onSubmit={onAddOption}
-          className="bg-dark-surface border border-dark-border rounded-2xl p-4 flex flex-col gap-3"
+          className="bg-surface border border-control rounded-2xl shadow-raised p-4 flex flex-col gap-3"
         >
           <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
             <legend className="sr-only">Nueva opción</legend>
@@ -250,14 +319,14 @@ export function RoulettePage() {
               placeholder="Ej: Opción A"
             />
             <label className="flex flex-col gap-1 text-sm">
-              <span className="text-light-muted font-medium">Color</span>
+              <span className="text-muted font-medium">Color</span>
               <input
                 id="roulette-color"
                 type="color"
                 disabled={spinning}
                 value={color}
                 onChange={(e) => setColor(e.currentTarget.value)}
-                className="h-11 w-12 rounded-md border border-dark-border bg-dark-surface disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-11 w-12 rounded-md border border-control bg-surface disabled:bg-surface-sunken disabled:cursor-not-allowed"
               />
             </label>
           </fieldset>
@@ -274,7 +343,7 @@ export function RoulettePage() {
           {options.map((opt, i) => (
             <li
               key={`${opt.label}-${i}`}
-              className="inline-flex max-w-full min-w-0 items-center gap-2 px-3 py-1 rounded-md bg-dark-surface border border-dark-border text-sm text-light-text"
+              className="inline-flex max-w-full min-w-0 items-center gap-2 px-3 py-1 rounded bg-surface border border-control text-sm text-ink shadow-low"
             >
               <span
                 className="inline-block h-3 w-3 shrink-0 rounded-full"
@@ -287,7 +356,7 @@ export function RoulettePage() {
                 onClick={() => onRemoveOption(i)}
                 disabled={spinning}
                 aria-label={`Quitar opción ${opt.label}`}
-                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-light-muted hover:text-danger focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-danger focus-visible:outline focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:cursor-not-allowed"
               >
                 ×
               </button>
@@ -316,7 +385,7 @@ export function RoulettePage() {
               height={CANVAS_SIZE}
               role="img"
               aria-label={`Ruleta de decisiones con ${options.length} opciones`}
-              className="h-auto w-full max-w-[250px] sm:max-w-[360px] rounded-full bg-dark-bg-alt border-2 border-dark-border shadow-2xl"
+              className="h-auto w-full max-w-[250px] sm:max-w-[360px] rounded-full bg-surface border-2 border-control shadow-high"
             />
           </div>
 
@@ -342,7 +411,7 @@ export function RoulettePage() {
           ref={dialogRef}
           aria-labelledby="roulette-result-title"
           aria-describedby="roulette-result-text"
-          className="rounded-2xl bg-dark-surface border border-dark-border text-light-text p-6 max-w-sm backdrop:bg-black/70"
+          className="rounded-2xl bg-surface border border-control text-ink p-6 max-w-sm shadow-high backdrop:bg-scrim"
           onClose={() =>
             document.getElementById('roulette-spin-btn')?.focus()
           }
@@ -352,7 +421,7 @@ export function RoulettePage() {
           </h2>
           <p
             id="roulette-result-text"
-            className="my-4 break-words text-center text-3xl font-bold text-light-text"
+            className="my-4 break-words text-center font-mono text-3xl font-bold text-ink"
           >
             {result?.winner.label}
           </p>

@@ -125,7 +125,7 @@ export function NumbersPage() {
         aria-label="Generador de números"
         className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 tabIndex={-1} className="text-3xl font-bold">
+        <h1 tabIndex={-1} className="font-bold">
           Números aleatorios
         </h1>
 
@@ -133,7 +133,7 @@ export function NumbersPage() {
           id="numbers-form"
           onSubmit={onSubmit}
           aria-describedby={error ? 'numbers-error' : undefined}
-          className="bg-dark-surface border border-dark-border rounded-2xl p-6 flex flex-col gap-4"
+          className="bg-surface border border-control rounded-2xl shadow-raised p-6 flex flex-col gap-4"
         >
           <Field
             id="numbers-count"
@@ -146,7 +146,7 @@ export function NumbersPage() {
           />
 
           <fieldset className="grid grid-cols-2 gap-3">
-            <legend className="col-span-2 text-sm font-medium text-light-muted">
+            <legend className="col-span-2 text-sm font-medium text-muted">
               Rango
             </legend>
             <Field
@@ -167,18 +167,18 @@ export function NumbersPage() {
             />
           </fieldset>
 
-          <label className="inline-flex min-h-11 items-center gap-2 text-sm text-light-text">
+          <label className="inline-flex min-h-11 items-center gap-2 text-sm text-ink">
             <input
               id="numbers-unique"
               type="checkbox"
               checked={unique}
               onChange={(e) => setUnique(e.currentTarget.checked)}
               aria-describedby="numbers-unique-hint"
-              className="h-5 w-5 rounded border-dark-border bg-dark-surface text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+              className="h-5 w-5 rounded border-control bg-surface text-action focus-visible:outline focus-visible:outline focus-visible:outline-focus"
             />
             Sin repetición
           </label>
-          <p id="numbers-unique-hint" className="text-xs text-light-muted">
+          <p id="numbers-unique-hint" className="text-xs text-muted">
             Los números no se repiten dentro del mismo sorteo.
           </p>
 
@@ -206,7 +206,7 @@ export function NumbersPage() {
         {result ? (
           <output
             id="numbers-result"
-            className="bg-dark-surface border border-dark-border rounded-md p-4 font-mono text-light-text text-center"
+            className="bg-surface border border-control rounded-lg p-4 font-mono text-ink text-center shadow-pressed"
           >
             {result.numbers.join(', ')}
           </output>
