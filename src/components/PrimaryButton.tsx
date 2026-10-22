@@ -2,8 +2,8 @@
 // PrimaryButton
 //
 // Botón principal de los formularios, con foco accesible y variantes
-// (`variant`: primary | ghost | accent | danger). Replica los estilos del
-// frontend original.
+// (`variant`: primary | ghost | accent | danger). La piel viene de los
+// tokens de la dirección "Papel de goma".
 // =============================================================================
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
@@ -15,13 +15,13 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANTS: Record<NonNullable<Props['variant']>, string> = {
   primary:
-    'bg-primary text-light-inverse hover:bg-primary-dark hover:text-light-inverse disabled:bg-dark-surface disabled:text-light-muted',
+    'bg-action text-on-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
   ghost:
-    'bg-transparent text-light-text border border-dark-border hover:bg-dark-surface hover:border-primary-light disabled:text-light-muted',
+    'bg-transparent text-ink border border-control shadow-low hover:bg-surface-hover hover:border-action active:bg-surface-sunken active:shadow-pressed disabled:text-muted disabled:bg-surface-sunken',
   accent:
-    'bg-accent text-light-inverse hover:bg-accent-hover disabled:bg-dark-surface disabled:text-light-muted',
+    'bg-action text-on-action shadow-raised hover:bg-action-hover active:bg-action-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
   danger:
-    'bg-danger text-light-inverse hover:bg-danger-dark disabled:bg-dark-surface disabled:text-light-muted',
+    'bg-danger text-on-action shadow-raised hover:bg-danger-dark active:bg-danger-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
 };
 
 export function PrimaryButton({
@@ -33,7 +33,7 @@ export function PrimaryButton({
   return (
     <button
       {...rest}
-      className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light disabled:cursor-not-allowed ${
+      className={`inline-flex min-h-11 items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-[background-color,color,box-shadow] focus-visible:outline focus-visible:outline-focus disabled:cursor-not-allowed disabled:border disabled:border-control ${
         VARIANTS[variant]
       } ${className}`}
     >

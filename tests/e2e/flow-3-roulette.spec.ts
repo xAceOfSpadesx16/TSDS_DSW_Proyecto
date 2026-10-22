@@ -89,6 +89,7 @@ test.describe('Flow 3 — Roulette full flow', () => {
     await roulette.addOption('Té', '#84cc16');
     await roulette.spin();
     await roulette.winner();
+    await page.locator('#roulette-close-result').click();
 
     expect(await history.entryCount()).toBe(1);
     expect(await history.latestSynced()).toBe(true);

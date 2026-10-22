@@ -93,6 +93,75 @@ test.describe('Flow 2 — Anonymous vs authenticated draws', () => {
     ).toBe(true);
   });
 
+  test('el historial de invitado sobrevive a una recarga', async ({ page }) => {
+    const history = new HistoryAside(page);
+    const dice = new DicePage(page);
+
+    await page.goto('/');
+    await page.waitForURL('/');
+    await dice.goto();
+    await dice.rollDice(6);
+    await dice.result();
+
+    await expect.poll(() => history.entryCount()).toBe(1);
+
+    await page.reload();
+    await page.locator('#section-dice').waitFor();
+    await expect.poll(() => history.entryCount()).toBe(1);
+    expect(await history.latestLocal()).toBe(true);
+  });
+
+  test('al iniciar sesión con historial de invitado ofrece importarlo y "Ahora no" lo conserva', async ({
+    page,
+  }) => {
+    const auth = new AuthPage(page);
+    const history = new HistoryAside(page);
+    const dice = new DicePage(page);
+    await mockBackend(page, user);
+
+    await page.goto('/');
+    await page.waitForURL('/');
+    await dice.goto();
+    await dice.rollDice(6);
+    await dice.result();
+    await expect.poll(() => history.entryCount()).toBe(1);
+
+    await auth.gotoLogin();
+    await auth.login({ email: user.email, password: user.password });
+    await page.waitForURL('/');
+
+    const dialog = page.locator('#guest-import-dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText('Importar a mi cuenta');
+    await page.getByRole('button', { name: 'Ahora no' }).click();
+    await expect(dialog).not.toBeVisible();
+
+    await auth.logout();
+    await dice.goto();
+    await expect.poll(() => history.entryCount()).toBe(1);
+    expect(await history.latestLocal()).toBe(true);
+  });
+
+  test('el modificador y el último dado se restauran al recargar', async ({ page }) => {
+    const dice = new DicePage(page);
+
+    await page.goto('/');
+    await page.waitForURL('/');
+    await dice.goto();
+    await dice.setModifier(4);
+    await dice.rollDice(20);
+    await dice.result();
+
+    await page.reload();
+    await page.locator('#section-dice').waitFor();
+
+    await expect(page.getByLabel('Modificador')).toHaveValue('4');
+    await expect(page.locator('[data-sides="20"]')).toHaveAttribute(
+      'data-active',
+      'true',
+    );
+  });
+
   test('an empty history is neither synced nor local (no false positives)', async ({ page }) => {
     const history = new HistoryAside(page);
     const dice = new DicePage(page);

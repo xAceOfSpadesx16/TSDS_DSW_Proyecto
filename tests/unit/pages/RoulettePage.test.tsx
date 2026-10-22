@@ -4,16 +4,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RoulettePage } from '../../../src/pages/RoulettePage';
 import { rouletteStrategy } from '../../../src/strategies/RouletteStrategy';
+import { saveRouletteOptions } from '../../../src/lib/storage';
 import { useHistoryStore } from '../../../src/store/historyStore';
 import { createUserEvent, fillByLabel } from '../helpers/pageUtils';
 import { installLocalStorage } from '../helpers/localStorageMock';
 import { mockCanvasContext, mockNativeDialog } from '../helpers/domMocks';
 
-const DEFAULT_COLOR = '#6c5ce7';
+const DEFAULT_COLOR = '#1f4fb5';
 const resetHistory = () => useHistoryStore.setState({ entries: [] });
 
 function renderRoulette() {
-  render(<RoulettePage />);
+  return render(<RoulettePage />);
 }
 
 const addOption = async (label: string, color = DEFAULT_COLOR) => {
@@ -59,6 +60,39 @@ describe('RoulettePage — opciones', () => {
     expect(screen.getByLabelText('Color')).toHaveValue(DEFAULT_COLOR);
   });
 
+  it('mantiene un color distinto por opción al superar la paleta', async () => {
+    for (let index = 0; index < 7; index += 1) {
+      await addOption(`Extra ${index + 1}`);
+    }
+    const dots = Array.from(
+      document.querySelectorAll(
+        '#roulette-options-list li > span[aria-hidden="true"]',
+      ),
+    );
+    const colors = dots.map((dot) => dot.getAttribute('style'));
+    expect(colors).toHaveLength(9);
+    expect(new Set(colors).size).toBe(colors.length);
+  });
+
+  it('normaliza colores duplicados al restaurar opciones', () => {
+    cleanup();
+    saveRouletteOptions(
+      Array.from({ length: 10 }, (_, index) => ({
+        label: `Restaurada ${index + 1}`,
+        color: DEFAULT_COLOR,
+      })),
+    );
+    renderRoulette();
+    const dots = Array.from(
+      document.querySelectorAll(
+        '#roulette-options-list li > span[aria-hidden="true"]',
+      ),
+    );
+    const colors = dots.map((dot) => dot.getAttribute('style'));
+    expect(colors).toHaveLength(10);
+    expect(new Set(colors).size).toBe(colors.length);
+  });
+
   it('no agrega una opción con el label en blanco', () => {
     // El input es `required`: jsdom bloquea el submit y onAddOption no dispara.
     fireEvent.click(screen.getByRole('button', { name: 'Agregar opción' }));
@@ -91,6 +125,33 @@ describe('RoulettePage — opciones', () => {
     window.dispatchEvent(new Event('resize'));
     expect(ctxSpy.mock.calls.length).toBeGreaterThan(callsBefore);
   });
+
+  it('expone el canvas como imagen, la lista de opciones y el grupo del formulario', () => {
+    expect(
+      screen.getByRole('img', { name: /Ruleta de decisiones con 2 opciones/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('list', { name: 'Opciones cargadas' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Nueva opción' })).toBeInTheDocument();
+  });
+
+  it('restaura las opciones y las restablece', async () => {
+    cleanup();
+    const first = renderRoulette();
+    await addOption('Quizás', '#00ff00');
+
+    first.unmount();
+    renderRoulette();
+
+    expect(screen.getByText('Quizás')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Restablecer' }));
+
+    expect(screen.queryByText('Quizás')).not.toBeInTheDocument();
+    expect(screen.getByText('Sí')).toBeInTheDocument();
+    expect(screen.getByText('No')).toBeInTheDocument();
+  });
 });
 
 describe('RoulettePage — giro', () => {
@@ -122,10 +183,14 @@ describe('RoulettePage — giro', () => {
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     expect(screen.getByRole('alert')).toHaveTextContent('Fallo al girar');
+    expect(document.querySelector('#roulette-spin-btn')).toHaveAttribute(
+      'aria-describedby',
+      'roulette-error',
+    );
   });
 
   it('gira, anima, abre el modal con el ganador y lo cierra', async () => {
-    // rAF controlado: observamos el estado "Girando..." y luego commiteamos.
+    // rAF controlado: observamos el estado "Girando…" y luego commiteamos.
     const rafCalls: FrameRequestCallback[] = [];
     vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
       rafCalls.push(cb);
@@ -136,9 +201,17 @@ describe('RoulettePage — giro', () => {
     const spin = screen.getByRole('button', { name: 'Girar ruleta' });
     fireEvent.click(spin);
 
-    // Estado intermedio: todavía girando.
-    expect(screen.getByRole('button', { name: 'Girando...' })).toBeInTheDocument();
+    // Estado intermedio: todavía girando y con las opciones bloqueadas.
+    expect(screen.getByRole('button', { name: 'Girando…' })).toBeInTheDocument();
     expect(spin).toBeDisabled();
+    expect(screen.getByLabelText('Opción')).toBeDisabled();
+    expect(screen.getByLabelText('Color')).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Agregar opción' }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Quitar opción Sí' }),
+    ).toBeDisabled();
 
     act(() => {
       rafCalls[0](1); // delta < duración → sigue girando (spinning=true)
@@ -148,6 +221,16 @@ describe('RoulettePage — giro', () => {
     });
 
     await waitFor(() => expect(showModal).toHaveBeenCalled());
+    const dialog = document.getElementById(
+      'roulette-result-overlay',
+    ) as HTMLDialogElement;
+    expect(dialog).toHaveAttribute(
+      'aria-labelledby',
+      'roulette-result-title',
+    );
+    expect(document.getElementById('roulette-result-title')).toHaveTextContent(
+      '¡Ganador!',
+    );
 
     const winner = document.querySelector('#roulette-result-text')!.textContent!;
     expect(['Sí', 'No']).toContain(winner);
@@ -156,8 +239,27 @@ describe('RoulettePage — giro', () => {
     expect(entries[0].module).toBe('roulette');
     expect(entries[0].description).toMatch(/^Ganador: (Sí|No)$/);
 
-    // Cerrar el modal.
+    // Cerrar el modal: el foco vuelve al botón de girar.
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
     await waitFor(() => expect(close).toHaveBeenCalled());
+    dialog.dispatchEvent(new Event('close'));
+    await waitFor(() => expect(document.activeElement).toBe(spin));
+  });
+
+  it('con prefers-reduced-motion muestra el ganador sin animación', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }),
+    );
+    const { showModal } = mockNativeDialog();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Girar ruleta' }));
+
+    await waitFor(() => expect(showModal).toHaveBeenCalled());
+    expect(screen.getByRole('dialog')).toHaveAttribute(
+      'aria-labelledby',
+      'roulette-result-title',
+    );
+    expect(screen.getByRole('button', { name: 'Girar ruleta' })).not.toBeDisabled();
   });
 });

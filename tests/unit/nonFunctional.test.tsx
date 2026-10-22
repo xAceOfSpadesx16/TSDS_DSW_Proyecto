@@ -36,25 +36,16 @@ describe('accesibilidad (roles WAI-ARIA)', () => {
     vi.restoreAllMocks();
   });
 
-  it('expone tablist/tab/tabpanel con aria-controls y aria-live en el resultado', () => {
-    expect(screen.getByRole('tablist', { name: 'Dados y números' })).toBeInTheDocument();
-
-    const rpg = screen.getByRole('tab', { name: 'Dados RPG' });
-    const numbers = screen.getByRole('tab', { name: 'Números' });
-    expect(rpg).toHaveAttribute('aria-selected', 'true');
-    expect(rpg).toHaveAttribute('aria-controls', 'panel-rpg');
-    expect(numbers).toHaveAttribute('aria-controls', 'panel-numbers');
-
-    expect(screen.getByRole('tabpanel', { name: /RPG/ })).toBeInTheDocument();
-    expect(document.querySelector('#dice-result')).toHaveAttribute('aria-live', 'polite');
-  });
-
-  it('marca los mensajes de error con role alert', () => {
-    fireEvent.click(screen.getByRole('tab', { name: 'Números' }));
-    fill('#num-min', '10');
-    fill('#num-max', '5');
-    fireEvent.click(screen.getByRole('button', { name: 'Generar' }));
-    expect(screen.getByRole('alert')).toHaveTextContent('debe ser >= mínimo');
+  it('no expone el tablist de Números y separa la animación del anuncio final', () => {
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    expect(document.querySelector('#dice-result')).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+    expect(document.querySelector('#dice-result')).not.toHaveAttribute(
+      'aria-live',
+    );
   });
 });
 
@@ -89,14 +80,6 @@ describe('navegación por teclado', () => {
     cleanup();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
-  });
-
-  it('avanza el foco con Tab entre las pestañas', async () => {
-    const user = userEvent.setup();
-    await user.tab();
-    expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Dados RPG' }));
-    await user.tab();
-    expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Números' }));
   });
 
   it('activa un dado con Enter desde el teclado (foco + Enter)', async () => {
@@ -218,8 +201,9 @@ describe('seguridad — XSS', () => {
     fill('#weighted-weight', '1');
     fireEvent.click(screen.getByRole('button', { name: '+ Agregar' }));
 
-    const html = document.querySelector('#weighted-list')!.innerHTML;
-    expect(html).toContain('&lt;img');
-    expect(html).not.toContain('<img src=x onerror');
+    const list = document.querySelector('#weighted-list')!;
+    expect(list.innerHTML).toContain('&lt;img');
+    expect(document.querySelector('#weighted-list img')).toBeNull();
+    expect(list.textContent).toContain(malicious);
   });
 });

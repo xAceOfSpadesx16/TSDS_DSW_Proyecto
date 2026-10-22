@@ -52,14 +52,14 @@ export class WeightedPage {
   }
 
   async winner(): Promise<string | null> {
-    const el = this.page.locator('#weighted-result > div.text-2xl').first();
+    const el = this.page.locator('#weighted-winner').first();
     if (await el.count() === 0) return null;
     return el.textContent();
   }
 
   /** Probabilidad declarada del ganador, si está visible. */
   async probability(): Promise<string | null> {
-    const el = this.page.locator('#weighted-result > div:last-child').first();
+    const el = this.page.locator('#weighted-probability').first();
     if (await el.count() === 0) return null;
     return el.textContent();
   }

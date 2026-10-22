@@ -12,7 +12,7 @@ export class RoulettePage {
     await this.page.locator('#roulette-spin-btn').waitFor();
   }
 
-  async addOption(label: string, color = '#6c5ce7'): Promise<void> {
+  async addOption(label: string, color = '#1f4fb5'): Promise<void> {
     await this.page.locator('#roulette-label').fill(label);
     if (color) {
       await this.page.locator('#roulette-color').fill(color);

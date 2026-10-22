@@ -1,7 +1,7 @@
 // =============================================================================
 // NumbersPage (/numbers)
 //
-// Formulario con `count`, `min`, `max` y el toggle de unicidad. Usa la
+// Formulario con `count`, `min`, `max` y el toggle de unicidad. Se usa la
 // `numbersStrategy` que ya existía (estaba registrada en la fábrica de
 // estrategias pero sin pantalla) y registra el resultado con `addHistory`,
 // igual que el resto de las páginas.
@@ -11,11 +11,16 @@
 // pedir más números únicos de los que caben en el rango.
 // =============================================================================
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Field } from '../components/Field';
 import { HistoryAside } from '../components/HistoryAside';
+import {
+  clearNumbersOptions,
+  loadNumbersOptions,
+  saveNumbersOptions,
+} from '../lib/storage';
 import { numbersStrategy } from '../strategies/NumbersStrategy';
 import { useHistoryStore } from '../store/historyStore';
 import {
@@ -27,13 +32,38 @@ import {
 import type { NumbersResult } from '../domain/contracts';
 
 export function NumbersPage() {
-  const [count, setCount] = useState<NumericInput>(5);
-  const [min, setMin] = useState<NumericInput>(1);
-  const [max, setMax] = useState<NumericInput>(50);
-  const [unique, setUnique] = useState(true);
+  const [initialOptions] = useState(() => loadNumbersOptions());
+  const [count, setCount] = useState<NumericInput>(initialOptions?.count ?? 5);
+  const [min, setMin] = useState<NumericInput>(initialOptions?.min ?? 1);
+  const [max, setMax] = useState<NumericInput>(initialOptions?.max ?? 50);
+  const [unique, setUnique] = useState(initialOptions?.unique ?? true);
   const [result, setResult] = useState<NumbersResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const addHistory = useHistoryStore((s) => s.add);
+
+  useEffect(() => {
+    const countNum = clampMin(count, 1);
+    const minNum = toNumberOr(min);
+    const maxNum = toNumberOr(max);
+    if (maxNum >= minNum) {
+      saveNumbersOptions({
+        count: countNum,
+        min: minNum,
+        max: maxNum,
+        unique,
+      });
+    }
+  }, [count, min, max, unique]);
+
+  const onReset = () => {
+    clearNumbersOptions();
+    setCount(5);
+    setMin(1);
+    setMax(50);
+    setUnique(true);
+    setResult(null);
+    setError(null);
+  };
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -88,20 +118,22 @@ export function NumbersPage() {
 
   return (
     <main
-      className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 p-6 w-full mx-auto"
-      role="main"
+      className="workspace workspace-grid"
     >
       <section
         id="section-numbers"
         aria-label="Generador de números"
-        className="min-w-0 animate-fade-in max-w-3xl mx-auto flex flex-col gap-4"
+        className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
       >
-        <h1 className="text-3xl font-bold">Números aleatorios</h1>
+        <h1 tabIndex={-1} className="font-bold">
+          Números aleatorios
+        </h1>
 
         <form
           id="numbers-form"
           onSubmit={onSubmit}
-          className="bg-dark-surface border border-dark-border rounded-2xl p-6 flex flex-col gap-4"
+          aria-describedby={error ? 'numbers-error' : undefined}
+          className="panel bg-surface rounded-2xl shadow-raised p-6 flex flex-col gap-4"
         >
           <Field
             id="numbers-count"
@@ -113,7 +145,10 @@ export function NumbersPage() {
             onBlur={() => setCount(clampMin(count, 1))}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <fieldset className="grid grid-cols-2 gap-3">
+            <legend className="col-span-2 text-sm font-medium text-muted">
+              Rango
+            </legend>
             <Field
               id="numbers-min"
               label="Mínimo"
@@ -130,22 +165,36 @@ export function NumbersPage() {
               onChange={(e) => setMax(readNumeric(e.currentTarget.value))}
               onBlur={() => setMax(toNumberOr(max))}
             />
-          </div>
+          </fieldset>
 
-          <label className="inline-flex items-center gap-2 text-sm text-light-text">
+          <label className="inline-flex min-h-11 items-center gap-2 text-sm text-ink">
             <input
               id="numbers-unique"
               type="checkbox"
               checked={unique}
               onChange={(e) => setUnique(e.currentTarget.checked)}
-              className="w-4 h-4 rounded border-dark-border bg-dark-surface text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-light"
+              aria-describedby="numbers-unique-hint"
+              className="h-5 w-5 rounded-md border-control bg-surface text-action focus-visible:outline focus-visible:outline-focus"
             />
             Sin repetición
           </label>
+          <p id="numbers-unique-hint" className="text-xs text-muted">
+            Los números no se repiten dentro del mismo sorteo.
+          </p>
 
-          <PrimaryButton id="generate-numbers-btn" type="submit" variant="primary">
-            Generar
-          </PrimaryButton>
+          <div className="flex flex-wrap gap-2">
+            <PrimaryButton id="generate-numbers-btn" type="submit" variant="primary">
+              Generar
+            </PrimaryButton>
+            <PrimaryButton
+              id="numbers-reset-btn"
+              type="button"
+              variant="ghost"
+              onClick={onReset}
+            >
+              Restablecer
+            </PrimaryButton>
+          </div>
         </form>
 
         {error ? (
@@ -157,7 +206,7 @@ export function NumbersPage() {
         {result ? (
           <output
             id="numbers-result"
-            className="bg-dark-surface border border-dark-border rounded-md p-4 font-mono text-light-text text-center"
+            className="panel bg-surface rounded-2xl p-4 font-mono text-ink text-center shadow-pressed"
           >
             {result.numbers.join(', ')}
           </output>

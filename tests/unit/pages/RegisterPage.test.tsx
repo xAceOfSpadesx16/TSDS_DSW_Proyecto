@@ -5,16 +5,17 @@
 // Verifican el flujo real del componente: renderizado, envío con datos válidos
 // (llamada a `authRepository.register` + redirección al home), bloqueo por
 // validación nativa (`required`), y los dos caminos de error: ApiError del
-// backend y fallo genérico ("Error desconocido.").
+// backend y fallo genérico con voseo.
 // =============================================================================
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '../../../src/domain/types';
 import { RegisterPage } from '../../../src/pages/RegisterPage';
 import { authRepository } from '../../../src/repositories/authRepository';
+import { useAuthStore } from '../../../src/store/authStore';
 import { createUserEvent, fillByLabel, resetAuthForTests } from '../helpers/pageUtils';
 import { installLocalStorage } from '../helpers/localStorageMock';
 
@@ -107,7 +108,7 @@ describe('RegisterPage', () => {
     expect(await screen.findAllByText('Email ya registrado')).toHaveLength(2);
   });
 
-  it('muestra "Error desconocido." cuando el registro falla sin ser ApiError', async () => {
+  it('muestra el error genérico cuando el registro falla sin ser ApiError', async () => {
     const user = createUserEvent();
     vi.spyOn(authRepository, 'register').mockRejectedValue(new Error('caída del servidor'));
     resetAuthForTests();
@@ -119,7 +120,7 @@ describe('RegisterPage', () => {
 
     await user.click(screen.getByText('Crear cuenta'));
 
-    expect(await screen.findByText('Error desconocido.')).toBeTruthy();
+    expect(await screen.findByText('Ocurrió un error inesperado. Probá de nuevo.')).toBeTruthy();
   });
 
   it('redirige al login al hacer clic en "Iniciar sesión"', async () => {
@@ -129,5 +130,30 @@ describe('RegisterPage', () => {
     await user.click(screen.getByText('Iniciar sesión'));
 
     expect(await screen.findByTestId('login')).toBeTruthy();
+  });
+
+  it('redirige al inicio si ya hay sesión', async () => {
+    installLocalStorage();
+    useAuthStore.setState({
+      user: { id: 1, name: 'Ada', email: 'ada@example.com' },
+      token: 'jwt',
+      expiresAt: null,
+      status: 'idle',
+      error: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/register']}>
+        <Routes>
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/" element={<p data-testid="home">Inicio</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId('home')).toBeInTheDocument());
+    expect(
+      screen.queryByRole('heading', { name: 'Registro' }),
+    ).not.toBeInTheDocument();
   });
 });

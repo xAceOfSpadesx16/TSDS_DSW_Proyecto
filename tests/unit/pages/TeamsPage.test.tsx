@@ -10,7 +10,7 @@ import { installLocalStorage } from '../helpers/localStorageMock';
 const resetHistory = () => useHistoryStore.setState({ entries: [] });
 
 function renderTeams() {
-  render(<TeamsPage />);
+  return render(<TeamsPage />);
 }
 
 const generate = () => fireEvent.click(screen.getByRole('button', { name: 'Generar Equipos' }));
@@ -21,10 +21,13 @@ const fillParticipants = async (value: string) => {
   await fillByLabel(user, 'Participantes (uno por línea)', value);
 };
 
-// Rellena un campo de exclusión (Persona A / Persona B).
+// Elige una persona en un select de exclusión (Persona A / Persona B).
 const fillExclusion = async (which: 'a' | 'b', value: string) => {
   const user = createUserEvent();
-  await fillByLabel(user, which === 'a' ? 'Persona A' : 'Persona B', value);
+  await user.selectOptions(
+    screen.getByLabelText(which === 'a' ? 'Persona A' : 'Persona B'),
+    value,
+  );
 };
 
 describe('TeamsPage — participantes y modo', () => {
@@ -91,7 +94,38 @@ describe('TeamsPage — exclusiones', () => {
     vi.unstubAllGlobals();
   });
 
+  it('ofrece solo participantes en los selects de exclusión, sin texto libre', async () => {
+    await fillParticipants('Ana\nBruno\nCarla');
+
+    expect(
+      screen.getByRole('group', { name: 'Modo de reparto' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: 'Agregar exclusión' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Elegí dos personas que no deban quedar en el mismo equipo.'),
+    ).toBeInTheDocument();
+
+    const selectA = screen.getByLabelText('Persona A') as HTMLSelectElement;
+    const selectB = screen.getByLabelText('Persona B') as HTMLSelectElement;
+    expect(Array.from(selectA.options).map((option) => option.value)).toEqual([
+      '',
+      'Ana',
+      'Bruno',
+      'Carla',
+    ]);
+    expect(Array.from(selectB.options).map((option) => option.value)).toEqual([
+      '',
+      'Ana',
+      'Bruno',
+      'Carla',
+    ]);
+    expect(screen.queryByRole('textbox', { name: 'Persona A' })).not.toBeInTheDocument();
+  });
+
   it('agrega y elimina un par de exclusiones', async () => {
+    await fillParticipants('Juan\nPedro');
     await fillExclusion('a', 'Juan');
     await fillExclusion('b', 'Pedro');
     fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
@@ -103,6 +137,8 @@ describe('TeamsPage — exclusiones', () => {
   });
 
   it('no agrega una exclusión con campos vacíos o iguales', async () => {
+    await fillParticipants('Juan\nPedro');
+
     // Iguales.
     await fillExclusion('a', 'Juan');
     await fillExclusion('b', 'Juan');
@@ -116,6 +152,17 @@ describe('TeamsPage — exclusiones', () => {
     expect(screen.queryByText('↔')).not.toBeInTheDocument();
   });
 
+  it('elimina las exclusiones que incluyen a un participante que se quita', async () => {
+    await fillParticipants('Ana\nBruno\nCarla');
+    await fillExclusion('a', 'Ana');
+    await fillExclusion('b', 'Bruno');
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+    expect(screen.getByText('Ana ↔ Bruno')).toBeInTheDocument();
+
+    await fillParticipants('Ana\nCarla');
+    expect(screen.queryByText('Ana ↔ Bruno')).not.toBeInTheDocument();
+  });
+
   it('respeta una exclusión colocando a las dos personas en equipos distintos', async () => {
     await fillParticipants('Ana\nBruno\nCarla\nDiego\nJuan\nPedro');
     fireEvent.click(screen.getByRole('button', { name: 'Cantidad de grupos' }));
@@ -126,6 +173,16 @@ describe('TeamsPage — exclusiones', () => {
 
     await waitFor(() => expect(document.querySelector('#team-results')).toBeInTheDocument());
 
+    expect(
+      screen.getByRole('heading', { name: 'Resultados', level: 2 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Equipo 1', level: 3 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Equipo 2', level: 3 }),
+    ).toBeInTheDocument();
+
     const cards = Array.from(document.querySelectorAll('#team-results > div'));
     expect(cards).toHaveLength(2);
     const teamMembers = cards.map((c) =>
@@ -134,6 +191,42 @@ describe('TeamsPage — exclusiones', () => {
     const juanTeam = teamMembers.findIndex((m) => m.includes('Juan'));
     const pedroTeam = teamMembers.findIndex((m) => m.includes('Pedro'));
     expect(juanTeam).not.toBe(pedroTeam);
+  });
+
+  it('restaura participantes, modo, valor y exclusiones, y los restablece', async () => {
+    cleanup();
+    const user = createUserEvent();
+    const first = renderTeams();
+    await fillParticipants('Ana\nBruno\nCarla');
+    await fillExclusion('a', 'Ana');
+    await fillExclusion('b', 'Bruno');
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tamaño de grupo' }));
+    await fillByLabel(user, 'Tamaño de grupo', '3');
+
+    first.unmount();
+    renderTeams();
+
+    expect(screen.getByLabelText('Participantes (uno por línea)')).toHaveValue(
+      'Ana\nBruno\nCarla',
+    );
+    expect(screen.getByText('Ana ↔ Bruno')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tamaño de grupo' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByLabelText('Tamaño de grupo')).toHaveValue(3);
+
+    const userAfterReload = createUserEvent();
+    await userAfterReload.click(screen.getByRole('button', { name: 'Restablecer' }));
+
+    expect(screen.getByLabelText('Participantes (uno por línea)')).toHaveValue('');
+    expect(screen.queryByText('Ana ↔ Bruno')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cantidad de grupos' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByLabelText('Cantidad de grupos')).toHaveValue(2);
   });
 });
 
@@ -158,14 +251,41 @@ describe('TeamsPage — generación y errores', () => {
 
     const cards = Array.from(document.querySelectorAll('#team-results > div'));
     expect(cards).toHaveLength(2);
-    // Cada tarjeta tiene borde de color distinto y un encabezado "Equipo N".
-    const colors = cards.map((c) => getComputedStyle(c).borderLeftColor);
+    // Cada tarjeta tiene un punto de color distinto y un encabezado "Equipo N".
+    const colors = cards.map((card) =>
+      getComputedStyle(card.querySelector('[data-team-color]')!).backgroundColor,
+    );
     expect(colors[0]).not.toBe('');
     expect(colors[0]).not.toBe(colors[1]);
     expect(screen.getByText('Equipo 1')).toBeInTheDocument();
     expect(screen.getByText('Equipo 2')).toBeInTheDocument();
 
     expect(useHistoryStore.getState().entries[0].description).toBe('4 participantes → 2 equipos');
+  });
+
+  it('al generar desplaza el resultado completo a la vista', async () => {
+    const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    const calls: Array<{ element: HTMLElement }> = [];
+    const scrollIntoView = vi.fn(function (this: HTMLElement) {
+      calls.push({ element: this });
+    });
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    try {
+      await fillParticipants('Ana\nBruno\nCarla\nDiego');
+      generate();
+
+      await waitFor(() =>
+        expect(document.querySelector('#team-results')).toBeInTheDocument(),
+      );
+      expect(calls[0]?.element.id).toBe('team-results-section');
+      expect(scrollIntoView).toHaveBeenCalledWith({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    } finally {
+      HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+    }
   });
 
   it('muestra un error si hay menos de 2 participantes', async () => {
@@ -184,5 +304,52 @@ describe('TeamsPage — generación y errores', () => {
     });
     generate();
     expect(screen.getByRole('alert')).toHaveTextContent('No se pueden formar 5 grupos');
+  });
+});
+
+describe('TeamsPage — restricciones imposibles', () => {
+  beforeEach(() => {
+    installLocalStorage();
+    resetHistory();
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it('muestra el error, no muestra resultados y no registra historial', async () => {
+    // El espía se instala antes del render para que el componente capture la
+    // versión espiada de `add`.
+    const addSpy = vi.spyOn(useHistoryStore.getState(), 'add');
+    render(<TeamsPage />);
+
+    await fillParticipants('Ana\nBruno\nCarla');
+    // Tres personas mutuamente excluidas en dos grupos: imposible.
+    await fillExclusion('a', 'Ana');
+    await fillExclusion('b', 'Bruno');
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+    await fillExclusion('a', 'Ana');
+    await fillExclusion('b', 'Carla');
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+    await fillExclusion('a', 'Bruno');
+    await fillExclusion('b', 'Carla');
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+    generate();
+
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        /No se pueden cumplir las restricciones/,
+      ),
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent('Ana ↔ Bruno');
+    expect(document.querySelector('#team-form')).toHaveAttribute(
+      'aria-describedby',
+      'teams-error',
+    );
+    expect(document.querySelector('#team-results')).not.toBeInTheDocument();
+    expect(addSpy).not.toHaveBeenCalled();
+    expect(useHistoryStore.getState().entries).toHaveLength(0);
   });
 });

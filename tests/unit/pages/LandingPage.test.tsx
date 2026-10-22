@@ -9,7 +9,8 @@ const MODULES: Array<{ title: RegExp; href: string }> = [
   { title: /Generador de Equipos/, href: '/teams' },
   { title: /Sorteo con Pesos/, href: '/weighted' },
   { title: /Ruleta de Decisiones/, href: '/roulette' },
-  { title: /Dados y Números/, href: '/dice' },
+  { title: /Dados RPG/, href: '/dice' },
+  { title: /Números Aleatorios/, href: '/numbers' },
 ];
 
 describe('LandingPage', () => {
@@ -30,14 +31,30 @@ describe('LandingPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('renderiza las 4 tarjetas de módulos con título, ícono y destino correctos', () => {
+  it('tiene un llamado principal que lleva a los módulos', () => {
     renderLanding();
+    const cta = screen.getByRole('link', { name: 'Empezar a sortear' });
+    expect(cta).toHaveAttribute('href', '#modulos');
+  });
+
+  it('renderiza las 5 tarjetas de módulos con título, ícono y destino correctos', () => {
+    renderLanding();
+    expect(
+      screen.getByRole('heading', { name: 'Módulos disponibles', level: 2 }),
+    ).toBeInTheDocument();
     for (const { title, href } of MODULES) {
       const card = screen.getByRole('link', { name: title });
       expect(card).toHaveAttribute('href', href);
+      expect(
+        screen.getByRole('heading', { name: title, level: 3 }),
+      ).toBeInTheDocument();
     }
-    // Las 4 cards están presentes.
-    expect(screen.getAllByRole('link', { name: /Generador de Equipos|Sorteo con Pesos|Ruleta de Decisiones|Dados y Números/ })).toHaveLength(4);
+    // Las 5 cards están presentes.
+    expect(
+      screen.getAllByRole('link', {
+        name: /Generador de Equipos|Sorteo con Pesos|Ruleta de Decisiones|Dados RPG|Números Aleatorios/,
+      }),
+    ).toHaveLength(5);
   });
 
   it('no renderiza el panel de historial en esta vista', () => {

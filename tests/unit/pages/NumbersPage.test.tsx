@@ -18,7 +18,7 @@ const resetHistory = () =>
   useHistoryStore.setState({ entries: [], currentPage: 1, lastPage: 1, error: null });
 
 function renderNumbers() {
-  render(<NumbersPage />);
+  return render(<NumbersPage />);
 }
 
 const generate = () => {
@@ -51,6 +51,10 @@ describe('NumbersPage — formulario', () => {
     expect(screen.getByLabelText('Mínimo')).toBeInTheDocument();
     expect(screen.getByLabelText('Máximo')).toBeInTheDocument();
     expect(screen.getByLabelText('Sin repetición')).toBeChecked();
+    expect(
+      screen.getByText('Los números no se repiten dentro del mismo sorteo.'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Rango' })).toBeInTheDocument();
   });
 
   it('genera la cantidad pedida dentro del rango y lo registra en el historial', async () => {
@@ -151,6 +155,10 @@ describe('NumbersPage — formulario', () => {
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('debe ser mayor o igual');
+    expect(document.querySelector('#numbers-form')).toHaveAttribute(
+      'aria-describedby',
+      'numbers-error',
+    );
     expect(useHistoryStore.getState().entries).toHaveLength(0);
   });
 
@@ -192,5 +200,31 @@ describe('NumbersPage — formulario', () => {
 
     await waitFor(() => expect(document.querySelector('#numbers-result')).toBeInTheDocument());
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('restaura las opciones y las restablece', async () => {
+    cleanup();
+    const user = createUserEvent();
+    const first = renderNumbers();
+    await fillByLabel(user, 'Cantidad', '7');
+    await fillByLabel(user, 'Mínimo', '2');
+    await fillByLabel(user, 'Máximo', '9');
+    await user.click(screen.getByLabelText('Sin repetición'));
+
+    first.unmount();
+    renderNumbers();
+
+    expect(screen.getByLabelText('Cantidad')).toHaveValue(7);
+    expect(screen.getByLabelText('Mínimo')).toHaveValue(2);
+    expect(screen.getByLabelText('Máximo')).toHaveValue(9);
+    expect(screen.getByLabelText('Sin repetición')).not.toBeChecked();
+
+    const userAfterReload = createUserEvent();
+    await userAfterReload.click(screen.getByRole('button', { name: 'Restablecer' }));
+
+    expect(screen.getByLabelText('Cantidad')).toHaveValue(5);
+    expect(screen.getByLabelText('Mínimo')).toHaveValue(1);
+    expect(screen.getByLabelText('Máximo')).toHaveValue(50);
+    expect(screen.getByLabelText('Sin repetición')).toBeChecked();
   });
 });

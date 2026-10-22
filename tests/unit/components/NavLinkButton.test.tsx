@@ -24,15 +24,15 @@ describe('NavLinkButton', () => {
     renderLink('/teams');
     const link = screen.getByRole('link', { name: 'Etiqueta' });
     // La ruta actual es /teams, así que el enlace está activo.
-    expect(link.className).toContain('bg-primary');
-    expect(link.className).toContain('text-light-inverse');
+    expect(link.className).toContain('bg-action');
+    expect(link.className).toContain('text-on-action');
   });
 
   it('no resalta el enlace cuando la ruta no es active', () => {
     renderLink('/roulette');
     const link = screen.getByRole('link', { name: 'Etiqueta' });
     // La ruta actual es /teams, no /roulette.
-    expect(link.className).toContain('text-light-muted');
-    expect(link.className).not.toContain('bg-primary');
+    expect(link.className).toContain('text-muted');
+    expect(link.className).not.toContain('bg-action');
   });
 });

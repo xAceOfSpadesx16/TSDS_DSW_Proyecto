@@ -25,11 +25,12 @@ let bound = false;
 /**
  * Sincroniza el historial con los cambios de sesión.
  *
- * - Entra a una sesión → `load()`, que internamente reenvía primero los
- *   sorteos pendientes del usuario que acaba de entrar y después trae la
- *   página 1 del backend. Los pendientes de otra cuenta se descartan
- *   adentro de `load()`; las entradas de invitado no se migran (§2).
- * - Sale de la sesión → `clear()` vacía la lista.
+ * - Entra a una sesión → ofrece importar el historial de invitado y llama a
+ *   `load()`, que internamente reenvía primero los sorteos pendientes del
+ *   usuario que acaba de entrar y después trae la página 1 del backend. Los
+ *   pendientes de otra cuenta se descartan adentro de `load()`.
+ * - Sale de la sesión → `loadGuest()` muestra el historial que quedó
+ *   guardado en este navegador. No se borra el historial de la cuenta.
  *
  * Es idempotente: llamarlo más de una vez no duplica suscripciones.
  */
@@ -46,9 +47,10 @@ export function bindHistoryToAuth(): void {
     }
 
     if (authenticated) {
+      useHistoryStore.getState().requestGuestImport();
       void useHistoryStore.getState().load();
     } else {
-      void useHistoryStore.getState().clear();
+      useHistoryStore.getState().loadGuest();
     }
   });
 }
@@ -67,6 +69,6 @@ export function syncHistoryOnStartup(): void {
   if (selectIsAuthenticated(useAuthStore.getState())) {
     void useHistoryStore.getState().load();
   } else {
-    useHistoryStore.getState().clear();
+    useHistoryStore.getState().loadGuest();
   }
 }

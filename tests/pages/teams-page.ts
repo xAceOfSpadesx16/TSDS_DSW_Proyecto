@@ -39,19 +39,8 @@ export class TeamsPage {
 
   async addExclusion(a: string, b: string): Promise<void> {
     await this.openAdvancedRules();
-    await this.page.locator('#exclusion-a').fill(a);
-    await this.page.locator('#exclusion-b').fill(b);
-    // Los inputs son controlados por React: el estado se commite de forma
-    // asíncrona. En vez de un timeout estático, esperamos reactivamente a que
-    // los valores estén commiteados (polling) antes del submit.
-    await this.page.waitForFunction(
-      ({ a, b }) => {
-        const elA = document.querySelector<HTMLInputElement>('#exclusion-a');
-        const elB = document.querySelector<HTMLInputElement>('#exclusion-b');
-        return !!elA && !!elB && elA.value === a && elB.value === b;
-      },
-      { a, b },
-    );
+    await this.page.locator('#exclusion-a').selectOption(a);
+    await this.page.locator('#exclusion-b').selectOption(b);
     await this.page.locator('#add-exclusion-btn').click();
     await this.page
       .locator('#exclusion-list li')

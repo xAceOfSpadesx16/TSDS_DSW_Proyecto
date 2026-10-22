@@ -2,12 +2,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import type { LocalHistoryEntry } from '../../../src/store/historyStore';
 import { useHistoryStore } from '../../../src/store/historyStore';
 import { HistoryAside } from '../../../src/components/HistoryAside';
-import { ApiError } from '../../../src/domain/types';
+import { ApiError, type CreateHistoryPayload } from '../../../src/domain/types';
 import { useAuthStore } from '../../../src/store/authStore';
 import { historyRepository } from '../../../src/repositories/historyRepository';
+import { installLocalStorage } from '../helpers/localStorageMock';
 
 // El store llama al backend cuando hay sesión; estos tests cubren el panel
 // sin red, así que se mockea el repositorio completo.
@@ -37,17 +39,54 @@ const entries: LocalHistoryEntry[] = [
   },
 ];
 
+function record(
+  module: CreateHistoryPayload['module_name'],
+  payload: CreateHistoryPayload['payload'],
+  result: CreateHistoryPayload['result'],
+  action = 'Sorteo',
+): CreateHistoryPayload {
+  return { module_name: module, action, payload, result } as CreateHistoryPayload;
+}
+
+function entryWithRecord(
+  id: string,
+  module: CreateHistoryPayload['module_name'],
+  payload: CreateHistoryPayload['payload'],
+  result: CreateHistoryPayload['result'],
+  timestamp = '2026-10-20T15:00:00.000Z',
+): LocalHistoryEntry {
+  return {
+    id,
+    module,
+    description: 'descripción',
+    timestamp,
+    synced: true,
+    record: record(module, payload, result),
+  };
+}
+
+async function renderOpen() {
+  const user = userEvent.setup();
+  render(<HistoryAside />);
+  await user.click(screen.getByRole('button', { name: 'Mostrar historial' }));
+  return user;
+}
+
 beforeEach(() => {
+  installLocalStorage();
   // Sin sesión por defecto: el panel no toca el backend y "cargar más" queda
   // oculto. Los tests que necesitan lo contrario lo activan explícitamente.
   useAuthStore.setState({ user: null, token: null, expiresAt: null });
   useHistoryStore.setState({
     entries: [],
+    guestEntries: [],
     currentPage: 1,
     lastPage: 1,
     loading: false,
     error: null,
   });
+  vi.mocked(historyRepository.remove).mockReset();
+  vi.mocked(historyRepository.clearAll).mockReset();
 });
 
 afterEach(() => {
@@ -55,60 +94,183 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('HistoryAside (sidebar)', () => {
-  it('muestra el estado vacío cuando no hay operaciones', () => {
+describe('HistoryAside — disclosure', () => {
+  it('arranca colapsado y alterna aria-expanded y visibilidad', async () => {
+    const user = userEvent.setup();
+    render(<HistoryAside />);
+
+    const toggle = screen.getByRole('button', { name: 'Mostrar historial' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveClass('min-h-11', 'min-w-11');
+    expect(screen.queryByText('Sin operaciones registradas.')).not.toBeInTheDocument();
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Sin operaciones registradas.')).toBeInTheDocument();
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('Sin operaciones registradas.')).not.toBeInTheDocument();
+  });
+
+  it('recuerda el estado abierto después de remontar', async () => {
+    const user = userEvent.setup();
+    const first = render(<HistoryAside />);
+    await user.click(screen.getByRole('button', { name: 'Mostrar historial' }));
+    first.unmount();
+
     render(<HistoryAside />);
     expect(
-      screen.getByText('Sin operaciones registradas.'),
-    ).toBeInTheDocument();
+      screen.getByRole('button', { name: 'Ocultar historial' }),
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Sin operaciones registradas.')).toBeInTheDocument();
+  });
+});
+
+describe('HistoryAside (sidebar)', () => {
+  it('muestra el estado vacío al abrir cuando no hay operaciones', async () => {
+    await renderOpen();
+    expect(screen.getByText('Sin operaciones registradas.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Limpiar' })).not.toBeInTheDocument();
   });
 
-  it('lista las operaciones con su módulo, descripción y estado de sync', () => {
+  it('lista las operaciones con módulo, fecha, hora y estado de sync', async () => {
     useHistoryStore.setState({ entries });
-    render(<HistoryAside />);
+    await renderOpen();
 
     expect(screen.getByText('Dados')).toBeInTheDocument();
     expect(screen.getByText('Equipos')).toBeInTheDocument();
     expect(screen.getByText('Tirada de dados')).toBeInTheDocument();
     expect(screen.getByText('Creación de equipos')).toBeInTheDocument();
 
-    // La entrada no sincronizada muestra "solo local".
-    const list = document.getElementById('history-list')!;
-    const items = list.querySelectorAll('li');
+    const items = document.querySelectorAll<HTMLElement>('[data-history-entry]');
     expect(items).toHaveLength(2);
-    const unsynced = Array.from(items).find((li) =>
-      li.textContent?.includes('Creación de equipos'),
+    const unsynced = Array.from(items).find((item) =>
+      item.textContent?.includes('Creación de equipos'),
     );
-    expect(unsynced?.textContent).toContain('solo local');
+    expect(unsynced?.textContent).toContain('Guardado en este navegador');
 
-    // (3.7.1) la marca temporal se renderiza HH:mm (dos dígitos).
-    const rpgLi = Array.from(items).find((li) =>
-      li.textContent?.includes('Tirada de dados'),
+    const rpg = Array.from(items).find((item) =>
+      item.textContent?.includes('Tirada de dados'),
     )!;
-    const timeText = rpgLi.querySelector('div')!.textContent ?? '';
-    expect(timeText).toMatch(/(\d{2}:\d{2})/);
+    const time = rpg.querySelector('time')!;
+    expect(time).toHaveAttribute('datetime', '2026-09-08T10:00:00.000Z');
+    expect(time.textContent).toMatch(/\d{1,2}:\d{2}/);
+    expect(rpg.querySelector('span[title]')).toHaveAttribute(
+      'title',
+      'Tirada de dados',
+    );
 
-    // (3.7.2) el atributo title conserva la descripción completa (no truncada).
-    const descSpan = rpgLi.querySelector('span.truncate')!;
-    expect(descSpan.getAttribute('title')).toBe('Tirada de dados');
+    // Una entrada sincronizada no muestra el distintivo local.
+    expect(rpg.textContent).not.toContain('Guardado en este navegador');
+  });
 
-    // (3.7.3) una entrada sincronizada NO muestra el distintivo "solo local".
-    expect(rpgLi.textContent).not.toContain('solo local');
+  it('omite datetime cuando el timestamp es inválido', async () => {
+    useHistoryStore.setState({
+      entries: [{ ...entries[0], timestamp: 'no-es-fecha' }],
+    });
+    await renderOpen();
+
+    const entryTime = document.querySelector('[data-history-entry] time');
+    expect(entryTime).not.toHaveAttribute('datetime');
+  });
+
+  it('agrupa por día con encabezados Hoy y Ayer', async () => {
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(10, 0, 0, 0);
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(10, 0, 0, 0);
+
+    useHistoryStore.setState({
+      entries: [
+        { ...entries[0], id: 'today', timestamp: today.toISOString() },
+        { ...entries[0], id: 'yesterday', timestamp: yesterday.toISOString() },
+      ],
+    });
+    await renderOpen();
+
+    expect(screen.getByRole('heading', { name: 'Hoy', level: 3 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Ayer', level: 3 })).toBeInTheDocument();
+    const times = document.querySelectorAll('#history-list time[datetime]');
+    expect(times.length).toBeGreaterThanOrEqual(4); // 2 encabezados + 2 entradas
+  });
+
+  it('muestra el resultado real de los cinco módulos', async () => {
+    useHistoryStore.setState({
+      entries: [
+        entryWithRecord(
+          'dice',
+          'dice',
+          { sides: 6, modifier: 3, count: 2 },
+          { rolls: [3, 5], total: 11, modifier: 3 },
+        ),
+        entryWithRecord(
+          'numbers',
+          'numbers',
+          { count: 3, min: 1, max: 10, unique: true },
+          { numbers: [3, 7, 9] },
+        ),
+        entryWithRecord(
+          'roulette',
+          'roulette',
+          { options: [{ label: 'Pizza', color: '#6c5ce7' }] },
+          { winner: { label: 'Pizza', color: '#6c5ce7' } },
+        ),
+        entryWithRecord(
+          'teams',
+          'teams',
+          { participants: ['Ana', 'Bruno', 'Carla'], mode: 'count', value: 2 },
+          {
+            teams: [
+              ['Ana', 'Bruno'],
+              ['Carla'],
+            ],
+            colors: ['#6c5ce7', '#00cec9'],
+          },
+        ),
+        entryWithRecord(
+          'weighted',
+          'weighted',
+          { entries: [{ name: 'Ana', weight: 3 }] },
+          { winner: { name: 'Ana', weight: 3 }, probability: 60 },
+        ),
+      ],
+    });
+    await renderOpen();
+
+    expect(screen.getByText('Tiradas: 3, 5 · Total: 11 (+3)')).toBeInTheDocument();
+    expect(screen.getByText('Números: 3, 7, 9')).toBeInTheDocument();
+    expect(screen.getByText('Ganador: Pizza')).toBeInTheDocument();
+    expect(screen.getByText('2 equipos · 3 integrantes')).toBeInTheDocument();
+    expect(screen.getByText('Ganador: Ana · 60%')).toBeInTheDocument();
+    expect(screen.getByText('Ver integrantes').closest('details')).not.toBeNull();
+    expect(screen.getByText('Ver integrantes').closest('summary')).toHaveClass(
+      'min-h-11',
+    );
+    expect(screen.getByText(/Ana, Bruno/)).toBeInTheDocument();
+  });
+
+  it('el borrado tiene nombre accesible y objetivo de 44×44', async () => {
+    useHistoryStore.setState({ entries: [entries[0]] });
+    await renderOpen();
+
+    const deleteButton = screen.getByRole('button', {
+      name: /Borrar Tirada de dados/,
+    });
+    expect(deleteButton).toHaveClass('h-11', 'w-11');
   });
 
   it('muestra el botón Limpiar y vacía la lista al pulsarlo', async () => {
     useHistoryStore.setState({ entries });
-    const user = userEvent.setup();
-    render(<HistoryAside />);
+    const user = await renderOpen();
 
     const clearBtn = screen.getByRole('button', { name: 'Limpiar' });
     expect(clearBtn).toBeInTheDocument();
 
     await user.click(clearBtn);
-    expect(
-      screen.getByText('Sin operaciones registradas.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Sin operaciones registradas.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Limpiar' })).not.toBeInTheDocument();
   });
 });
@@ -123,7 +285,6 @@ describe('HistoryAside — errores', () => {
   });
 
   it('un borrado fallido muestra el mensaje y no quita la entrada', async () => {
-    // Sesión activa para que `remove` intente borrar en el backend.
     useAuthStore.setState({
       user: { id: 1, name: 'Ada', email: 'ada@example.com' },
       token: 'jwt',
@@ -136,22 +297,17 @@ describe('HistoryAside — errores', () => {
       new ApiError(500, { message: 'No se pudo borrar el registro.' }),
     );
 
-    const user = userEvent.setup();
-    render(<HistoryAside />);
-
+    const user = await renderOpen();
     await user.click(screen.getByRole('button', { name: /Borrar Tirada de dados/ }));
 
-    // El mensaje del backend queda visible...
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'No se pudo borrar el registro.',
     );
-    // ...y la entrada sigue en la lista, porque el backend no la borró.
     expect(useHistoryStore.getState().entries).toHaveLength(1);
     expect(screen.getByText('Tirada de dados')).toBeInTheDocument();
   });
 
   it('un borrado con error de red nombra la operación que falló', async () => {
-    // Sesión activa para que `remove` intente borrar en el backend.
     useAuthStore.setState({
       user: { id: 1, name: 'Ada', email: 'ada@example.com' },
       token: 'jwt',
@@ -160,25 +316,21 @@ describe('HistoryAside — errores', () => {
       entries: [{ ...entries[0], synced: true }],
       error: null,
     });
-    // Fallo de red: no es `ApiError`, así que no hay mensaje del backend.
-    vi.mocked(historyRepository.remove).mockRejectedValue(new TypeError('Failed to fetch'));
+    vi.mocked(historyRepository.remove).mockRejectedValue(
+      new TypeError('Failed to fetch'),
+    );
 
-    const user = userEvent.setup();
-    render(<HistoryAside />);
-
+    const user = await renderOpen();
     await user.click(screen.getByRole('button', { name: /Borrar Tirada de dados/ }));
 
-    // El mensaje nombra la operación (borrar), no un texto genérico.
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('No se pudo borrar el registro.');
-    // Y la entrada sigue en la lista.
     expect(useHistoryStore.getState().entries).toHaveLength(1);
   });
 
   it('el mensaje se limpia al empezar la siguiente operación', async () => {
     useHistoryStore.setState({ entries, error: 'Error viejo' });
-    const user = userEvent.setup();
-    render(<HistoryAside />);
+    const user = await renderOpen();
 
     expect(screen.getByRole('alert')).toHaveTextContent('Error viejo');
 
@@ -198,7 +350,6 @@ describe('HistoryAside (mobile)', () => {
     expect(toggle).toHaveAttribute('aria-pressed', 'false');
 
     await user.click(toggle);
-    expect(screen.getByRole('button', { name: 'Cerrar' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cerrar' })).toHaveAttribute(
       'aria-pressed',
       'true',
