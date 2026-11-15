@@ -48,6 +48,7 @@ Una suite de cinco herramientas en una sola interfaz, usable de punta a punta si
 ## Evidence on Hand
 
 - Aplicación funcional con cinco módulos, autenticación JWT, historial local y sincronizado, y persistencia en `localStorage` del historial de invitado y de los sorteos pendientes.
+- Suite de tests actual: **94** backend, **398** frontend (40 archivos) y **48** E2E de Playwright; el type check del frontend es `tsc -b`.
 - Documentación técnica en `Frontend/README.md` y `design.md`.
 - No hay testimonios, clientes, métricas de uso, casos de estudio ni contenido de marketing real. No inventarlos.
 

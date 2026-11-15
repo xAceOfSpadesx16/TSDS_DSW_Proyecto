@@ -89,16 +89,21 @@ de desarrollo, sumalos a `allowed_origins` en ese archivo.
 
 ## Workflow de desarrollo
 
-1. Backend: `cd ../TSDS_DSW_Proyecto_Backend && make serve` (corre en `127.0.0.1:8000`)
-2. Frontend: `npm run dev` (corre en `127.0.0.1:5173`)
-3. Abrir `http://localhost:5173`
+1. Backend (en otra terminal o con subshell):
+   `(cd ../TSDS_DSW_Proyecto_Backend && make serve)` — corre en `127.0.0.1:8000`.
+2. Frontend, desde esta carpeta: `npm run dev` — corre en `127.0.0.1:5173`.
+3. Abrir `http://localhost:5173`.
 
 ## Verificación
 
+Todos los comandos salvo el primero se ejecutan desde esta carpeta
+(`TSDS_DSW_Proyecto/`); el backend va en su propia subshell para no cambiar
+de directorio:
+
 ```bash
-cd ../TSDS_DSW_Proyecto_Backend && php artisan test   # backend: 94 tests
-npm test                                              # frontend: 398 tests
-npm run lint                                          # tsc -b, sin errores
-npm run build                                         # tsc -b + vite build
-npx playwright test                                   # 48 E2E
+(cd ../TSDS_DSW_Proyecto_Backend && php artisan test)   # backend: 94 tests
+npm test                                                # frontend: 398 tests
+npm run lint                                            # tsc -b, sin errores
+npm run build                                           # tsc -b + vite build
+npx playwright test                                     # 48 E2E
 ```
