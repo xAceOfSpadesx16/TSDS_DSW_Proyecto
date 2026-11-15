@@ -31,3 +31,8 @@ pnpm-debug.log*
 
 # Artefactos de TypeScript
 *.tsbuildinfo
+
+# Reportes de tests y cobertura
+coverage/
+test-results/
+playwright-report/

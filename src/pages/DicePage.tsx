@@ -140,13 +140,13 @@ export function DicePage() {
       <section
         id="section-dice"
         aria-label="Dados RPG"
-        className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
+        className="w-full min-w-0 animate-fade-in flex flex-col gap-3 sm:gap-4"
       >
         <h1 tabIndex={-1} className="font-bold">
           Dados RPG
         </h1>
 
-        <div className="panel bg-surface rounded-2xl shadow-raised p-6 flex flex-col gap-4">
+        <div className="panel bg-surface rounded-2xl shadow-raised p-4 sm:p-6 flex flex-col gap-3 sm:gap-4">
           <fieldset
             className="flex min-w-0 flex-col gap-2"
             aria-describedby={diceError ? 'dice-error' : undefined}
@@ -157,7 +157,7 @@ export function DicePage() {
                 <button
                   key={sides}
                   type="button"
-                  className={`dice-btn border-2 px-4 py-3 rounded-full text-lg font-bold transition-[transform,background-color,border-color,box-shadow] shadow-low active:shadow-pressed focus-visible:outline focus-visible:outline-focus ${
+                  className={`dice-btn border-2 px-3 py-2 sm:px-4 sm:py-3 rounded-full text-lg font-bold transition-[transform,background-color,border-color,box-shadow] shadow-low active:shadow-pressed focus-visible:outline focus-visible:outline-focus ${
                     lastSides === sides
                       ? 'border-action bg-surface text-action shadow-pressed'
                       : 'border-control bg-surface text-ink hover:-translate-y-0.5 hover:border-action'
@@ -181,7 +181,7 @@ export function DicePage() {
             onChange={(e) => setModifier(Number(e.currentTarget.value))}
           />
 
-          <div className="flex items-center justify-center gap-4 py-6">
+          <div className="flex items-center justify-center gap-4 py-4 sm:py-6">
             <output
               id="dice-result"
               className={`dice-registration panel relative w-32 h-32 flex items-center justify-center font-mono text-[2.75rem] leading-[3rem] font-bold rounded-xl bg-surface text-action shadow-pressed ${
@@ -223,7 +223,7 @@ export function DicePage() {
             </p>
           ) : null}
 
-          <div className="flex justify-end">
+          <div className="flex justify-start sm:justify-end">
             <PrimaryButton
               id="dice-reset-btn"
               type="button"

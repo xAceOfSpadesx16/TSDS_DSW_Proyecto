@@ -26,13 +26,13 @@ Una suite de cinco herramientas en una sola interfaz, usable de punta a punta si
 - El flujo principal debe funcionar sin una cuenta; el backend agrega login, registro e historial.
 - Proyecto académico de Diseño de Aplicativos Web. La evaluación incluye accesibilidad y semántica; esas cualidades no deben degradarse.
 - La integración con el backend (login, registro e historiales) debe mantenerse por requisito de la asignatura.
-- El historial de invitado vive actualmente en memoria; no se confirmó que deba persistir entre recargas.
+- El historial de invitado se persiste en `localStorage` (máximo 100 entradas) y los sorteos que no llegan al backend quedan como pendientes persistidos por usuario, también en `localStorage`.
 
 ## Capabilities and Constraints
 
 - Cinco módulos: Generador de Equipos, Sorteo con Pesos, Ruleta de Decisiones, Dados RPG y Números Aleatorios.
 - Autenticación JWT opcional, registro, historial por usuario y sincronización con backend Laravel.
-- Los sorteos funcionan sin sesión; el historial de invitado vive en memoria y está acotado.
+- Los sorteos funcionan sin sesión; el historial de invitado vive en `localStorage`, está acotado a 100 entradas y se importa a la cuenta al iniciar sesión. Los pendientes de sincronización también se persisten para sobrevivir a una recarga.
 - Stack actual: Vite + React 18 + TypeScript, Tailwind, Zustand, React Router; backend Laravel 12.
 - Interfaz en español, con voseo como tono confirmado.
 - No hay una restricción visual confirmada ni un compromiso de conservar todos los features actuales; el estado actual es evidencia, no una prohibición de cambio.
@@ -47,7 +47,7 @@ Una suite de cinco herramientas en una sola interfaz, usable de punta a punta si
 
 ## Evidence on Hand
 
-- Aplicación funcional con cinco módulos, autenticación JWT, historial local y sincronizado.
+- Aplicación funcional con cinco módulos, autenticación JWT, historial local y sincronizado, y persistencia en `localStorage` del historial de invitado y de los sorteos pendientes.
 - Documentación técnica en `Frontend/README.md` y `design.md`.
 - No hay testimonios, clientes, métricas de uso, casos de estudio ni contenido de marketing real. No inventarlos.
 

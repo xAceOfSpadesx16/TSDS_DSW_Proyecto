@@ -9,16 +9,17 @@ Single Page Application con **Vite + React 18 + TypeScript estricto**.
 - **UI**: React 18 + Tailwind 3 (tema equivalente al original preservado en `tailwind.config.js`)
 - **Estado**: Zustand 5 (auth + history)
 - **Routing**: React Router 7 (BrowserRouter — URLs limpias)
-- **Backend**: Laravel 12 (`../DSW-Backend`) — autenticación JWT y persistencia del historial
+- **Backend**: Laravel 12 (`../TSDS_DSW_Proyecto_Backend`) — autenticación JWT y persistencia del historial
 
 ## Scripts
 
 ```bash
 npm install            # instalar dependencias
 npm run dev            # dev server en http://localhost:5173
-npm run build          # build de producción (tsc --noEmit + vite build)
+npm run build          # build de producción (tsc -b + vite build)
 npm run preview        # servir dist/ localmente
-npm run lint           # tsc --noEmit
+npm run lint           # tsc -b (type check por proyectos, sin emitir)
+npm test               # vitest run: 398 tests (40 archivos)
 ```
 
 ## Variables de entorno
@@ -30,7 +31,7 @@ VITE_API_BASE_URL=http://127.0.0.1:8000/api
 ```
 
 Por defecto apunta a `http://127.0.0.1:8000/api` (asume backend corriendo vía
-`make serve` en `../DSW-Backend`).
+`make serve` en `../TSDS_DSW_Proyecto_Backend`).
 
 ## Estructura
 
@@ -73,26 +74,31 @@ JWT contra el backend. El token se persiste en `localStorage` bajo
 en cada request a la API (vía `bindAuthStoreToHttpClient()`).
 
 Sin sesión activa, todas las funciones de sorteo siguen operativas; los
-resultados se guardan solo localmente (`useHistoryStore`) y se marcan con
-"solo local". Al iniciar sesión, los próximos sorteos se sincronizan con
-`POST /api/history`.
+resultados se guardan en `localStorage` (`thrive_guest_history_v1`, máximo 100)
+y se marcan con "solo local". Al iniciar sesión se ofrece importarlos a la
+cuenta, y los próximos sorteos se sincronizan con `POST /api/history`. Si un
+guardado falla con sesión activa, la entrada queda pendiente y se persiste por
+usuario en `localStorage` (`thrive_pending_<userId>_v1`) para reintentarse al
+recuperar la conexión o al recargar la página.
 
 ## CORS
 
-El backend (`DSW-Backend/config/cors.php`) está configurado para aceptar
+El backend (`TSDS_DSW_Proyecto_Backend/config/cors.php`) está configurado para aceptar
 `http://localhost:5173` y `http://127.0.0.1:5173`. Si agregás otros orígenes
 de desarrollo, sumalos a `allowed_origins` en ese archivo.
 
 ## Workflow de desarrollo
 
-1. Backend: `cd ../DSW-Backend && make serve` (corre en `127.0.0.1:8000`)
+1. Backend: `cd ../TSDS_DSW_Proyecto_Backend && make serve` (corre en `127.0.0.1:8000`)
 2. Frontend: `npm run dev` (corre en `127.0.0.1:5173`)
 3. Abrir `http://localhost:5173`
 
 ## Verificación
 
 ```bash
-cd ../DSW-Backend && make test    # backend: 71 tests, debe pasar
-npm run lint                        # frontend: tsc --noEmit, debe pasar
-npm run build                       # build de producción
+cd ../TSDS_DSW_Proyecto_Backend && php artisan test   # backend: 94 tests
+npm test                                              # frontend: 398 tests
+npm run lint                                          # tsc -b, sin errores
+npm run build                                         # tsc -b + vite build
+npx playwright test                                   # 48 E2E
 ```
