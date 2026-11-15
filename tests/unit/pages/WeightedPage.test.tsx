@@ -67,7 +67,7 @@ describe('WeightedPage — participantes y barras', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByText('Carga masiva')).toBeInTheDocument();
     expect(
-      screen.getByText('1 a 100: cuanto más peso, más probabilidad.'),
+      screen.getByText('1 a 100: cuánto más peso, más probabilidad.'),
     ).toBeInTheDocument();
     expect(screen.getByText(/Formato:/)).toBeInTheDocument();
     expect(document.querySelector('#weighted-bulk-details')).not.toHaveAttribute(
