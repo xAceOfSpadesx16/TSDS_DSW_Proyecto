@@ -108,6 +108,7 @@ export class ApiError extends Error {
   readonly status: number;
   readonly errors?: Record<string, string[]>;
 
+  /** Crea el error con su estado y cuerpo. */
   constructor(status: number, body: ApiErrorBody) {
     super(body.message);
     this.name = 'ApiError';

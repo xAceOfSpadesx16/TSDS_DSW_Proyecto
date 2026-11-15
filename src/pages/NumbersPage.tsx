@@ -1,4 +1,3 @@
-
 import { useEffect, useState, type FormEvent } from 'react';
 
 import { PrimaryButton } from '../components/PrimaryButton';
