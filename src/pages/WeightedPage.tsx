@@ -1,13 +1,3 @@
-// =============================================================================
-// WeightedPage (/weighted)
-//
-// Sorteo con pesos proporcionales. Permite:
-// - Agregar, editar y quitar entradas (nombre + peso).
-// - Cargar una lista en bloque ("Ana, 3" por línea).
-// - Ver el porcentaje de cada fila y el peso total antes de sortear.
-// - Sortear; opcionalmente auto-elimina ganadores.
-// - Reiniciar la lista original o restablecer todo.
-// =============================================================================
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
@@ -29,12 +19,7 @@ import { useHistoryStore } from '../store/historyStore';
 import { readNumeric, type NumericInput } from '../lib/numericInput';
 import type { WeightedEntry, WeightedResultLocal } from '../domain/contracts';
 
-/**
- * Peso válido: entero entre 1 y 100. El vacío se interpreta como 1, igual
- * que el mínimo del formulario de alta. Devuelve `null` si el valor no es
- * un entero válido (por ejemplo 3.5), para no persistir datos que el
- * validador de `storage.ts` rechazaría al recargar.
- */
+/** Valida un peso entero entre 1 y 100; el vacío vale 1. */
 function parseWeight(value: NumericInput): number | null {
   if (value === '') return 1;
   const numeric = Number(value);
@@ -48,6 +33,7 @@ function formatPercent(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
+/** Página del sorteo ponderado. */
 export function WeightedPage() {
   const [initialOptions] = useState(() => loadWeightedOptions());
   const [entries, setEntries] = useState<WeightedEntry[]>(
@@ -73,8 +59,6 @@ export function WeightedPage() {
   const lastEditingIndexRef = useRef<number | null>(null);
   const addHistory = useHistoryStore((s) => s.add);
 
-  // Al entrar en edición el foco va al nombre; al salir vuelve al botón de
-  // edición de esa fila. Quitar mueve el foco al encabezado de la lista.
   useEffect(() => {
     if (editingIndex !== null) {
       lastEditingIndexRef.current = editingIndex;
@@ -102,7 +86,6 @@ export function WeightedPage() {
     saveWeightedOptions({ entries, originalEntries, autoRemove });
   }, [entries, originalEntries, autoRemove]);
 
-  // Al sortear, el resultado se hace visible y el encabezado recibe el foco.
   useEffect(() => {
     if (!result) return;
     const heading = document.getElementById('weighted-result-heading');

@@ -1,9 +1,3 @@
-// =============================================================================
-// DicePage (/dice)
-//
-// Tiradas de dados RPG: 5 botones (d4/d6/d8/d12/d20), modificador y resultado.
-// Los números aleatorios viven en su propia pantalla (`/numbers`).
-// =============================================================================
 
 import { useEffect, useRef, useState } from 'react';
 
@@ -32,12 +26,11 @@ function describeDice(result: DiceResult, sides: number): string {
   return `${result.rolls.length}d${sides}${modifierStr} = ${result.total}`;
 }
 
+/** Página de tiradas de dados RPG. */
 export function DicePage() {
   const addHistory = useHistoryStore((s) => s.add);
   const rafIdRef = useRef<number>(0);
 
-  // Cancelar la animación de tirada si la página se desmonta en medio del
-  // "shake" (evita un setState sobre un componente desmontado / fuga de rAF).
   useEffect(() => {
     return () => {
       if (rafIdRef.current) {
@@ -113,11 +106,6 @@ export function DicePage() {
 
     setShaking(true);
 
-    // Animación: alternar caras durante ~500ms, luego commitear el resultado
-    // real. El tiempo se mide con el reloj de `requestAnimationFrame`: el
-    // primer timestamp recibido marca el inicio. No se usa `performance.now()`
-    // porque mezcla dos orígenes de tiempo (el del rAF y el de pared) y la
-    // duración pasaría a depender de cuándo arrancó el proceso.
     let animationStart: number | null = null;
     const tick = (now: number) => {
       if (animationStart === null) {

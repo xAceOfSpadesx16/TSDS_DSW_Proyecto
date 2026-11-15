@@ -1,12 +1,6 @@
-// =============================================================================
-// NotFoundPage (*)
-//
-// 404 simple para rutas inexistentes. Se muestra dentro del RootLayout
-// (header arriba + grid principal).
-// =============================================================================
-
 import { Link } from 'react-router-dom';
 
+/** Página 404. */
 export function NotFoundPage() {
   return (
     <main className="p-6 w-full mx-auto">

@@ -1,14 +1,6 @@
-// =============================================================================
-// Utilidades matemáticas puras.
-//
-// Equivalentes en TS estricto de `js/utils/mathUtils.js`. Usadas por las
-// estrategias de sorteo. Mantener sin efectos secundarios: deben poder
-// ejecutarse indistintamente en cliente y servidor (test-friendly).
-// =============================================================================
+/** Utilidades matemáticas puras usadas por las estrategias de sorteo. */
 
-/**
- * Fisher–Yates moderno. Devuelve un NUEVO array; el original queda intacto.
- */
+/** Devuelve una copia barajada con Fisher–Yates. */
 export function fisherYatesShuffle<T>(input: readonly T[]): T[] {
   const array = input.slice();
   for (let i = array.length - 1; i > 0; i--) {
@@ -18,7 +10,7 @@ export function fisherYatesShuffle<T>(input: readonly T[]): T[] {
   return array;
 }
 
-/** Entero aleatorio en [min, max] (ambos inclusive). */
+/** Entero aleatorio en [min, max]. */
 export function randomInt(min: number, max: number): number {
   if (max < min) {
     throw new Error(`randomInt: max (${max}) debe ser >= min (${min})`);
@@ -26,11 +18,7 @@ export function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/**
- * Baraja in-place. Alias explícito para indicar mutación cuando se quiere.
- * Muta el arreglo recibido (Fisher–Yates, sin `.slice()`) y devuelve la misma
- * referencia mutada, tal como indica su contrato.
- */
+/** Baraja el arreglo recibido y devuelve la misma referencia. */
 export function shuffleInPlace<T>(array: T[]): T[] {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -39,16 +27,13 @@ export function shuffleInPlace<T>(array: T[]): T[] {
   return array;
 }
 
+/** Entrada con nombre y peso para el sorteo ponderado. */
 export interface WeightedEntry {
   name: string;
   weight: number;
 }
 
-/**
- * Selección por probabilidad acumulada (un único ganador).
- * `entries` con peso > 0; la suma de pesos no necesita ser 1.
- * Si la entrada cae exactamente en el borde, se devuelve la última.
- */
+/** Elige un ganador con probabilidad proporcional al peso. */
 export function weightedRandom(entries: readonly WeightedEntry[]): WeightedEntry {
   const totalWeight = entries.reduce((acc, e) => acc + e.weight, 0);
   if (totalWeight <= 0) {
@@ -62,14 +47,10 @@ export function weightedRandom(entries: readonly WeightedEntry[]): WeightedEntry
       return entry;
     }
   }
-  // Fallback por redondeo en el borde superior.
   return entries[entries.length - 1];
 }
 
-/**
- * Genera `count` enteros únicos en [min, max].
- * Lanza si el rango disponible es insuficiente.
- */
+/** Genera `count` enteros únicos en [min, max], ordenados. */
 export function uniqueRandomInts(count: number, min: number, max: number): number[] {
   if (count < 1) {
     throw new Error('uniqueRandomInts: count debe ser >= 1');
@@ -81,8 +62,6 @@ export function uniqueRandomInts(count: number, min: number, max: number): numbe
         `(rango disponible: ${range})`,
     );
   }
-  // Selección sin rechazo: marcar números ya tomados en un Set y
-  // samplear hasta completar `count`. Para `count << range` es O(count).
   const taken = new Set<number>();
   const out: number[] = [];
   while (out.length < count) {

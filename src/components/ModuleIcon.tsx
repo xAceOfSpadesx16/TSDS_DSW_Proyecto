@@ -1,12 +1,8 @@
-// =============================================================================
-// ModuleIcon
-//
-// Íconos SVG inline para los cinco módulos. Trazo de tinta sobre papel, sin
-// glifos de ajedrez ni emojis: heredan el color del texto y son decorativos.
-// =============================================================================
+/** Íconos SVG de los cinco módulos. */
 
 import type { ReactNode } from 'react';
 
+/** Nombre del ícono de módulo. */
 export type ModuleIconName =
   | 'teams'
   | 'weighted'
@@ -64,6 +60,7 @@ interface Props {
   className?: string;
 }
 
+/** Renderiza el ícono decorativo del módulo. */
 export function ModuleIcon({ name, className = 'h-7 w-7' }: Props) {
   return (
     <svg

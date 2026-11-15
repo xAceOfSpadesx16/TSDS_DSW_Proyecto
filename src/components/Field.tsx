@@ -1,10 +1,4 @@
-// =============================================================================
-// Field
-//
-// Wrapper para inputs con label asociado. Aísla la accesibilidad (`htmlFor`,
-// `aria-required`, `aria-invalid`, `aria-describedby` y mensajes de error)
-// para que cada página lo consuma sin repetir boilerplate.
-// =============================================================================
+/** Input con label, ayuda y error accesibles. */
 
 import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
 
@@ -14,6 +8,7 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   error?: string | undefined;
 }
 
+/** Envuelve un input con su label y mensajes asociados. */
 export function Field({ label, hint, error, id, ...rest }: Props) {
   const generatedId = useId();
   const fieldId = id ?? generatedId;

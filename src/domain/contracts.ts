@@ -1,17 +1,9 @@
-// =============================================================================
-// Contratos exactos de `payload` y `result` por módulo.
-// Reflejan `App\Modules\History\Strategies\*Strategy` del backend.
-// Si el backend agrega un campo, sumarlo acá y a la estrategia.
-// =============================================================================
+/** Contratos de `payload` y `result` por módulo, espejo del backend. */
 
-/**
- * Identificador de módulo. Vive acá (y no en `types.ts`) porque es la clave
- * de los mapas de contrato de más abajo; `types.ts` lo re-exporta para no
- * romper los imports existentes.
- */
+/** Identificador de módulo y clave de los mapas de contrato. */
 export type ModuleName = 'dice' | 'numbers' | 'roulette' | 'teams' | 'weighted';
 
-// ---- dice --------------------------------------------------------------------
+/** Entrada de una tirada de dados. */
 export interface DiceInput {
   sides: number;
   modifier: number;
@@ -19,6 +11,7 @@ export interface DiceInput {
   formula?: string;
 }
 
+/** Resultado de una tirada de dados. */
 export interface DiceResult {
   rolls: number[];
   total: number;
@@ -26,7 +19,7 @@ export interface DiceResult {
   formula?: string;
 }
 
-// ---- numbers -----------------------------------------------------------------
+/** Entrada del generador de números. */
 export interface NumbersInput {
   count: number;
   min: number;
@@ -34,32 +27,36 @@ export interface NumbersInput {
   unique: boolean;
 }
 
+/** Resultado del generador de números. */
 export interface NumbersResult {
   numbers: number[];
 }
 
-// ---- roulette ----------------------------------------------------------------
+/** Opción de la ruleta. */
 export interface RouletteOption {
   label: string;
   color: string;
 }
 
+/** Entrada de la ruleta. */
 export interface RouletteInput {
   options: RouletteOption[];
 }
 
+/** Resultado que persiste la ruleta. */
 export interface RouletteResultBackend {
   winner: RouletteOption;
 }
 
-/** Resultado local extendido con el ángulo para la animación del canvas. */
+/** Resultado local de la ruleta con el ángulo final de la animación. */
 export interface RouletteResultLocal extends RouletteResultBackend {
   finalAngle: number;
 }
 
-// ---- teams -------------------------------------------------------------------
+/** Modo de reparto de equipos. */
 export type TeamsMode = 'count' | 'size';
 
+/** Entrada del generador de equipos. */
 export interface TeamsInput {
   participants: string[];
   mode: TeamsMode;
@@ -67,42 +64,36 @@ export interface TeamsInput {
   exclusions?: Array<[string, string]>;
 }
 
+/** Resultado del generador de equipos. */
 export interface TeamsResult {
   teams: string[][];
   colors: string[];
 }
 
-// ---- weighted ----------------------------------------------------------------
+/** Participante del sorteo ponderado. */
 export interface WeightedEntry {
   name: string;
   weight: number;
 }
 
+/** Entrada del sorteo ponderado. */
 export interface WeightedInput {
   entries: WeightedEntry[];
   autoRemove?: boolean;
 }
 
+/** Resultado que persiste el sorteo ponderado. */
 export interface WeightedResultBackend {
   winner: WeightedEntry;
   probability: number;
 }
 
-/** Resultado local extendido con los participantes que quedan tras el sorteo. */
+/** Resultado local del sorteo ponderado con los participantes restantes. */
 export interface WeightedResultLocal extends WeightedResultBackend {
   remainingEntries: WeightedEntry[];
 }
 
-// =============================================================================
-// Mapas de contrato por módulo
-//
-// Antes `payload` y `result` eran `Record<string, unknown>`, que no
-// restringe nada y además no es asignable desde una `interface` (las
-// interfaces no tienen index signature). Estos mapas son la fuente de
-// verdad: `payload` y `result` se tipan según el módulo.
-// =============================================================================
-
-/** `payload` (parámetros de entrada) de cada módulo. */
+/** `payload` de cada módulo. */
 export interface ModulePayloads {
   dice: DiceInput;
   numbers: NumbersInput;
@@ -111,7 +102,7 @@ export interface ModulePayloads {
   weighted: WeightedInput;
 }
 
-/** `result` (salida normalizada al backend) de cada módulo. */
+/** `result` normalizado al backend de cada módulo. */
 export interface ModuleResults {
   dice: DiceResult;
   numbers: NumbersResult;
@@ -126,41 +117,22 @@ export type ModulePayload = ModulePayloads[ModuleName];
 /** `result` de cualquier módulo. */
 export type ModuleResult = ModuleResults[ModuleName];
 
-// =============================================================================
-// Interfaz `DrawStrategy`
-//
-// Una estrategia por módulo. Es "autosuficiente": sabe cómo armar el payload
-// que el backend espera y cómo convertir su resultado local al shape exacto
-// que el endpoint POST /api/history validará.
-// =============================================================================
-
+/** Par de resultados local y de backend de una ejecución. */
 export interface DrawExecution<TLocal, TBackend> {
-  /** Resultado local (lo que la UI necesita para renderizar). */
   local: TLocal;
-  /** Resultado normalizado al contrato del backend (lo que se enviará al repo). */
   backend: TBackend;
 }
 
+/** Contrato que implementa cada estrategia de sorteo. */
 export interface DrawStrategy<TInput, TLocal, TBackend> {
   readonly moduleId: ModuleName;
 
-  /** Etiqueta humana del sorteo, usada para el campo `action` del historial. */
+  /** Etiqueta humana del sorteo para el campo `action` del historial. */
   actionLabel(input: TInput): string;
 
-  /**
-   * Construye el `payload` exacto que `CreateHistoryPayload` exige.
-   *
-   * Devuelve el tipo de entrada del módulo, no un `Record<string, unknown>`:
-   * el payload *es* la forma normalizada de los parámetros del sorteo.
-   */
+  /** Construye el `payload` exacto que espera el backend. */
   buildPayload(input: TInput): TInput;
 
-  /**
-   * Ejecuta el sorteo en el cliente y produce:
-   * - `local`: resultado para uso de UI (puede incluir campos extra como
-   *   `finalAngle` para animación o `remainingEntries` para sorteos sin
-   *   reposición).
-   * - `backend`: el subconjunto que cumple el contrato del backend.
-   */
+  /** Ejecuta el sorteo y devuelve el resultado local y el del backend. */
   execute(input: TInput): DrawExecution<TLocal, TBackend>;
 }

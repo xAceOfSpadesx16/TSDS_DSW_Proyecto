@@ -1,11 +1,4 @@
-// =============================================================================
-// Header
-//
-// Barra superior con marca, navegación responsive y acciones de auth.
-// Debajo de `lg` la navegación se colapsa en un botón con `aria-expanded`;
-// se cierra con Escape, al navegar o al elegir una opción. En pantallas
-// chicas las acciones de auth se ofrecen dentro del mismo panel.
-// =============================================================================
+/** Barra superior con marca, navegación y acciones de sesión. */
 
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -14,6 +7,7 @@ import { NavLinkButton } from './NavLinkButton';
 import { PrimaryButton } from './PrimaryButton';
 import { useAuthStore, selectIsAuthenticated } from '../store/authStore';
 
+/** Header fijo; en mobile colapsa la navegación en un panel. */
 export function Header() {
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
@@ -24,12 +18,10 @@ export function Header() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navRef = useRef<HTMLElement>(null);
 
-  // Al cambiar de ruta el panel móvil no debe quedar abierto.
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
 
-  // Escape cierra el panel y devuelve el foco al botón que lo abrió.
   useEffect(() => {
     if (!open) {
       return;
@@ -44,7 +36,6 @@ export function Header() {
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [open]);
 
-  // Al abrir, el foco entra al primer enlace del panel.
   useEffect(() => {
     if (!open) {
       return;

@@ -1,10 +1,4 @@
-// =============================================================================
-// authStore
-//
-// Estado de autenticación del usuario. Persiste `{ user, token }` en
-// localStorage para sobrevivir a recargas. Expone selectores derivados
-// (`isAuthenticated`) y un binding con el httpClient para inyectar el JWT.
-// =============================================================================
+/** Estado de autenticación persistido en `localStorage`. */
 
 import { create } from 'zustand';
 
@@ -58,43 +52,29 @@ function persist(state: PersistedAuth | null): void {
   }
 }
 
+/** Estado y acciones de autenticación. */
 export interface AuthState {
   user: User | null;
   token: string | null;
-  /** Timestamp epoch (ms) en que expira el token, o null si desconocido. */
   expiresAt: number | null;
   status: 'idle' | 'loading' | 'error';
   error: string | null;
 
+  /** Revalida la sesión persistida al arrancar. */
   hydrate(): Promise<void>;
+  /** Inicia sesión. */
   login(payload: LoginPayload): Promise<void>;
+  /** Registra un usuario. */
   register(payload: RegisterPayload): Promise<void>;
+  /** Cierra la sesión local y avisa al backend. */
   logout(): Promise<void>;
 }
 
-/**
- * Limpia la sesión persistida y el estado en memoria.
- *
- * Se usa en tres lugares: logout explícito, token vencido durante
- * `hydrate()` y 401 recibido por el httpClient. Cada uno necesita el
- * `set` del store, que solo existe dentro de `create`, así que la
- * acción se declara aparte y se recibe por parámetro.
- */
 function clearSession(set: (partial: Partial<AuthState>) => void): void {
   persist(null);
   set({ user: null, token: null, expiresAt: null, status: 'idle', error: null });
 }
 
-/**
- * Pide un token nuevo y lo persiste con su expiración.
- *
- * Es la acción que usa el `httpClient` cuando recibe un 401, y también la
- * que usa `hydrate()` cuando el token guardado ya venció. Devuelve `null`
- * si el backend no renovó nada, para que el llamador decida si cierra la
- * sesión.
- *
- * @param staleToken Token que el backend rechazó; solo se usa para el log.
- */
 async function refreshSession(
   set: (partial: Partial<AuthState>) => void,
   staleToken?: string,
@@ -115,6 +95,7 @@ async function refreshSession(
   }
 }
 
+/** Hook del estado de autenticación. */
 export const useAuthStore = create<AuthState>((set, get) => {
   const persisted = loadPersisted();
   return {
@@ -124,13 +105,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
     status: 'idle',
     error: null,
 
-    /**
-     * Revalida la sesión persistida al arrancar la app.
-     *
-     * Si `expires_at` ya pasó se intenta un refresh antes de cerrar la
-     * sesión: el token puede seguir siendo renovable dentro de la ventana
-     * del backend (14 días). Si el refresh no prospera, se cierra.
-     */
     async hydrate() {
       const { token, expiresAt } = get();
 
@@ -141,7 +115,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
       if (expiresAt !== null && Date.now() >= expiresAt) {
         const renewed = await refreshSession(set);
         if (!renewed) {
-          // Token vencido y no renovable: se cierra la sesión.
           clearSession(set);
         }
         return;
@@ -152,13 +125,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
         set({ user, status: 'idle', error: null });
       } catch (err) {
         if (err instanceof ApiError && err.status === 401) {
-          // El backend rechazó el token: la sesión no existe más.
           clearSession(set);
           return;
         }
-        // Cualquier otro fallo (red caída, 500, timeout) no prueba que el
-        // token sea inválido, así que mantenemos la sesión y dejamos el
-        // error visible. El usuario sigue operando como hasta ahora.
         set({ status: 'error', error: 'No se pudo verificar la sesión.' });
       }
     },
@@ -214,31 +183,24 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
 
     async logout() {
-      // Best-effort contra el backend (puede fallar si el token ya expiró).
       try {
         await authRepository.logout();
       } catch {
-        // Ignorar: el borrado local es lo que importa.
+        // El borrado local es lo que importa.
       }
       clearSession(set);
     },
   };
 });
 
-// Selectores derivados.
+/** Indica si hay usuario y token en memoria. */
 export const selectIsAuthenticated = (s: AuthState): boolean =>
   s.token !== null && s.user !== null;
 
-/**
- * Conecta el httpClient al token del store. Llamar una sola vez en `main.tsx`
- * para evitar dependencias circulares entre el store y el cliente.
- */
+/** Conecta el `httpClient` con el token del store. */
 export function bindAuthStoreToHttpClient(): void {
   setTokenProvider(() => useAuthStore.getState().token);
 
-  // Varias pestañas: el httpClient compara el token que recibió el 401 con
-  // el persistido. Si otra pestaña ya lo renovó, adopta ese token en vez de
-  // pedir un refresh propio.
   setStoredTokenReader(() => loadPersisted()?.token ?? null);
   setAdoptedTokenHandler((token) => {
     const persisted = loadPersisted();
@@ -254,10 +216,6 @@ export function bindAuthStoreToHttpClient(): void {
     });
   });
 
-  // Un 401 en cualquier request con token deja la sesión muerta: la
-  // limpiamos sin redirigir (el error igual lo recibe el llamador). Si
-  // `localStorage` ya tiene otro token, otra pestaña lo renovó: se adopta
-  // y NO se borra la persistencia.
   setUnauthorizedHandler((staleToken) => {
     const persisted = loadPersisted();
     if (persisted && persisted.token !== staleToken) {
@@ -273,7 +231,6 @@ export function bindAuthStoreToHttpClient(): void {
     clearSession(useAuthStore.setState);
   });
 
-  // Antes de limpiar, el httpClient intenta renovar el token una vez.
   setTokenRefresher((staleToken) =>
     refreshSession(useAuthStore.setState, staleToken),
   );

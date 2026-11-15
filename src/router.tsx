@@ -1,10 +1,4 @@
-// =============================================================================
-// router
-//
-// Configuración central de rutas del SPA. Usa `createBrowserRouter` (v7)
-// para URLs limpias (`/dice`, `/roulette`, etc.). El dev server de Vite
-// ya está configurado para hacer fallback de 404 a index.html.
-// =============================================================================
+/** Configuración central de rutas del SPA. */
 
 import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 
@@ -19,6 +13,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
+/** Árbol de rutas. */
 export const routes: RouteObject[] = [
   {
     path: '/',
@@ -37,4 +32,5 @@ export const routes: RouteObject[] = [
   },
 ];
 
+/** Router de la aplicación. */
 export const router = createBrowserRouter(routes);

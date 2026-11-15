@@ -1,21 +1,13 @@
-// =============================================================================
-// palette.ts
-//
-// Colores de datos que no se pueden expresar solo con clases Tailwind: los
-// segmentos del canvas de la ruleta y los bordes de las tarjetas de equipos.
-// Los colores de interfaz viven en `src/index.css` (variables CSS).
-// =============================================================================
+/** Colores de datos para el canvas de la ruleta y los equipos. */
 
 /** Tinta y papel de la dirección, para fallbacks del canvas. */
 export const PAPER_INK = '#221f1a';
+/** Superficie de papel. */
 export const PAPER_SURFACE = '#ece6da';
+/** Texto sobre el cobalto. */
 export const PAPER_ON_ACTION = '#f8fbff';
 
-/**
- * Paleta accesible para las opciones de la ruleta. Todos estos colores
- * alcanzan al menos 4.5:1 con `PAPER_ON_ACTION`; si el usuario elige un
- * color propio, la etiqueta se ajusta en `accessibleSegment`.
- */
+/** Paleta accesible para las opciones de la ruleta. */
 export const ROULETTE_PALETTE: readonly string[] = [
   '#1f4fb5',
   '#1f6b47',
@@ -27,7 +19,7 @@ export const ROULETTE_PALETTE: readonly string[] = [
   '#155e75',
 ];
 
-/** Paleta de bordes para las tarjetas de equipos (contraste ≥ 3:1). */
+/** Paleta de bordes para las tarjetas de equipos. */
 export const TEAM_PALETTE: readonly string[] = [
   '#1f4fb5',
   '#1f6b47',
@@ -67,6 +59,7 @@ function luminance([r, g, b]: Rgb): number {
   );
 }
 
+/** Calcula el contraste WCAG entre dos colores hex. */
 export function contrastRatio(a: string, b: string): number {
   const rgbA = parseHex(a);
   const rgbB = parseHex(b);
@@ -86,7 +79,6 @@ function mixWithBlack(value: string, amount: number): string {
     .map((channel) => channel.toString(16).padStart(2, '0'))
     .join('')}`;
 }
-
 
 /** Comprueba si un color es un hex de seis dígitos. */
 export function isHexColor(value: string): boolean {
@@ -116,12 +108,7 @@ function hslToHex(hue: number, saturation: number, lightness: number): string {
   return `#${channel(red)}${channel(green)}${channel(blue)}`;
 }
 
-/**
- * Devuelve un color válido y no usado. Primero intenta respetar el color
- * preferido; si ya está en uso, toma el primer hueco de la paleta. Cuando
- * la paleta se agota, genera un tono oscuro con el ángulo áureo: el texto
- * claro conserva al menos 4.5:1 y cada opción mantiene un color propio.
- */
+/** Devuelve un color válido y no usado para una opción de la ruleta. */
 export function uniqueRouletteColor(
   used: ReadonlySet<string>,
   preferred: string,
@@ -149,16 +136,13 @@ export function uniqueRouletteColor(
   return candidate;
 }
 
+/** Relleno y color de etiqueta accesibles de un segmento. */
 export interface AccessibleSegment {
   fill: string;
   label: string;
 }
 
-/**
- * Devuelve un relleno y un color de etiqueta con contraste ≥ 4.5:1.
- * Si ningún texto claro/oscuro alcanza el mínimo, oscurece el relleno en
- * pasos pequeños hasta que el texto claro lo logre.
- */
+/** Ajusta un color para que su etiqueta alcance contraste ≥ 4.5:1. */
 export function accessibleSegment(value: string): AccessibleSegment {
   const candidate = parseHex(value) ? value : ROULETTE_PALETTE[0];
   const lightContrast = contrastRatio(candidate, PAPER_ON_ACTION);

@@ -1,10 +1,4 @@
-// =============================================================================
-// PrimaryButton
-//
-// Botón principal de los formularios, con foco accesible y variantes
-// (`variant`: primary | ghost | accent | danger). La piel viene de los
-// tokens de la dirección "Papel de goma".
-// =============================================================================
+/** Botón principal con variantes visuales. */
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
@@ -24,6 +18,7 @@ const VARIANTS: Record<NonNullable<Props['variant']>, string> = {
     'bg-danger text-on-action shadow-raised hover:bg-danger-dark active:bg-danger-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
 };
 
+/** Botón con las variantes primary, ghost, accent y danger. */
 export function PrimaryButton({
   variant = 'primary',
   className = '',

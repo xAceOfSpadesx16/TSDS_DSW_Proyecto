@@ -1,10 +1,4 @@
-// =============================================================================
-// WeightedStrategy — módulo `weighted`.
-//
-// Sortear un ganador con probabilidad proporcional al peso. Si `autoRemove`
-// es true, devuelve también la lista restante para sorteos sin reposición.
-// El backend solo recibe `{ winner, probability }`.
-// =============================================================================
+/** Estrategia del sorteo ponderado. */
 
 import type {
   WeightedEntry,
@@ -15,20 +9,19 @@ import type {
 import type { DrawExecution, DrawStrategy } from '../domain/contracts';
 import { weightedRandom } from '../lib/mathUtils';
 
+/** Línea inválida de la carga masiva. */
 export interface WeightedBulkInvalidLine {
   line: string;
   reason: string;
 }
 
+/** Resultado de la carga masiva. */
 export interface WeightedBulkResult {
   entries: WeightedEntry[];
   invalid: WeightedBulkInvalidLine[];
 }
 
-/**
- * Porcentajes por fila en décimas, con reparto de resto mayor para que la
- * suma visible sea exactamente 100.0.
- */
+/** Calcula porcentajes por fila en décimas que suman 100.0. */
 export function computeWeightedPercentages(
   entries: ReadonlyArray<WeightedEntry>,
 ): number[] {
@@ -51,16 +44,7 @@ export function computeWeightedPercentages(
   return base.map((value) => value / 10);
 }
 
-/**
- * Parsea la carga masiva: una persona por línea, con peso opcional.
- *
- * Formatos aceptados:
- *   `Ana`        → peso 1
- *   `Ana, 3`     → peso 3
- *
- * Las líneas vacías se ignoran. Las líneas inválidas se devuelven con el
- * motivo para que la pantalla las informe sin descartar las válidas.
- */
+/** Parsea la carga masiva `Nombre` o `Nombre, peso`. */
 export function parseWeightedBulk(text: string): WeightedBulkResult {
   const entries: WeightedEntry[] = [];
   const invalid: WeightedBulkInvalidLine[] = [];
@@ -105,16 +89,19 @@ export function parseWeightedBulk(text: string): WeightedBulkResult {
   return { entries, invalid };
 }
 
+/** Sortea un ganador con probabilidad proporcional al peso. */
 export class WeightedStrategy
   implements
     DrawStrategy<WeightedInput, WeightedResultLocal, WeightedResultBackend>
 {
   readonly moduleId = 'weighted' as const;
 
+  /** Describe la cantidad de participantes. */
   actionLabel(input: WeightedInput): string {
     return `Sorteo entre ${input.entries.length} participantes`;
   }
 
+  /** Normaliza el payload al contrato del backend. */
   buildPayload(input: WeightedInput): WeightedInput {
     return {
       entries: input.entries.map((e) => ({ name: e.name, weight: e.weight })),
@@ -122,6 +109,7 @@ export class WeightedStrategy
     };
   }
 
+  /** Ejecuta el sorteo. */
   execute(input: WeightedInput): DrawExecution<WeightedResultLocal, WeightedResultBackend> {
     if (input.entries.length === 0) {
       throw new Error('No hay participantes para sortear.');
@@ -150,7 +138,7 @@ export class WeightedStrategy
   }
 }
 
+/** Instancia compartida de la estrategia. */
 export const weightedStrategy = new WeightedStrategy();
 
-// Re-export del tipo público para evitar imports redundantes en consumidores.
 export type { WeightedEntry };

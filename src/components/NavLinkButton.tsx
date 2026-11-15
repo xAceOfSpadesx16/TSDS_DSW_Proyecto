@@ -1,11 +1,4 @@
-// =============================================================================
-// NavLinkButton
-//
-// Botón-enlace usado en la barra de navegación. Replica exactamente los
-// estilos del antiguo `index.html` (con la clase .nav-link presente para
-// que `NavigationUI` legacy siga siendo identificable si alguna vez se
-// agrega de vuelta) y aplica el resaltado activo de `NavLink`.
-// =============================================================================
+/** Enlace de navegación con estilo de botón. */
 
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
@@ -22,6 +15,7 @@ const ACTIVE =
 const INACTIVE =
   'text-muted hover:text-ink hover:bg-surface-hover active:bg-surface-sunken hover:no-underline';
 
+/** Enlace de la barra de navegación que resalta la ruta activa. */
 export function NavLinkButton({ to, children }: Props) {
   return (
     <NavLink

@@ -1,15 +1,11 @@
-// =============================================================================
-// storage — único módulo que accede a `localStorage`.
-//
-// Centraliza el prefijo, la versión, la validación y el manejo de un
-// `localStorage` no disponible o corrupto. Los stores y las páginas consumen
-// funciones tipadas; ningún componente toca `localStorage` directamente.
-// =============================================================================
+/** Acceso tipado a `localStorage` con versión, validación y fallos seguros. */
 
 import type { RouletteOption, TeamsMode, WeightedEntry } from '../domain/contracts';
 import type { CreateHistoryPayload, ModuleName } from '../domain/types';
 
+/** Versión del esquema persistido. */
 export const STORAGE_SCHEMA_VERSION = 1;
+/** Máximo de sorteos guardados para invitados. */
 export const MAX_GUEST_ENTRIES = 100;
 
 const STORAGE_PREFIX = 'thrive_';
@@ -32,43 +28,30 @@ const MODULE_NAMES: readonly ModuleName[] = [
 
 const DICE_SIDES: readonly number[] = [4, 6, 8, 12, 20];
 
-// -----------------------------------------------------------------------------
-// Tipos persistidos
-// -----------------------------------------------------------------------------
-
-/** Un sorteo que no llegó al backend y espera reintentarse. */
+/** Sorteo que no llegó al backend y espera reintentarse. */
 export interface PendingDraw {
   record: CreateHistoryPayload;
   userId: number;
 }
 
+/** Entrada del historial visible en la interfaz. */
 export interface LocalHistoryEntry {
-  /** id local estable para key de React; los del backend son UUIDs. */
   id: string;
   module: ModuleName;
   description: string;
   timestamp: string;
-  /** `true` si fue confirmado por el backend; `false` si solo es local. */
   synced: boolean;
-  /**
-   * Sorteos que fallaron al guardarse con sesión activa, pendientes de
-   * reintento. Se persisten por id de usuario y guardan ese id para no
-   * enviarlos nunca con otra cuenta.
-   */
   pending?: PendingDraw;
-  /**
-   * Payload original del sorteo. Se guarda en el historial de invitado para
-   * poder importarlo a la cuenta sin reconstruirlo.
-   */
   record?: CreateHistoryPayload;
 }
 
+/** Opciones persistidas de la pantalla de dados. */
 export interface DiceOptions {
-  /** Última cara usada; `null` hasta la primera tirada. */
   lastSides: number | null;
   modifier: number;
 }
 
+/** Opciones persistidas del generador de números. */
 export interface NumbersOptions {
   count: number;
   min: number;
@@ -76,6 +59,7 @@ export interface NumbersOptions {
   unique: boolean;
 }
 
+/** Opciones persistidas del generador de equipos. */
 export interface TeamsOptions {
   participantsText: string;
   mode: TeamsMode;
@@ -83,19 +67,17 @@ export interface TeamsOptions {
   exclusions: Array<[string, string]>;
 }
 
+/** Opciones persistidas de la ruleta. */
 export interface RouletteOptions {
   options: RouletteOption[];
 }
 
+/** Opciones persistidas del sorteo ponderado. */
 export interface WeightedOptions {
   entries: WeightedEntry[];
   originalEntries: WeightedEntry[];
   autoRemove: boolean;
 }
-
-// -----------------------------------------------------------------------------
-// Acceso base
-// -----------------------------------------------------------------------------
 
 function getStorage(): Storage | null {
   try {
@@ -108,7 +90,7 @@ function getStorage(): Storage | null {
   }
 }
 
-/** `true` si el navegador permite usar `localStorage` en este contexto. */
+/** Indica si el navegador permite usar `localStorage`. */
 export function isStorageAvailable(): boolean {
   return getStorage() !== null;
 }
@@ -217,10 +199,7 @@ function removeKey(key: string): void {
   }
 }
 
-// -----------------------------------------------------------------------------
-// Lectura/escritura JSON para claves que ya tienen su propio formato (auth)
-// -----------------------------------------------------------------------------
-
+/** Lee y valida un JSON persistido sin versión. */
 export function readStoredJson<T>(
   key: string,
   validate: (value: unknown) => value is T,
@@ -241,6 +220,7 @@ export function readStoredJson<T>(
   }
 }
 
+/** Persiste un JSON sin versión. */
 export function writeStoredJson(key: string, value: unknown): void {
   const storage = getStorage();
   if (!storage) {
@@ -253,39 +233,37 @@ export function writeStoredJson(key: string, value: unknown): void {
   }
 }
 
+/** Borra una clave persistida. */
 export function removeStoredKey(key: string): void {
   removeKey(key);
 }
 
-// -----------------------------------------------------------------------------
-// Historial de invitado
-// -----------------------------------------------------------------------------
-
+/** Carga el historial de invitado. */
 export function loadGuestHistory(): LocalHistoryEntry[] {
   const stored = readVersioned(GUEST_HISTORY_KEY, isHistoryEntryArray) ?? [];
   return stored.slice(0, MAX_GUEST_ENTRIES);
 }
 
+/** Guarda el historial de invitado, acotado al máximo. */
 export function saveGuestHistory(entries: LocalHistoryEntry[]): void {
   writeVersioned(GUEST_HISTORY_KEY, entries.slice(0, MAX_GUEST_ENTRIES));
 }
 
+/** Borra el historial de invitado. */
 export function clearGuestHistory(): void {
   removeKey(GUEST_HISTORY_KEY);
 }
-
-// -----------------------------------------------------------------------------
-// Pendientes por usuario
-// -----------------------------------------------------------------------------
 
 function pendingKey(userId: number): string {
   return `${PENDING_KEY_PREFIX}${userId}_v1`;
 }
 
+/** Carga los pendientes de un usuario. */
 export function loadPendingDraws(userId: number): LocalHistoryEntry[] {
   return readVersioned(pendingKey(userId), isHistoryEntryArray) ?? [];
 }
 
+/** Reemplaza los pendientes de un usuario. */
 export function savePendingDraws(
   userId: number,
   entries: LocalHistoryEntry[],
@@ -293,11 +271,13 @@ export function savePendingDraws(
   writeVersioned(pendingKey(userId), entries);
 }
 
+/** Agrega o actualiza un pendiente del usuario. */
 export function savePendingDraw(userId: number, entry: LocalHistoryEntry): void {
   const current = loadPendingDraws(userId).filter((e) => e.id !== entry.id);
   savePendingDraws(userId, [entry, ...current]);
 }
 
+/** Borra un pendiente del usuario. */
 export function removePendingDraw(userId: number, id: string): void {
   const current = loadPendingDraws(userId).filter((e) => e.id !== id);
   if (current.length > 0) {
@@ -307,13 +287,10 @@ export function removePendingDraw(userId: number, id: string): void {
   }
 }
 
+/** Borra todos los pendientes de un usuario. */
 export function clearPendingDraws(userId: number): void {
   removeKey(pendingKey(userId));
 }
-
-// -----------------------------------------------------------------------------
-// Opciones por pantalla
-// -----------------------------------------------------------------------------
 
 function isDiceOptions(value: unknown): value is DiceOptions {
   if (!isRecord(value)) {
@@ -396,70 +373,82 @@ function isWeightedOptions(value: unknown): value is WeightedOptions {
   );
 }
 
+/** Carga las opciones de la pantalla de dados. */
 export function loadDiceOptions(): DiceOptions | null {
   return readVersioned(DICE_OPTIONS_KEY, isDiceOptions);
 }
 
+/** Guarda las opciones de la pantalla de dados. */
 export function saveDiceOptions(options: DiceOptions): void {
   writeVersioned(DICE_OPTIONS_KEY, options);
 }
 
+/** Borra las opciones de la pantalla de dados. */
 export function clearDiceOptions(): void {
   removeKey(DICE_OPTIONS_KEY);
 }
 
+/** Carga las opciones del generador de números. */
 export function loadNumbersOptions(): NumbersOptions | null {
   return readVersioned(NUMBERS_OPTIONS_KEY, isNumbersOptions);
 }
 
+/** Guarda las opciones del generador de números. */
 export function saveNumbersOptions(options: NumbersOptions): void {
   writeVersioned(NUMBERS_OPTIONS_KEY, options);
 }
 
+/** Borra las opciones del generador de números. */
 export function clearNumbersOptions(): void {
   removeKey(NUMBERS_OPTIONS_KEY);
 }
 
+/** Carga las opciones de la ruleta. */
 export function loadRouletteOptions(): RouletteOptions | null {
   return readVersioned(ROULETTE_OPTIONS_KEY, isRouletteOptions);
 }
 
+/** Guarda las opciones de la ruleta. */
 export function saveRouletteOptions(options: RouletteOption[]): void {
   writeVersioned(ROULETTE_OPTIONS_KEY, { options });
 }
 
+/** Borra las opciones de la ruleta. */
 export function clearRouletteOptions(): void {
   removeKey(ROULETTE_OPTIONS_KEY);
 }
 
+/** Carga las opciones del generador de equipos. */
 export function loadTeamsOptions(): TeamsOptions | null {
   return readVersioned(TEAMS_OPTIONS_KEY, isTeamsOptions);
 }
 
+/** Guarda las opciones del generador de equipos. */
 export function saveTeamsOptions(options: TeamsOptions): void {
   writeVersioned(TEAMS_OPTIONS_KEY, options);
 }
 
+/** Borra las opciones del generador de equipos. */
 export function clearTeamsOptions(): void {
   removeKey(TEAMS_OPTIONS_KEY);
 }
 
+/** Carga las opciones del sorteo ponderado. */
 export function loadWeightedOptions(): WeightedOptions | null {
   return readVersioned(WEIGHTED_OPTIONS_KEY, isWeightedOptions);
 }
 
+/** Guarda las opciones del sorteo ponderado. */
 export function saveWeightedOptions(options: WeightedOptions): void {
   writeVersioned(WEIGHTED_OPTIONS_KEY, options);
 }
 
+/** Borra las opciones del sorteo ponderado. */
 export function clearWeightedOptions(): void {
   removeKey(WEIGHTED_OPTIONS_KEY);
 }
 
-// -----------------------------------------------------------------------------
-// Estado del panel de historial
-// -----------------------------------------------------------------------------
-
+/** Carga si el panel de historial estaba abierto. */
 export function loadHistoryOpen(): boolean | null {
   return readVersioned(
     HISTORY_OPEN_KEY,
@@ -467,10 +456,12 @@ export function loadHistoryOpen(): boolean | null {
   );
 }
 
+/** Guarda el estado abierto del panel de historial. */
 export function saveHistoryOpen(open: boolean): void {
   writeVersioned(HISTORY_OPEN_KEY, open);
 }
 
+/** Borra el estado del panel de historial. */
 export function clearHistoryOpen(): void {
   removeKey(HISTORY_OPEN_KEY);
 }

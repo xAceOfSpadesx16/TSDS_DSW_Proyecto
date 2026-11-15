@@ -1,13 +1,4 @@
-// =============================================================================
-// HistoryAside
-//
-// Panel lateral con las últimas operaciones del usuario (autor o anónimo).
-// Colapsado por defecto; el estado se recuerda en `storage.ts`. Los
-// resultados se formatean por módulo y las fechas se agrupan por día.
-//
-// La variante `mobile` queda preparada para la Fase 5: el panel se muestra
-// como hoja inferior y conserva el mismo contenido.
-// =============================================================================
+/** Panel de historial y su botón flotante en mobile. */
 
 import { useEffect, useMemo, useState } from 'react';
 
@@ -49,10 +40,10 @@ function ChevronIcon({ open }: { open: boolean }) {
 }
 
 interface Props {
-  /** `responsive` elige sidebar/hoja inferior; los otros modos son explícitos. */
   variant?: 'responsive' | 'sidebar' | 'mobile';
 }
 
+/** Lista los sorteos agrupados por día y permite limpiarlos. */
 export function HistoryAside({ variant = 'responsive' }: Props) {
   const entries = useHistoryStore((s) => s.entries);
   const currentPage = useHistoryStore((s) => s.currentPage);
@@ -73,15 +64,8 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
 
   const groups = useMemo(() => formatHistoryGroups(entries), [entries]);
 
-  // "Cargar más" solo tiene sentido con sesión (el invitado solo tiene
-  // su mirror local, sin paginación de servidor) y si quedan páginas.
   const canLoadMore = isAuthenticated && currentPage < lastPage;
 
-  /**
-   * "Limpiar" con sesión borra los registros en el backend, que no se
-   * pueden recuperar: por eso pide confirmación. Sin sesión solo vacía
-   * memoria, así que no molesta preguntar.
-   */
   const onClear = () => {
     if (
       isAuthenticated &&
@@ -98,8 +82,6 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
   const isResponsive = variant === 'responsive';
   const showFloating = isMobileSheet || isResponsive;
 
-  // En `mobile` el panel es una hoja inferior no modal. En `responsive`
-  // además se comporta como sidebar estático desde `lg`.
   const visibilityClass = isMobileSheet
     ? openMobile
       ? '!flex !fixed !bottom-0 !left-0 !right-0 !max-h-[60vh] z-40 overflow-y-auto'

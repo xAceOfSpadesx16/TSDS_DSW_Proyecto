@@ -1,25 +1,22 @@
-// =============================================================================
-// NumbersStrategy — módulo `numbers`.
-//
-// Genera `count` enteros en [min, max], con o sin repetición. El resultado
-// se ordena ascendente para coincidir con el comportamiento del frontend
-// original (`js/services/DiceService.js`).
-// =============================================================================
+/** Estrategia del generador de números. */
 
 import type { NumbersInput, NumbersResult } from '../domain/contracts';
 import type { DrawExecution, DrawStrategy } from '../domain/contracts';
 import { randomInt, uniqueRandomInts } from '../lib/mathUtils';
 
+/** Genera números enteros con o sin repetición. */
 export class NumbersStrategy
   implements DrawStrategy<NumbersInput, NumbersResult, NumbersResult>
 {
   readonly moduleId = 'numbers' as const;
 
+  /** Describe cantidad, rango y unicidad. */
   actionLabel(input: NumbersInput): string {
     const unique = input.unique ? 'únicos' : 'con repetición';
     return `${input.count} números [${input.min}-${input.max}] (${unique})`;
   }
 
+  /** Normaliza el payload al contrato del backend. */
   buildPayload(input: NumbersInput): NumbersInput {
     return {
       count: input.count,
@@ -29,6 +26,7 @@ export class NumbersStrategy
     };
   }
 
+  /** Genera los números y los devuelve ordenados. */
   execute(input: NumbersInput): DrawExecution<NumbersResult, NumbersResult> {
     if (input.count < 1) {
       throw new Error('La cantidad debe ser >= 1.');
@@ -54,4 +52,5 @@ export class NumbersStrategy
   }
 }
 
+/** Instancia compartida de la estrategia. */
 export const numbersStrategy = new NumbersStrategy();

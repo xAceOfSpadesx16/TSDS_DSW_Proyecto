@@ -1,13 +1,6 @@
-// =============================================================================
-// Tipos del dominio — espejo fiel del contrato del backend Laravel.
-// Mantener este archivo sincronizado con `app/Modules/History/Strategies/*`
-// y `app/Modules/Auth/*` del backend.
-// =============================================================================
+/** Tipos del dominio que reflejan el contrato de la API. */
 
-// -----------------------------------------------------------------------------
-// Autenticación
-// -----------------------------------------------------------------------------
-
+/** Usuario autenticado que devuelve el backend. */
 export interface User {
   id: number;
   name: string;
@@ -17,6 +10,7 @@ export interface User {
   updated_at?: string;
 }
 
+/** Respuesta de login y registro. */
 export interface AuthResponse {
   user: User;
   token: string;
@@ -24,24 +18,19 @@ export interface AuthResponse {
   expires_in: number;
 }
 
+/** Credenciales de `POST /api/auth/login`. */
 export interface LoginPayload {
   email: string;
   password: string;
 }
 
+/** Datos de `POST /api/auth/register`. */
 export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
 }
 
-// -----------------------------------------------------------------------------
-// Historial
-// -----------------------------------------------------------------------------
-
-// `ModuleName` se define en `contracts.ts` (es la clave de los mapas de
-// payload/result por módulo) y se re-exporta acá porque es donde lo
-// consumían el resto del código antes.
 export type { ModuleName } from './contracts';
 import type {
   ModuleName,
@@ -51,19 +40,19 @@ import type {
   ModuleResults,
 } from './contracts';
 
+/** Registro de historial tal como lo devuelve el backend. */
 export interface HistoryRecord {
   id: string;
   user_id: number;
   module_name: ModuleName;
   action: string;
-  /** Parámetros del sorteo, tipados según `module_name`. */
   payload: ModulePayload;
-  /** Salida del sorteo, tipada según `module_name`. */
   result: ModuleResult;
   created_at: string;
   updated_at: string;
 }
 
+/** Metadatos de paginación de `GET /api/histories`. */
 export interface HistoryMeta {
   current_page: number;
   last_page: number;
@@ -71,19 +60,13 @@ export interface HistoryMeta {
   total: number;
 }
 
+/** Lista paginada de historial. */
 export interface HistoryListResponse {
   data: HistoryRecord[];
   meta: HistoryMeta;
 }
 
-/**
- * Cuerpo de `POST /api/history`.
- *
- * Se modela como unión discriminada por `module_name`: según el módulo,
- * `payload` y `result` tienen que ser de ese módulo. Antes ambos eran
- * `Record<string, unknown>`, que no encontraba relación entre el módulo y
- * sus campos y además rechazaba las `interface` del dominio.
- */
+/** Cuerpo de `POST /api/history`, discriminado por módulo. */
 export type CreateHistoryPayload = {
   [M in ModuleName]: {
     module_name: M;
@@ -93,64 +76,34 @@ export type CreateHistoryPayload = {
   };
 }[ModuleName];
 
-// -----------------------------------------------------------------------------
-// Health
-// -----------------------------------------------------------------------------
-
-/**
- * Respuesta de `GET /api/health`.
- *
- * Refleja el closure de `routes/api.php`: `{ status, service, version, timestamp }`.
- * El `service` sale de `config('app.name')` en el backend.
- */
+/** Respuesta de `GET /api/health`. */
 export interface HealthStatus {
-  /** `ok` cuando el backend responde. */
   status: string;
-  /** Nombre de la aplicación, de `config('app.name')`. */
   service: string;
-  /** Versión del backend. */
   version: string;
-  /** Momento del check en ISO-8601. */
   timestamp: string;
 }
 
-// -----------------------------------------------------------------------------
-// Legal
-// -----------------------------------------------------------------------------
-
-/** Una sección del disclaimer (encabezado + párrafo). */
+/** Sección del aviso legal. */
 export interface LegalDisclaimerSection {
   heading: string;
   body: string;
 }
 
-/**
- * Respuesta de `GET /api/legal/disclaimer`.
- *
- * Refleja `LegalService::disclaimer()` del backend.
- */
+/** Respuesta de `GET /api/legal/disclaimer`. */
 export interface LegalDisclaimer {
   title: string;
   version: string;
   sections: LegalDisclaimerSection[];
 }
 
-// -----------------------------------------------------------------------------
-// Errores de la API
-// -----------------------------------------------------------------------------
-
-/**
- * Forma estándar de error que devuelve el backend (ver bootstrap/app.php):
- * - 401: `{ message }`
- * - 422: `{ message, errors?: Record<string, string[]> }`
- * - 404: `{ message }`
- * - 500: `{ message }`
- */
+/** Cuerpo de error estándar de la API. */
 export interface ApiErrorBody {
   message: string;
   errors?: Record<string, string[]>;
 }
 
+/** Error HTTP de la API con estado y errores de validación. */
 export class ApiError extends Error {
   readonly status: number;
   readonly errors?: Record<string, string[]>;

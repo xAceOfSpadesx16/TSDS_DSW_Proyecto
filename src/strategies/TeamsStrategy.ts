@@ -1,10 +1,4 @@
-// =============================================================================
-// TeamsStrategy — módulo `teams`.
-//
-// Divide una lista de participantes en `value` grupos (modo `count`) o en
-// grupos de tamaño `value` (modo `size`). Soporta exclusiones: dos personas
-// que no pueden terminar en el mismo equipo.
-// =============================================================================
+/** Estrategia del generador de equipos. */
 
 import type {
   TeamsInput,
@@ -15,8 +9,7 @@ import type { DrawExecution, DrawStrategy } from '../domain/contracts';
 import { fisherYatesShuffle } from '../lib/mathUtils';
 import { TEAM_PALETTE } from '../lib/palette';
 
-// Paleta compartida para los bordes de las tarjetas de equipo. Los colores
-// viven en `palette.ts` porque también los usa la ruleta y el canvas.
+/** Paleta de bordes de las tarjetas de equipo. */
 export const TEAM_COLORS: readonly string[] = TEAM_PALETTE;
 
 function pickColor(index: number): string {
@@ -31,11 +24,6 @@ function roundRobinSplit(shuffled: string[], groupCount: number): string[][] {
   return teams;
 }
 
-/**
- * Valida y normaliza las exclusiones contra la lista real de participantes.
- * La UI ya las elige de una lista, pero la estrategia no confía en eso: así
- * ningún payload manipulado puede generar un resultado que viole una regla.
- */
 function normalizeExclusions(
   participants: string[],
   exclusions: ReadonlyArray<[string, string]>,
@@ -58,7 +46,6 @@ function normalizeExclusions(
         `La exclusión ${a} ↔ ${b} incluye a alguien que no participa. Elegí dos personas de la lista.`,
       );
     }
-    // JSON evita colisiones con nombres que contengan separadores como `|`.
     const key = JSON.stringify([a, b].sort());
     if (seen.has(key)) {
       continue;
@@ -70,7 +57,6 @@ function normalizeExclusions(
   return normalized;
 }
 
-/** Capacidad de cada equipo para repartir de forma equilibrada. */
 function teamCapacities(total: number, groupCount: number): number[] {
   const base = Math.floor(total / groupCount);
   const extra = total % groupCount;
@@ -88,13 +74,6 @@ function impossibleExclusionsMessage(
   return `${verb} ${subject} con ${groupCount} ${teamsLabel} de tamaño equilibrado: ${pairs}. Ajustá la cantidad de equipos o el tamaño de grupo, o quitá alguna restricción.`;
 }
 
-/**
- * Split respetando exclusiones (pares que no pueden ir juntos).
- *
- * Usa backtracking con capacidad por equipo y heurística de "menos opciones
- * primero". Si no existe una asignación válida, lanza un error en vez de
- * devolver un resultado que viole una exclusión.
- */
 function splitWithExclusions(
   participants: string[],
   groupCount: number,
@@ -109,8 +88,6 @@ function splitWithExclusions(
 
   const capacities = teamCapacities(participants.length, groupCount);
   const teams: string[][] = Array.from({ length: groupCount }, () => []);
-  // Array, no Set: la lista puede tener nombres repetidos y cada aparición
-  // debe terminar en un equipo.
   const remaining = fisherYatesShuffle(participants);
 
   const canPlace = (participant: string, teamIndex: number): boolean =>
@@ -123,7 +100,6 @@ function splitWithExclusions(
       return true;
     }
 
-    // MRV: elegimos primero a quien tiene menos equipos disponibles.
     let chosenIndex = -1;
     let chosenOptions: number[] = [];
     for (let i = 0; i < remaining.length; i++) {
@@ -181,21 +157,23 @@ function resolveGroupCount(
     }
     return value;
   }
-  // mode === 'size'
   if (value < 1) {
     throw new Error('El tamaño de grupo debe ser >= 1.');
   }
   return Math.ceil(participants.length / value);
 }
 
+/** Reparte participantes en equipos equilibrados con exclusiones opcionales. */
 export class TeamsStrategy implements DrawStrategy<TeamsInput, TeamsResult, TeamsResult> {
   readonly moduleId = 'teams' as const;
 
+  /** Describe participantes y modo de reparto. */
   actionLabel(input: TeamsInput): string {
     const word = input.mode === 'count' ? 'grupos' : 'tam. grupo';
     return `${input.participants.length} participantes → ${input.value} ${word}`;
   }
 
+  /** Normaliza el payload al contrato del backend. */
   buildPayload(input: TeamsInput): TeamsInput {
     return {
       participants: input.participants,
@@ -207,6 +185,7 @@ export class TeamsStrategy implements DrawStrategy<TeamsInput, TeamsResult, Team
     };
   }
 
+  /** Ejecuta el reparto. */
   execute(input: TeamsInput): DrawExecution<TeamsResult, TeamsResult> {
     const participants = input.participants
       .map((p) => p.trim())
@@ -227,4 +206,5 @@ export class TeamsStrategy implements DrawStrategy<TeamsInput, TeamsResult, Team
   }
 }
 
+/** Instancia compartida de la estrategia. */
 export const teamsStrategy = new TeamsStrategy();

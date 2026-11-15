@@ -1,15 +1,3 @@
-// =============================================================================
-// NumbersPage (/numbers)
-//
-// Formulario con `count`, `min`, `max` y el toggle de unicidad. Se usa la
-// `numbersStrategy` que ya existía (estaba registrada en la fábrica de
-// estrategias pero sin pantalla) y registra el resultado con `addHistory`,
-// igual que el resto de las páginas.
-//
-// Las validaciones del front cubren lo que la estrategia ya rechaza
-// (count >= 1, max >= min) más el caso que la estrategia no puede saber:
-// pedir más números únicos de los que caben en el rango.
-// =============================================================================
 
 import { useEffect, useState, type FormEvent } from 'react';
 
@@ -31,6 +19,7 @@ import {
 } from '../lib/numericInput';
 import type { NumbersResult } from '../domain/contracts';
 
+/** Página del generador de números. */
 export function NumbersPage() {
   const [initialOptions] = useState(() => loadNumbersOptions());
   const [count, setCount] = useState<NumericInput>(initialOptions?.count ?? 5);
@@ -70,7 +59,6 @@ export function NumbersPage() {
     setError(null);
     setResult(null);
 
-    // Los mínimos se aplican al enviar, no en cada tecla.
     const countNum = clampMin(count, 1);
     const minNum = toNumberOr(min);
     const maxNum = toNumberOr(max);
@@ -87,8 +75,7 @@ export function NumbersPage() {
       return;
     }
 
-    // Con `unique` no se pueden pedir más números distintos de los que
-    // contiene el rango: el sorteo se quedaría sin combinaciones.
+    // Con `unique` no se pueden pedir más números que el rango disponible.
     const rangeSize = maxNum - minNum + 1;
     if (unique && countNum > rangeSize) {
       setError(

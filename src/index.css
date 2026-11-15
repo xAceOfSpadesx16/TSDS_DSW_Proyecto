@@ -3,11 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
- * Tokens de la dirección "Papel de goma" (claro). Los componentes consumen
- * estas variables a través de Tailwind o de utilidades semánticas; no hay
- * hexadecimales sueltos en JSX.
- */
+/* Tokens de la dirección "Papel de goma" (claro). */
 :root {
   color-scheme: light;
 
@@ -163,11 +159,7 @@ input[type="color"] {
   padding: 0.25rem;
 }
 
-/*
- * Estilos globales preservados literalmente del antiguo `css/globals.css`.
- * Si hay que ajustar keyframes o la flecha de la ruleta, este archivo es
- * la única fuente de verdad.
- */
+/* Keyframes y reglas globales de la app. */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -187,11 +179,7 @@ input[type="color"] {
   }
 }
 
-/*
- * Ancho único del área de trabajo. Todas las pantallas de sorteo usan
- * `.workspace` + `.workspace-grid`, y el historial ocupa la segunda columna.
- * Cambiar el ancho acá lo cambia en toda la app.
- */
+/* Ancho único del área de trabajo y su grilla con el historial. */
 @layer components {
   .workspace {
     width: 100%;
@@ -260,10 +248,7 @@ input[type="color"] {
   filter: drop-shadow(var(--shadow-arrow));
 }
 
-/*
- * Alternativa de alto contraste: sin sombras, bordes sólidos y foco más
- * grueso. La geometría y la jerarquía no cambian.
- */
+/* Alto contraste: sin sombras, bordes sólidos y foco más grueso. */
 @media (prefers-contrast: more) {
   :root {
     --color-muted: #221f1a;

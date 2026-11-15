@@ -1,3 +1,6 @@
+/** Espacio publicitario reservado con marcado de AdSense opcional. */
+
+/** Formato estándar del espacio publicitario. */
 export type AdSlotVariant =
   | 'tower'
   | 'tower-wide'
@@ -8,7 +11,6 @@ export type AdSlotVariant =
 interface AdSize {
   width: number;
   height: number;
-  /** Identificador de bloque de AdSense; reemplazar por el real al publicar. */
   slot: string;
 }
 
@@ -20,6 +22,7 @@ const AD_SIZES: Record<AdSlotVariant, AdSize> = {
   'mobile-banner': { width: 320, height: 100, slot: '1234567894' },
 };
 
+/** Props de `AdSlot`. */
 export interface AdSlotProps {
   variant: AdSlotVariant;
   className?: string;
@@ -29,6 +32,7 @@ function readClient(): string {
   return (import.meta.env.VITE_ADSENSE_CLIENT ?? '').trim();
 }
 
+/** Recuadro de reserva o `ins.adsbygoogle` si hay cliente configurado. */
 export function AdSlot({ variant, className = '' }: AdSlotProps) {
   const size = AD_SIZES[variant];
   const client = readClient();

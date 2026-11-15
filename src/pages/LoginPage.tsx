@@ -1,10 +1,3 @@
-// =============================================================================
-// LoginPage (/login)
-//
-// Form simple que llama `authStore.login`. Muestra errores de validación
-// por campo si el backend devuelve 422 (ej: email no registrado).
-// =============================================================================
-
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 
@@ -13,6 +6,7 @@ import { Field } from '../components/Field';
 import { useAuthStore, selectIsAuthenticated } from '../store/authStore';
 import { ApiError } from '../domain/types';
 
+/** Página de login. */
 export function LoginPage() {
   const login = useAuthStore((s) => s.login);
   const status = useAuthStore((s) => s.status);

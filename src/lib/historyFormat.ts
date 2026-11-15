@@ -1,23 +1,20 @@
-// =============================================================================
-// historyFormat — presentación de los resultados del historial.
-//
-// Convierte el `record` de cada sorteo en un resumen legible y, para equipos,
-// en la lista de integrantes que el panel muestra dentro de un `<details>`.
-// Es una función pura y compartida por el panel y sus tests.
-// =============================================================================
+/** Presentación de los resultados del historial. */
 
 import type { LocalHistoryEntry } from '../store/historyStore';
 
+/** Equipo formateado para el detalle del historial. */
 export interface HistoryTeamView {
   name: string;
   members: string[];
 }
 
+/** Resumen legible de una entrada del historial. */
 export interface HistoryResultView {
   summary: string;
   teams?: HistoryTeamView[];
 }
 
+/** Entradas del historial agrupadas por día. */
 export interface HistoryGroup {
   dateKey: string;
   label: string;
@@ -35,11 +32,6 @@ const TIME_FORMATTER = new Intl.DateTimeFormat('es', {
   minute: '2-digit',
 });
 
-/**
- * Resume el resultado real de un sorteo. Si la entrada no tiene `record`
- * (por ejemplo, un registro viejo o una entrada manipulada), cae en la
- * descripción que ya trae el store.
- */
 function fallback(entry: LocalHistoryEntry): HistoryResultView {
   return { summary: entry.description };
 }
@@ -52,11 +44,7 @@ function isNumberArray(value: unknown): value is number[] {
   return Array.isArray(value) && value.every((item) => typeof item === 'number');
 }
 
-/**
- * Resume el resultado real de un sorteo. Si la entrada no tiene `record`
- * (por ejemplo, un registro viejo) o el `record` no respeta la forma de su
- * módulo, cae en la descripción que ya trae el store.
- */
+/** Resume el resultado de un sorteo según su módulo. */
 export function formatHistoryResult(entry: LocalHistoryEntry): HistoryResultView {
   const record = entry.record;
   if (!record) {
@@ -142,7 +130,7 @@ export function formatHistoryResult(entry: LocalHistoryEntry): HistoryResultView
   return fallback(entry);
 }
 
-/** Hora local de la entrada, con dos dígitos. */
+/** Hora local de una entrada, con dos dígitos. */
 export function formatHistoryTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) {
@@ -166,11 +154,7 @@ function readableDate(dateKey: string): string {
   return DATE_FORMATTER.format(date);
 }
 
-/**
- * Agrupa las entradas por día local conservando el orden recibido (más
- * reciente primero). "Hoy" y "Ayer" se calculan contra `now`, que los tests
- * pueden fijar.
- */
+/** Agrupa las entradas por día local conservando el orden recibido. */
 export function formatHistoryGroups(
   entries: LocalHistoryEntry[],
   now: Date = new Date(),

@@ -1,10 +1,4 @@
-// =============================================================================
-// DiceStrategy — implementación del módulo `dice`.
-//
-// Una sola tirada o tirada múltiple vía `formula` (notación RPG: `2d6+3`).
-// El resultado local y el resultado enviado al backend tienen la misma
-// forma: `{ rolls, total, modifier, formula? }`.
-// =============================================================================
+/** Estrategia del módulo de dados. */
 
 import type { DiceInput, DiceResult } from '../domain/contracts';
 import type { DrawExecution, DrawStrategy } from '../domain/contracts';
@@ -40,9 +34,11 @@ function rollWithFormula(formula: string): DiceResult {
   };
 }
 
+/** Tiradas simples o con fórmula RPG. */
 export class DiceStrategy implements DrawStrategy<DiceInput, DiceResult, DiceResult> {
   readonly moduleId = 'dice' as const;
 
+  /** Devuelve `d20+2` o la fórmula normalizada. */
   actionLabel(input: DiceInput): string {
     if (input.formula) {
       return input.formula.toLowerCase();
@@ -51,6 +47,7 @@ export class DiceStrategy implements DrawStrategy<DiceInput, DiceResult, DiceRes
     return `d${input.sides}${modStr}`;
   }
 
+  /** Normaliza el payload al contrato del backend. */
   buildPayload(input: DiceInput): DiceInput {
     return {
       sides: input.sides,
@@ -60,6 +57,7 @@ export class DiceStrategy implements DrawStrategy<DiceInput, DiceResult, DiceRes
     };
   }
 
+  /** Ejecuta la tirada. */
   execute(input: DiceInput): DrawExecution<DiceResult, DiceResult> {
     const result = input.formula
       ? rollWithFormula(input.formula)
@@ -82,4 +80,5 @@ export class DiceStrategy implements DrawStrategy<DiceInput, DiceResult, DiceRes
   }
 }
 
+/** Instancia compartida de la estrategia. */
 export const diceStrategy = new DiceStrategy();

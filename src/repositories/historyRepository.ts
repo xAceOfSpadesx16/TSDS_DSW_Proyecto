@@ -1,10 +1,4 @@
-// =============================================================================
-// HistoryRepository
-//
-// Endpoints de historial:
-// - POST /api/history         — persiste un sorteo ejecutado
-// - GET  /api/histories       — lista paginada del usuario autenticado
-// =============================================================================
+/** Endpoints del historial. */
 
 import type {
   CreateHistoryPayload,
@@ -13,16 +7,20 @@ import type {
 } from '../domain/types';
 import { http } from './httpClient';
 
+/** Parámetros de paginación del historial. */
 export interface HistoryListQuery {
   page?: number;
   per_page?: number;
 }
 
+/** Cliente de los endpoints de historial. */
 export const historyRepository = {
+  /** Persiste un sorteo. */
   create(payload: CreateHistoryPayload): Promise<{ data: HistoryRecord }> {
     return http.post<{ data: HistoryRecord }>('/history', payload);
   },
 
+  /** Lista el historial del usuario autenticado. */
   list(query: HistoryListQuery = {}): Promise<HistoryListResponse> {
     return http.get<HistoryListResponse>('/histories', {
       page: query.page,
@@ -30,12 +28,12 @@ export const historyRepository = {
     });
   },
 
-  /** Borra un registro propio. 204 si lo borró, 404 si no es suyo o no existe. */
+  /** Borra un registro propio. */
   remove(id: string): Promise<void> {
     return http.delete<void>(`/history/${encodeURIComponent(id)}`);
   },
 
-  /** Borra todos los registros del usuario autenticado. 204. */
+  /** Borra todo el historial del usuario. */
   clearAll(): Promise<void> {
     return http.delete<void>('/histories');
   },

@@ -1,18 +1,4 @@
-// =============================================================================
-// RootLayout
-//
-// Estructura común a todas las páginas: Header + grid principal + outlet de
-// React Router. La página decide si renderiza el HistoryAside dentro del
-// slot derecho del grid (la home lo omite).
-//
-// Además pide el disclaimer al backend una vez al montar y lo muestra en el
-// pie. Si la petición falla no renderiza el pie: la app nunca se bloquea por
-// un texto legal.
-//
-// También consulta `/api/health` al arrancar. Si el backend no responde,
-// muestra un aviso discreto con botón "Reintentar" — se puede sortear igual,
-// solo que el historial no se guarda.
-// =============================================================================
+/** Estructura común: header, contenido, publicidad y pie. */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
@@ -36,14 +22,12 @@ const ROUTE_TITLES: Record<string, string> = {
   '/register': 'Registro · Thrive Randomizer',
 };
 
+/** Layout raíz de la aplicación. */
 export function RootLayout() {
   const location = useLocation();
-  // Normaliza mayúsculas y barra final: `/DICE` y `/dice/` son la misma
-  // pantalla para React Router y deben compartir título.
   const normalizedPath =
     location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
   const lastPathRef = useRef(normalizedPath);
-  // Login, registro y 404 no llevan publicidad; el resto de las rutas sí.
   const showAds =
     ROUTE_TITLES[normalizedPath] !== undefined &&
     normalizedPath !== '/login' &&
@@ -54,9 +38,6 @@ export function RootLayout() {
       ROUTE_TITLES[normalizedPath] ??
       'Página no encontrada · Thrive Randomizer';
 
-    // En el primer render (y en la doble ejecución de StrictMode) no robamos
-    // el foco: el enlace de salto debe ser el primero con Tab. Solo enfocamos
-    // el h1 cuando la ruta normalizada cambió de verdad.
     const previousPath = lastPathRef.current;
     lastPathRef.current = normalizedPath;
     if (previousPath === normalizedPath) {
@@ -65,13 +46,9 @@ export function RootLayout() {
     document.querySelector<HTMLElement>('main h1')?.focus();
   }, [normalizedPath]);
 
-  // `null` = todavía no llegó (o falló). No se renderiza nada hasta entonces.
   const [disclaimer, setDisclaimer] = useState<LegalDisclaimer | null>(null);
-  // `false` = backend disponible (o aún sin respuesta). `true` = caído.
   const [apiDown, setApiDown] = useState(false);
   const [checking, setChecking] = useState(false);
-  // Distingue una recuperación (estaba caído) de un check exitoso inicial:
-  // solo la recuperación dispara el reintento de pendientes.
   const wasDown = useRef(false);
 
   const guestImportPending = useHistoryStore((s) => s.guestImportPending);
@@ -91,8 +68,6 @@ export function RootLayout() {
         wasDown.current = false;
         setApiDown(false);
         if (recovered) {
-          // El backend volvió a responder: se reintentan los sorteos que
-          // quedaron sin guardar. El store ignora el intento sin sesión.
           void retryPendingDraws();
         }
       })
@@ -111,7 +86,6 @@ export function RootLayout() {
         if (!cancelled) setDisclaimer(data);
       })
       .catch(() => {
-        // Sin disclaimer no hay pie: la app sigue funcionando igual.
         if (!cancelled) setDisclaimer(null);
       });
     return () => {
@@ -140,8 +114,7 @@ export function RootLayout() {
     try {
       await importGuestHistory();
     } catch {
-      // El store deja el mensaje en `guestImportError`; el diálogo sigue
-      // abierto para que el usuario pueda reintentar o elegir "Ahora no".
+      // El mensaje queda en `guestImportError` y el diálogo sigue abierto.
     } finally {
       setImportingGuest(false);
     }
@@ -222,13 +195,7 @@ export function RootLayout() {
   );
 }
 
-/**
- * Columna publicitaria fija a un costado del área de trabajo.
- *
- * Debajo de 1440 px no ocupa lugar; entre 1440 y 1535 muestra el formato de
- * 120×600 y desde 1536 el de 160×600. El `sticky` la mantiene a la vista
- * mientras se recorre la página.
- */
+/** Columna publicitaria sticky a un costado del área de trabajo. */
 function AdRail({ side }: { side: 'left' | 'right' }) {
   return (
     <div
@@ -243,14 +210,7 @@ function AdRail({ side }: { side: 'left' | 'right' }) {
   );
 }
 
-/**
- * Banner publicitario de cierre, visible solo cuando no hay laterales.
- *
- * Usa 728×90 desde 820 px y 320×100 en pantallas más angostas. Queda en el
- * flujo, entre el contenido principal y el pie. Si el banner entra en la
- * franja del botón flotante de historial, publica un desplazamiento para que
- * el botón se aparte y no lo tape.
- */
+/** Banner de cierre, visible cuando no hay laterales. */
 function AdBanner() {
   const bannerRef = useRef<HTMLDivElement>(null);
 
@@ -328,12 +288,7 @@ function AdBanner() {
   );
 }
 
-/**
- * Aviso de backend caído.
- *
- * `role="status"` (no `alert`) porque no es un error de la acción del
- * usuario: es informativo y no debe interrumper un lector de pantalla.
- */
+/** Aviso informativo de backend caído. */
 function ApiDownBanner({
   checking,
   onRetry,
@@ -377,8 +332,6 @@ function DisclaimerFooter({ disclaimer }: { disclaimer: LegalDisclaimer }) {
             v{disclaimer.version}
           </span>
         </h2>
-        {/* Las secciones son largas: van en un `<details>` cerrado para no
-            empujar el contenido de la app al abrir la página. */}
         <details className="text-xs">
           <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-full border border-control bg-surface px-3 font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
             Ver el aviso completo ({disclaimer.sections.length} secciones)

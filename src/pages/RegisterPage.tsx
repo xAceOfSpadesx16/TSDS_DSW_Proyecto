@@ -1,10 +1,3 @@
-// =============================================================================
-// RegisterPage (/register)
-//
-// Form simple que llama `authStore.register`. Muestra errores de validación
-// por campo si el backend devuelve 422.
-// =============================================================================
-
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 
@@ -13,6 +6,7 @@ import { Field } from '../components/Field';
 import { useAuthStore, selectIsAuthenticated } from '../store/authStore';
 import { ApiError } from '../domain/types';
 
+/** Página de registro. */
 export function RegisterPage() {
   const register = useAuthStore((s) => s.register);
   const status = useAuthStore((s) => s.status);

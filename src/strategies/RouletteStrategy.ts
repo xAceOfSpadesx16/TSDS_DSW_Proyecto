@@ -1,12 +1,4 @@
-// =============================================================================
-// RouletteStrategy — módulo `roulette`.
-//
-// - Elegir ganador uniformemente entre las opciones provistas.
-// - Calcula el ángulo final para la animación del canvas (suma de 4–8
-//   vueltas completas + alineación al centro del segmento ganador).
-// - El backend solo recibe `{ winner: { label, color } }`; el `finalAngle`
-//   es local y se descarta antes de persistir el historial.
-// =============================================================================
+/** Estrategia de la ruleta. */
 
 import type {
   RouletteInput,
@@ -17,6 +9,7 @@ import type {
 import type { DrawExecution, DrawStrategy } from '../domain/contracts';
 import { randomInt } from '../lib/mathUtils';
 
+/** Segmento de la ruleta con sus ángulos. */
 export interface RouletteSegment {
   label: string;
   color: string;
@@ -24,6 +17,7 @@ export interface RouletteSegment {
   endAngle: number;
 }
 
+/** Divide las opciones en segmentos de igual ángulo. */
 export function calculateSegments(options: readonly RouletteOption[]): RouletteSegment[] {
   if (options.length === 0) {
     throw new Error('La ruleta necesita al menos una opción.');
@@ -37,13 +31,7 @@ export function calculateSegments(options: readonly RouletteOption[]): RouletteS
   }));
 }
 
-/**
- * Calcula el ángulo final del canvas.
- * - `currentRotation`: ángulo actual acumulado (en radianes, libre).
- * - `targetIndex`: índice del segmento ganador (0..N-1).
- * - `totalSegments`: N.
- * Suma 4–8 vueltas extra (1440°–2880°) más el offset al centro del segmento.
- */
+/** Calcula el ángulo final de la animación para el segmento ganador. */
 export function generateSpinAngle(
   currentRotation: number,
   targetIndex: number,
@@ -52,30 +40,31 @@ export function generateSpinAngle(
   const extraTurns = randomInt(4, 8);
   const baseTurns = extraTurns * Math.PI * 2;
   const anglePerSegment = (Math.PI * 2) / totalSegments;
-  // El puntero está arriba (en el frontend original, -π/2 en coords de canvas).
-  // Para alinear el centro del segmento con el puntero, sumamos media rotación
-  // menos el offset al centro del segmento objetivo.
   const segmentCenter = targetIndex * anglePerSegment + anglePerSegment / 2;
   const target = -Math.PI / 2 - segmentCenter;
   return currentRotation + baseTurns + target;
 }
 
+/** Elige un ganador y calcula el ángulo de la animación. */
 export class RouletteStrategy
   implements
     DrawStrategy<RouletteInput, RouletteResultLocal, RouletteResultBackend>
 {
   readonly moduleId = 'roulette' as const;
 
+  /** Describe la cantidad de opciones. */
   actionLabel(input: RouletteInput): string {
     return `Ruleta con ${input.options.length} opciones`;
   }
 
+  /** Normaliza el payload al contrato del backend. */
   buildPayload(input: RouletteInput): RouletteInput {
     return {
       options: input.options.map((o) => ({ label: o.label, color: o.color })),
     };
   }
 
+  /** Ejecuta el giro. */
   execute(input: RouletteInput): DrawExecution<RouletteResultLocal, RouletteResultBackend> {
     if (input.options.length === 0) {
       throw new Error('Agregá al menos una opción para girar la ruleta.');
@@ -90,4 +79,5 @@ export class RouletteStrategy
   }
 }
 
+/** Instancia compartida de la estrategia. */
 export const rouletteStrategy = new RouletteStrategy();

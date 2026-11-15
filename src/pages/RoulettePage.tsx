@@ -1,13 +1,3 @@
-// =============================================================================
-// RoulettePage (/roulette)
-//
-// - Form para agregar opciones (label + color).
-// - Canvas para la ruleta con animación de giro.
-// - Modal `<dialog>` con el ganador.
-//
-// La estrategia (`RouletteStrategy`) calcula el ángulo final; acá solo se
-// anima y se persiste el resultado en el historial.
-// =============================================================================
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
@@ -121,8 +111,6 @@ function drawRoulette(
 
   ctx.restore();
 
-  // Las etiquetas se dibujan siempre horizontales, fuera de la rotación del
-  // disco: así nunca quedan invertidas, ni siquiera después de un giro.
   ctx.save();
   ctx.fillStyle = ink;
   ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
@@ -141,7 +129,6 @@ function drawRoulette(
   }
   ctx.restore();
 
-  // Hub central.
   ctx.beginPath();
   ctx.arc(centerX, centerY, 14, 0, Math.PI * 2);
   ctx.fillStyle = ink;
@@ -151,6 +138,7 @@ function drawRoulette(
   ctx.stroke();
 }
 
+/** Página de la ruleta de decisiones. */
 export function RoulettePage() {
   const [initialOptions] = useState(() => loadRouletteOptions());
   const [options, setOptions] = useState<RouletteOption[]>(
@@ -187,14 +175,12 @@ export function RoulettePage() {
     dialogRef.current?.close?.();
   };
 
-  // Repintar cuando cambian las opciones.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     drawRoulette(canvas, options, rotationRef.current);
   }, [options]);
 
-  // Repintar en resize.
   useEffect(() => {
     const onResize = () => {
       const canvas = canvasRef.current;
@@ -224,7 +210,6 @@ export function RoulettePage() {
 
   const rafIdRef = useRef<number>(0);
 
-  // Cancela cualquier animación pendiente al desmontar (evita fugas de rAF).
   useEffect(() => {
     return () => {
       if (rafIdRef.current) {

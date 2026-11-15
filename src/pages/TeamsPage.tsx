@@ -1,11 +1,3 @@
-// =============================================================================
-// TeamsPage (/teams)
-//
-// Form con:
-// - textarea para participantes (uno por línea).
-// - toggle entre modo "cantidad de grupos" y "tamaño de grupo".
-// - reglas avanzadas: pares de exclusión (no pueden quedar juntos).
-// =============================================================================
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 
@@ -39,6 +31,7 @@ function parseParticipants(text: string): string[] {
     .filter((participant) => participant.length > 0);
 }
 
+/** Página del generador de equipos. */
 export function TeamsPage() {
   const [initialOptions] = useState(() => loadTeamsOptions());
   const [participantsText, setParticipantsText] = useState(
@@ -70,8 +63,6 @@ export function TeamsPage() {
     });
   }, [participantsText, mode, value, exclusions]);
 
-  // Al generar, el resultado completo se acerca al viewport; el botón de
-  // generar sigue visible porque el desplazamiento es el mínimo necesario.
   useEffect(() => {
     if (!result) return;
     const section = document.getElementById('team-results-section');
@@ -95,11 +86,7 @@ export function TeamsPage() {
     setValue(next === 'count' ? 2 : 3);
   };
 
-  /**
-   * Al cambiar la lista de participantes, las exclusiones que mencionan a
-   * alguien que ya no está se descartan: una regla sobre una persona ausente
-   * no se puede cumplir ni explicar.
-   */
+  /** Descarta exclusiones que mencionan a alguien que ya no participa. */
   const onChangeParticipants = (nextText: string) => {
     setParticipantsText(nextText);
     setError(null);
@@ -149,7 +136,6 @@ export function TeamsPage() {
     e.preventDefault();
     setError(null);
     setResult(null);
-    // El mínimo según el modo se aplica al enviar, no en cada tecla.
     const valueNum = clampValue(value, mode);
     setValue(valueNum);
     if (participants.length < 2) {

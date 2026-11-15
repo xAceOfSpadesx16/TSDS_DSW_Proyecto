@@ -1,9 +1,3 @@
-// =============================================================================
-// LandingPage (/)
-//
-// Equivalente al antiguo `index.html`: hero + grilla de cards con los 5
-// módulos. No usa el aside de historial (mantiene la decisión original).
-// =============================================================================
 
 import { Link } from 'react-router-dom';
 
@@ -55,6 +49,7 @@ const MODULES: ModuleCard[] = [
   },
 ];
 
+/** Landing con el hero y los cinco módulos. */
 export function LandingPage() {
   return (
     <main className="workspace">
