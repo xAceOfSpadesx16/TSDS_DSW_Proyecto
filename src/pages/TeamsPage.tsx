@@ -228,8 +228,18 @@ export function TeamsPage() {
           />
 
           <details className="panel bg-surface rounded-2xl p-3 shadow-low">
-            <summary className="flex min-h-11 cursor-pointer items-center rounded-full border border-control bg-surface px-3 text-sm font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
+            <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-full border border-control bg-surface px-3 text-sm font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
               Reglas avanzadas (exclusiones)
+              <svg
+                viewBox="0 0 20 20"
+                className="summary-chevron h-4 w-4 shrink-0 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path d="m5 7 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </summary>
             <p id="teams-exclusion-hint" className="mt-2 text-xs text-muted">
               Elegí dos personas que no deban quedar en el mismo equipo.

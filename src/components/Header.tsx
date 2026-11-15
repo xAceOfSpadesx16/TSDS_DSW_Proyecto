@@ -117,7 +117,7 @@ export function Header() {
         ) : null}
       </nav>
 
-      <div className="hidden md:flex items-center gap-2 whitespace-nowrap">
+      <div className="hidden md:ml-auto md:flex items-center gap-2 whitespace-nowrap lg:ml-0">
         {isAuthed ? (
           <>
             <span className="hidden max-w-[12rem] truncate text-sm text-muted sm:inline">

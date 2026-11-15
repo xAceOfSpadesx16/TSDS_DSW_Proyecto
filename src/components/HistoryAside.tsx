@@ -92,37 +92,44 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
         : '!hidden lg:!flex lg:!static lg:!w-auto'
       : '';
 
+  const toggleButton = (
+    <button
+      id="history-toggle-btn"
+      type="button"
+      onClick={() => {
+        setOpenMobile((value) => {
+          const next = !value;
+          if (next) {
+            setOpen(true);
+          }
+          return next;
+        });
+      }}
+      aria-pressed={openMobile}
+      aria-controls="history-aside"
+      className={
+        openMobile
+          ? 'inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-low hover:bg-surface-hover active:bg-surface-sunken active:shadow-pressed focus-visible:outline focus-visible:outline-focus'
+          : 'lg:hidden fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-high hover:bg-surface-hover active:bg-surface-sunken active:shadow-pressed focus-visible:outline focus-visible:outline-focus'
+      }
+    >
+      {openMobile ? 'Cerrar' : 'Historial'}
+    </button>
+  );
+
   return (
     <>
-      {showFloating ? (
-        <button
-          id="history-toggle-btn"
-          type="button"
-          onClick={() => {
-            setOpenMobile((value) => {
-              const next = !value;
-              if (next) {
-                setOpen(true);
-              }
-              return next;
-            });
-          }}
-          aria-pressed={openMobile}
-          aria-controls="history-aside"
-          className="lg:hidden fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-high hover:bg-surface-hover active:bg-surface-sunken active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
-        >
-          {openMobile ? 'Cerrar' : 'Historial'}
-        </button>
-      ) : null}
+      {showFloating && !openMobile ? toggleButton : null}
 
       <aside
         id="history-aside"
         aria-label="Historial de operaciones"
-        className={`panel self-start bg-surface rounded-2xl p-4 flex flex-col gap-3 shadow-high lg:shadow-raised ${visibilityClass}`}
+        className={`panel self-start bg-surface rounded-2xl p-4 flex flex-col gap-3 shadow-high lg:sticky lg:top-[4.5rem] lg:shadow-raised ${visibilityClass}`}
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-base font-bold text-ink">Historial</h2>
           <div className="flex items-center gap-2">
+            {showFloating && openMobile ? toggleButton : null}
             {open && entries.length > 0 ? (
               <button
                 id="clear-history-btn"
@@ -139,10 +146,14 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
               onClick={() => setOpen((value) => !value)}
               aria-expanded={open}
               aria-controls="history-panel"
+              aria-label={open ? 'Ocultar historial' : 'Mostrar historial'}
               className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-full border border-control bg-surface px-3 text-xs font-semibold text-muted shadow-low transition-colors hover:bg-surface-hover hover:text-ink active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
             >
               <ChevronIcon open={open} />
-              <span>{open ? 'Ocultar historial' : 'Mostrar historial'}</span>
+              <span>
+                {open ? 'Ocultar' : 'Mostrar'}
+                <span className="hidden sm:inline"> historial</span>
+              </span>
             </button>
           </div>
         </div>
@@ -159,7 +170,10 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
               Sin operaciones registradas.
             </p>
           ) : open ? (
-            <div id="history-list" className="flex min-w-0 flex-col gap-3 overflow-y-auto">
+            <div
+              id="history-list"
+              className="flex min-w-0 flex-col gap-3 overflow-y-auto lg:max-h-[calc(100dvh-16rem)]"
+            >
               {groups.map((group) => (
                 <section
                   key={group.dateKey}
@@ -186,8 +200,8 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
                           data-history-entry
                           className="panel flex min-w-0 flex-col gap-1 break-words px-3 py-2 rounded-2xl bg-surface shadow-low"
                         >
-                          <div className="flex items-start justify-between gap-2">
-                            <span className="text-xs font-semibold text-action">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-semibold text-ink">
                               {MODULE_LABELS[entry.module]}
                             </span>
                             <span className="flex items-center gap-1">
@@ -263,15 +277,17 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
           ) : null}
 
           {open && canLoadMore ? (
-            <button
-              id="history-load-more-btn"
-              type="button"
-              onClick={() => void loadMore()}
-              disabled={loading}
-              className="inline-flex min-h-11 items-center self-center rounded-full border border-control bg-surface px-3 text-xs text-action shadow-low transition-colors hover:bg-surface-hover hover:text-action-hover active:shadow-pressed focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none disabled:cursor-not-allowed"
-            >
-              {loading ? 'Cargando…' : 'Cargar más'}
-            </button>
+            <div className="flex justify-center border-t border-control pt-3">
+              <button
+                id="history-load-more-btn"
+                type="button"
+                onClick={() => void loadMore()}
+                disabled={loading}
+                className="inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-3 text-xs text-action shadow-low transition-colors hover:bg-surface-hover hover:text-action-hover active:shadow-pressed focus-visible:outline focus-visible:outline-focus disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none disabled:cursor-not-allowed"
+              >
+                {loading ? 'Cargando…' : 'Cargar más'}
+              </button>
+            </div>
           ) : null}
         </div>
       </aside>

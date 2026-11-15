@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 /** Página 404. */
 export function NotFoundPage() {
   return (
-    <main className="p-6 w-full mx-auto">
+    <main className="flex min-h-full w-full items-center justify-center p-6">
       <section className="max-w-md mx-auto animate-fade-in flex flex-col items-center gap-4 py-12 text-center">
         <h1
           tabIndex={-1}

@@ -135,9 +135,9 @@ export function RootLayout() {
           {apiDown ? (
             <ApiDownBanner checking={checking} onRetry={checkHealth} />
           ) : null}
-          <div className="flex w-full items-start justify-center">
+          <div className="flex w-full flex-1 items-start justify-center">
             {showAds ? <AdRail side="left" /> : null}
-            <div id="main-content" tabIndex={-1} className="min-w-0 flex-1">
+            <div id="main-content" tabIndex={-1} className="min-w-0 flex-1 self-stretch">
               <Outlet />
             </div>
             {showAds ? <AdRail side="right" /> : null}
@@ -323,7 +323,7 @@ function DisclaimerFooter({ disclaimer }: { disclaimer: LegalDisclaimer }) {
       id="legal-disclaimer"
       role="contentinfo"
       aria-label="Aviso legal"
-      className="panel bg-surface shadow-low px-6 py-6 text-sm text-muted"
+      className="panel mt-auto bg-surface shadow-low px-4 py-6 text-sm text-muted sm:px-6"
     >
       <div className="max-w-3xl mx-auto flex flex-col gap-2">
         <h2 className="text-sm font-bold text-ink">

@@ -131,7 +131,8 @@ select:focus-visible,
 textarea:focus-visible,
 button:focus-visible,
 a:focus-visible,
-summary:focus-visible {
+summary:focus-visible,
+main h1:focus {
   outline: var(--focus-width) solid var(--color-focus);
   outline-offset: var(--focus-offset);
 }
@@ -211,6 +212,25 @@ input[type="color"] {
       grid-template-columns: minmax(0, 1fr) 280px;
     }
   }
+}
+
+details[open] > summary .summary-chevron {
+  transform: rotate(180deg);
+}
+
+/* Scroll visible en el historial: deja claro que la lista continúa. */
+#history-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+#history-list::-webkit-scrollbar-track {
+  background-color: var(--color-surface-sunken);
+  border-radius: var(--radius-pill);
+}
+
+#history-list::-webkit-scrollbar-thumb {
+  background-color: var(--color-control-border);
+  border-radius: var(--radius-pill);
 }
 
 /* Espacios publicitarios: recuadro de reserva sobre superficie hundida. */

@@ -333,7 +333,7 @@ export function WeightedPage() {
               min={1}
               max={100}
               step={1}
-              hint="1 a 100: cuanto más peso, más probabilidad."
+              hint="1 a 100: cuánto más peso, más probabilidad."
               error={addWeightError ?? undefined}
               value={weight}
               onChange={(e) => {
@@ -351,8 +351,18 @@ export function WeightedPage() {
           id="weighted-bulk-details"
           className="panel bg-surface rounded-2xl shadow-raised"
         >
-          <summary className="flex min-h-11 cursor-pointer items-center rounded-full border border-control bg-surface px-4 text-sm font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
+          <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-full border border-control bg-surface px-4 text-sm font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
             Carga masiva
+            <svg
+                viewBox="0 0 20 20"
+                className="summary-chevron h-4 w-4 shrink-0 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path d="m5 7 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
           </summary>
           <div className="flex min-w-0 flex-col gap-2 px-4 pb-4 pt-1">
             <label
@@ -620,7 +630,7 @@ export function WeightedPage() {
             >
               {result.winner.name}
             </p>
-            <p id="weighted-probability" className="mt-1 text-sm text-muted">
+            <p id="weighted-probability" className="mt-1 font-mono text-sm text-muted">
               Probabilidad: <span className="font-mono">{result.probability}%</span>
             </p>
             <output
