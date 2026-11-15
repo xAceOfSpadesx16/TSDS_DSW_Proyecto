@@ -66,6 +66,26 @@ async function expectAxeClean(page: Page) {
 test.describe('Espacios publicitarios', () => {
   test.beforeEach(async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
+    // La API se mockea para que el pie y el aviso no dependan del backend real.
+    await page.route('**/api/legal/disclaimer', (route) =>
+      route.fulfill({
+        json: {
+          title: 'Aviso legal',
+          version: '1.0.0',
+          sections: [{ heading: 'Uso', body: 'Herramienta recreativa.' }],
+        },
+      }),
+    );
+    await page.route('**/api/health', (route) =>
+      route.fulfill({
+        json: {
+          status: 'ok',
+          service: 'Thrive Randomizer',
+          version: '1.0.0',
+          timestamp: new Date().toISOString(),
+        },
+      }),
+    );
   });
 
   for (const viewport of VIEWPORTS) {
