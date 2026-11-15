@@ -219,16 +219,19 @@ details[open] > summary .summary-chevron {
 }
 
 /* Scroll visible en el historial: deja claro que la lista continúa. */
-#history-list::-webkit-scrollbar {
+#history-list::-webkit-scrollbar,
+#history-aside::-webkit-scrollbar {
   width: 10px;
 }
 
-#history-list::-webkit-scrollbar-track {
+#history-list::-webkit-scrollbar-track,
+#history-aside::-webkit-scrollbar-track {
   background-color: var(--color-surface-sunken);
   border-radius: var(--radius-pill);
 }
 
-#history-list::-webkit-scrollbar-thumb {
+#history-list::-webkit-scrollbar-thumb,
+#history-aside::-webkit-scrollbar-thumb {
   background-color: var(--color-control-border);
   border-radius: var(--radius-pill);
 }

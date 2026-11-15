@@ -160,6 +160,27 @@ async function auditPage(page: Page): Promise<AuditIssue[]> {
       })
       .map((node) => node.getBoundingClientRect());
 
+    const clippedByScroll = (el: Element): boolean => {
+      let parent = el.parentElement;
+      while (parent && parent !== document.body) {
+        const cs = getComputedStyle(parent);
+        const scrollsY =
+          cs.overflowY === 'auto' ||
+          cs.overflowY === 'scroll' ||
+          cs.overflowY === 'hidden';
+        if (scrollsY && parent instanceof HTMLElement && parent.clientHeight > 0) {
+          const container = parent.getBoundingClientRect();
+          const own = el.getBoundingClientRect();
+          const centerY = own.top + own.height / 2;
+          if (centerY < container.top || centerY > container.bottom) {
+            return true;
+          }
+        }
+        parent = parent.parentElement;
+      }
+      return false;
+    };
+
     const visible = (el: Element): el is HTMLElement => {
       if (!(el instanceof HTMLElement)) return false;
       if (el.closest('details:not([open])') && !el.closest('summary')) {
@@ -172,7 +193,8 @@ async function auditPage(page: Page): Promise<AuditIssue[]> {
         cs.visibility === 'hidden' ||
         cs.opacity === '0' ||
         rect.width <= 0 ||
-        rect.height <= 0
+        rect.height <= 0 ||
+        clippedByScroll(el)
       ) {
         return false;
       }
@@ -199,10 +221,22 @@ async function auditPage(page: Page): Promise<AuditIssue[]> {
         .filter(Boolean)
         .join(' ');
 
-    const overlayAncestor = (el: Element): Element | null =>
-      el.closest(
-        'dialog[open], #app-nav, #history-aside, .ad-slot, #roulette-result-overlay',
-      );
+    const overlayAncestor = (el: Element): Element | null => {
+      const dialog = el.closest('dialog[open]');
+      if (dialog) return dialog;
+
+      const nav = el.closest('#app-nav');
+      if (nav instanceof HTMLElement && getComputedStyle(nav).position !== 'static') {
+        return nav;
+      }
+
+      const history = el.closest('#history-aside');
+      if (history instanceof HTMLElement && getComputedStyle(history).position === 'fixed') {
+        return history;
+      }
+
+      return null;
+    };
 
     const all = Array.from(document.querySelectorAll('body *'));
 
