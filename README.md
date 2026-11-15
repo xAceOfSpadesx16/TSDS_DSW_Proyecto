@@ -19,7 +19,7 @@ npm run dev            # dev server en http://localhost:5173
 npm run build          # build de producción (tsc -b + vite build)
 npm run preview        # servir dist/ localmente
 npm run lint           # tsc -b (type check por proyectos, sin emitir)
-npm test               # vitest run: 398 tests (40 archivos)
+npm test               # vitest run: 406 tests (41 archivos)
 ```
 
 ## Variables de entorno
@@ -102,8 +102,8 @@ de directorio:
 
 ```bash
 (cd ../TSDS_DSW_Proyecto_Backend && php artisan test)   # backend: 94 tests
-npm test                                                # frontend: 398 tests
+npm test                                                # frontend: 406 tests
 npm run lint                                            # tsc -b, sin errores
 npm run build                                           # tsc -b + vite build
-npx playwright test                                     # 48 E2E
+npx playwright test                                     # 66 E2E
 ```

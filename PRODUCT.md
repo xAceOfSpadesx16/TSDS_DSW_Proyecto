@@ -32,6 +32,7 @@ Una suite de cinco herramientas en una sola interfaz, usable de punta a punta si
 
 - Cinco módulos: Generador de Equipos, Sorteo con Pesos, Ruleta de Decisiones, Dados RPG y Números Aleatorios.
 - Autenticación JWT opcional, registro, historial por usuario y sincronización con backend Laravel.
+- Espacios publicitarios de reserva (laterales, rectángulo y banner) con medidas estándar de AdSense. En esta versión **no se carga el script de anuncios**: sin `VITE_ADSENSE_CLIENT` se muestran como recuadros de reserva y nunca aparecen en login, registro ni 404.
 - Los sorteos funcionan sin sesión; el historial de invitado vive en `localStorage`, está acotado a 100 entradas y se importa a la cuenta al iniciar sesión. Los pendientes de sincronización también se persisten para sobrevivir a una recarga.
 - Stack actual: Vite + React 18 + TypeScript, Tailwind, Zustand, React Router; backend Laravel 12.
 - Interfaz en español, con voseo como tono confirmado.
@@ -48,7 +49,8 @@ Una suite de cinco herramientas en una sola interfaz, usable de punta a punta si
 ## Evidence on Hand
 
 - Aplicación funcional con cinco módulos, autenticación JWT, historial local y sincronizado, y persistencia en `localStorage` del historial de invitado y de los sorteos pendientes.
-- Suite de tests actual: **94** backend, **398** frontend (40 archivos) y **48** E2E de Playwright; el type check del frontend es `tsc -b`.
+- Espacios publicitarios de reserva preparados para AdSense (marcado `ins.adsbygoogle`), sin script externo cargado en esta versión.
+- Suite de tests actual: **94** backend, **406** frontend (41 archivos) y **66** E2E de Playwright; el type check del frontend es `tsc -b`.
 - Documentación técnica en `Frontend/README.md` y `design.md`.
 - No hay testimonios, clientes, métricas de uso, casos de estudio ni contenido de marketing real. No inventarlos.
 

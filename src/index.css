@@ -34,6 +34,9 @@
   --color-warning: #92400e;
   --color-scrim: rgba(34, 31, 26, 0.45);
 
+  /* Recuadro de los espacios publicitarios: visible sin competir con la acción. */
+  --color-ad-border: #8a4b12;
+
   --focus-width: 2px;
   --focus-offset: 2px;
 
@@ -222,6 +225,18 @@ input[type="color"] {
   }
 }
 
+/* Espacios publicitarios: recuadro de reserva sobre superficie hundida. */
+.ad-slot-frame {
+  border: 2px solid var(--color-ad-border);
+}
+
+/* El botón flotante de historial se aparta cuando el banner entra en su franja. */
+@media (max-width: 1023px) {
+  #history-toggle-btn {
+    bottom: calc(1rem + var(--ad-banner-offset, 0px));
+  }
+}
+
 /* Flecha indicadora sobre la ruleta. */
 .dice-registration::after {
   content: '+';
@@ -254,6 +269,7 @@ input[type="color"] {
     --color-muted: #221f1a;
     --color-control-border: #221f1a;
     --color-focus: #221f1a;
+    --color-ad-border: #221f1a;
     --focus-width: 3px;
     --shadow-arrow: 0 0 0 transparent;
     --shadow-low: none;

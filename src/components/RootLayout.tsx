@@ -17,6 +17,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
+import { AdSlot } from './AdSlot';
 import { Header } from './Header';
 import { PrimaryButton } from './PrimaryButton';
 import { legalRepository } from '../repositories/legalRepository';
@@ -42,6 +43,11 @@ export function RootLayout() {
   const normalizedPath =
     location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
   const lastPathRef = useRef(normalizedPath);
+  // Login, registro y 404 no llevan publicidad; el resto de las rutas sí.
+  const showAds =
+    ROUTE_TITLES[normalizedPath] !== undefined &&
+    normalizedPath !== '/login' &&
+    normalizedPath !== '/register';
 
   useEffect(() => {
     document.title =
@@ -156,9 +162,14 @@ export function RootLayout() {
           {apiDown ? (
             <ApiDownBanner checking={checking} onRetry={checkHealth} />
           ) : null}
-          <div id="main-content" tabIndex={-1} className="flex-1">
-            <Outlet />
+          <div className="flex w-full items-start justify-center">
+            {showAds ? <AdRail side="left" /> : null}
+            <div id="main-content" tabIndex={-1} className="min-w-0 flex-1">
+              <Outlet />
+            </div>
+            {showAds ? <AdRail side="right" /> : null}
           </div>
+          {showAds ? <AdBanner /> : null}
           {disclaimer ? <DisclaimerFooter disclaimer={disclaimer} /> : null}
         </div>
 
@@ -208,6 +219,112 @@ export function RootLayout() {
         </dialog>
       </div>
     </>
+  );
+}
+
+/**
+ * Columna publicitaria fija a un costado del área de trabajo.
+ *
+ * Debajo de 1440 px no ocupa lugar; entre 1440 y 1535 muestra el formato de
+ * 120×600 y desde 1536 el de 160×600. El `sticky` la mantiene a la vista
+ * mientras se recorre la página.
+ */
+function AdRail({ side }: { side: 'left' | 'right' }) {
+  return (
+    <div
+      data-ad-rail={side}
+      className={`sticky top-[4.5rem] mt-4 hidden shrink-0 self-start min-[1440px]:flex ${
+        side === 'left' ? 'pl-4' : 'pr-4'
+      }`}
+    >
+      <AdSlot variant="tower" className="min-[1536px]:hidden" />
+      <AdSlot variant="tower-wide" className="hidden min-[1536px]:flex" />
+    </div>
+  );
+}
+
+/**
+ * Banner publicitario de cierre, visible solo cuando no hay laterales.
+ *
+ * Usa 728×90 desde 820 px y 320×100 en pantallas más angostas. Queda en el
+ * flujo, entre el contenido principal y el pie. Si el banner entra en la
+ * franja del botón flotante de historial, publica un desplazamiento para que
+ * el botón se aparte y no lo tape.
+ */
+function AdBanner() {
+  const bannerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const banner = bannerRef.current;
+    if (!banner) {
+      return;
+    }
+    const root = document.documentElement;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const button = document.getElementById('history-toggle-btn');
+      const wide = window.matchMedia?.('(min-width: 1440px)').matches ?? false;
+      if (!button || wide) {
+        root.style.setProperty('--ad-banner-offset', '0px');
+        return;
+      }
+
+      const bannerRect = banner.getBoundingClientRect();
+      const buttonRect = button.getBoundingClientRect();
+      const buttonZoneTop = window.innerHeight - 76;
+      const horizontalOverlap =
+        bannerRect.left < buttonRect.right && buttonRect.left < bannerRect.right;
+
+      if (
+        !horizontalOverlap ||
+        bannerRect.top >= window.innerHeight ||
+        bannerRect.bottom <= buttonZoneTop
+      ) {
+        root.style.setProperty('--ad-banner-offset', '0px');
+        return;
+      }
+
+      const offset = Math.max(0, window.innerHeight - bannerRect.top + 8);
+      root.style.setProperty('--ad-banner-offset', `${Math.round(offset)}px`);
+    };
+
+    const schedule = () => {
+      if (frame === 0) {
+        frame = requestAnimationFrame(update);
+      }
+    };
+
+    update();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    const observer =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(schedule);
+    observer?.observe(banner);
+    observer?.observe(document.body);
+
+    return () => {
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      observer?.disconnect();
+      if (frame !== 0) {
+        cancelAnimationFrame(frame);
+      }
+      root.style.removeProperty('--ad-banner-offset');
+    };
+  }, []);
+
+  return (
+    <div
+      ref={bannerRef}
+      className="flex w-full justify-center px-0 py-6 min-[360px]:px-4 min-[1440px]:hidden"
+    >
+      <AdSlot variant="mobile-banner" className="min-[820px]:hidden" />
+      <AdSlot variant="leaderboard" className="hidden min-[820px]:flex" />
+    </div>
   );
 }
 

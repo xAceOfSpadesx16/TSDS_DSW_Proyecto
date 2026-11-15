@@ -7,6 +7,7 @@
 
 import { Link } from 'react-router-dom';
 
+import { AdSlot } from '../components/AdSlot';
 import { ModuleIcon, type ModuleIconName } from '../components/ModuleIcon';
 
 interface ModuleCard {
@@ -82,11 +83,15 @@ export function LandingPage() {
         <h2 id="modulos-heading" className="sr-only">
           Módulos disponibles
         </h2>
-        {MODULES.map((m) => (
+        {MODULES.map((m, index) => (
           <Link
             key={m.to}
             to={m.to}
-            className="panel flex flex-col rounded-2xl bg-surface p-6 text-ink shadow-raised transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-high focus-visible:outline focus-visible:outline-focus hover:no-underline hover:text-ink sm:last:col-span-2 lg:last:col-span-1"
+            className={`panel flex flex-col rounded-2xl bg-surface p-6 text-ink shadow-raised transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-high focus-visible:outline focus-visible:outline-focus hover:no-underline hover:text-ink ${
+              index === MODULES.length - 1
+                ? 'sm:col-span-2 lg:col-span-1'
+                : ''
+            }`}
           >
             <span className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-md bg-surface-sunken text-ink shadow-pressed">
               <ModuleIcon name={m.icon} className="h-6 w-6" />
@@ -98,6 +103,10 @@ export function LandingPage() {
             </span>
           </Link>
         ))}
+        <AdSlot
+          variant="rectangle"
+          className="hidden self-center justify-self-center lg:block"
+        />
       </section>
     </main>
   );
