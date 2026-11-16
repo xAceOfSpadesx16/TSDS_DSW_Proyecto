@@ -9,13 +9,13 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANTS: Record<NonNullable<Props['variant']>, string> = {
   primary:
-    'bg-action text-on-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
+    'bg-action text-on-action border border-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:border-control disabled:shadow-none',
   ghost:
-    'bg-transparent text-ink border border-control shadow-low hover:bg-surface-hover hover:border-action active:bg-surface-sunken active:shadow-pressed disabled:text-muted disabled:bg-surface-sunken',
+    'bg-surface text-ink border border-control shadow-low hover:bg-surface-hover hover:text-ink hover:border-action active:bg-surface-sunken active:text-action active:shadow-pressed disabled:text-muted disabled:bg-surface-sunken disabled:shadow-none',
   accent:
-    'bg-action text-on-action shadow-raised hover:bg-action-hover active:bg-action-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
+    'bg-surface-sunken text-action border border-action shadow-pressed hover:bg-surface-hover active:bg-surface-sunken active:text-action active:shadow-pressed disabled:text-muted disabled:bg-surface-sunken disabled:border-control disabled:shadow-none',
   danger:
-    'bg-danger text-on-action shadow-raised hover:bg-danger-dark active:bg-danger-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:shadow-none',
+    'bg-danger text-on-action border border-danger shadow-raised hover:bg-danger-dark active:bg-danger-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:border-control disabled:shadow-none',
 };
 
 /** Botón con las variantes primary, ghost, accent y danger. */

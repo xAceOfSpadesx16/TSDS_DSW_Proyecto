@@ -107,7 +107,7 @@ export function Header() {
                 </NavLink>
                 <NavLink
                   to="/register"
-                  className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-full text-sm font-semibold bg-action text-on-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed hover:no-underline focus-visible:outline focus-visible:outline-focus"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-action bg-action px-3 py-2 text-sm font-semibold text-on-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed hover:no-underline focus-visible:outline focus-visible:outline-focus"
                 >
                   Registro
                 </NavLink>
@@ -137,7 +137,7 @@ export function Header() {
             </NavLink>
             <NavLink
               to="/register"
-              className="inline-flex min-h-11 items-center justify-center px-3 py-2 rounded-full text-sm font-semibold bg-action text-on-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed hover:no-underline"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-action bg-action px-3 py-2 text-sm font-semibold text-on-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed hover:no-underline"
             >
               Registro
             </NavLink>

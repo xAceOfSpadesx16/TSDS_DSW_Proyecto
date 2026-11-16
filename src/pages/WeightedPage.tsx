@@ -563,7 +563,7 @@ export function WeightedPage() {
           <div className="flex flex-wrap items-center gap-3">
             <PrimaryButton
               id="weighted-draw-btn"
-              variant="accent"
+              variant="primary"
               onClick={onDraw}
               disabled={entries.length === 0}
               aria-describedby={describedBy}

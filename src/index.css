@@ -15,18 +15,18 @@
   --color-ink: #221f1a;
   --color-muted: #5b554b;
 
-  --color-action: #1f4fb5;
-  --color-action-hover: #173e8f;
-  --color-action-active: #102e6b;
-  --color-action-soft: #e3e8f6;
-  --color-on-action: #f8fbff;
+  --color-action: #235b55;
+  --color-action-hover: #1c4b46;
+  --color-action-active: #173f3a;
+  --color-action-soft: #dbe7e4;
+  --color-on-action: #f5f9f7;
 
   --color-control-border: #807669;
   --color-focus: #b45309;
   --color-error: #a32121;
   --color-error-strong: #7f1d1d;
   --color-error-active: #5c1111;
-  --color-success: #1f6b47;
+  --color-success: #14532d;
   --color-warning: #92400e;
   --color-scrim: rgba(34, 31, 26, 0.45);
 

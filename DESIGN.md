@@ -1,6 +1,6 @@
 ---
 name: Thrive Randomizer
-description: Suite de sorteos rápidos con un relieve neumórfico de papel cálido, tinta cobalto y sellos de goma.
+description: Suite de sorteos rápidos con un relieve neumórfico de papel cálido, tinta verde petróleo y sellos de goma.
 colors:
   canvas: "#ece6da"
   surface: "#ece6da"
@@ -8,16 +8,16 @@ colors:
   surface-sunken: "#e2dacb"
   ink: "#221f1a"
   muted: "#5b554b"
-  action: "#1f4fb5"
-  action-hover: "#173e8f"
-  action-active: "#102e6b"
-  on-action: "#f8fbff"
+  action: "#235b55"
+  action-hover: "#1c4b46"
+  action-active: "#173f3a"
+  on-action: "#f5f9f7"
   control-border: "#807669"
   focus: "#b45309"
   error: "#a32121"
   error-strong: "#7f1d1d"
   error-active: "#5c1111"
-  success: "#1f6b47"
+  success: "#14532d"
   warning: "#92400e"
   ad-border: "#8a4b12"
 typography:
@@ -107,8 +107,8 @@ components:
     rounded: "{rounded.chip}"
     padding: "4px 12px"
   nav-active:
-    backgroundColor: "{colors.action}"
-    textColor: "{colors.on-action}"
+    backgroundColor: "{colors.surface-sunken}"
+    textColor: "{colors.action}"
     rounded: "{rounded.pill}"
     padding: "8px 16px"
 ---
@@ -119,9 +119,9 @@ components:
 
 **Creative North Star: "El taller de sellos de barrio"**
 
-Thrive Randomizer se siente como una pieza de papel de goma sobre la mesa de un taller de impresión: un solo material cálido, relieve amplio y tinta cobalto para actuar. La página y las tarjetas comparten el mismo tono; la profundidad aparece por dos sombras opuestas, una luz arriba a la izquierda y una sombra abajo a la derecha. El resultado es táctil, luminoso y manual, no una consola nocturna.
+Thrive Randomizer se siente como una pieza de papel de goma sobre la mesa de un taller de impresión: un solo material cálido, relieve amplio y tinta verde petróleo para actuar. La página y las tarjetas comparten el mismo tono; la profundidad aparece por dos sombras opuestas, una luz arriba a la izquierda y una sombra abajo a la derecha. El resultado es táctil, luminoso y manual, no una consola nocturna.
 
-La dirección es de modo claro único. No hay tema oscuro ni conmutador: el uso diurno pide superficies que reflejen poca luz y un contraste de tinta sobre papel. La tinta cobalto se reserva para acciones, foco de selección y sellos; el resto se lee como papel y lápiz.
+La dirección es de modo claro único. No hay tema oscuro ni conmutador: el uso diurno pide superficies que reflejen poca luz y un contraste de tinta sobre papel. La tinta verde petróleo se reserva para acciones, foco de selección y sellos; el resto se lee como papel y lápiz.
 
 La aplicación es una herramienta de trabajo, no una landing page. Prioriza escaneo, resultados legibles y controles de 44×44 px. La expresividad se concentra en la tipografía display, los íconos de módulo y el relieve de los contenedores; el resto se mantiene quieto.
 
@@ -135,12 +135,13 @@ La aplicación es una herramienta de trabajo, no una landing page. Prioriza esca
 
 ## Colors
 
-La paleta es un solo papel cálido con dos tintas: una casi negra para leer y una cobalto para actuar. El verde y el ladrillo aparecen solo como estados semánticos o colores de datos. Los colores de datos de la ruleta y de los equipos viven centralizados en `src/lib/palette.ts`; no son tokens de interfaz y nunca se escriben en JSX.
+La paleta es un solo papel cálido con dos tintas: una casi negra para leer y un verde petróleo para actuar. El verde de aprobación y el ladrillo aparecen solo como estados semánticos o colores de datos. Los colores de datos de la ruleta y de los equipos viven centralizados en `src/lib/palette.ts`; no son tokens de interfaz y nunca se escriben en JSX.
 
 ### Primary
-- **Cobalt Stamp** (`#1f4fb5`): fondo de acciones primarias, enlace activo, borde de la ficha de dado seleccionada y texto de enlaces. Alcanza 7.11:1 con Paper White.
-- **Deep Cobalt** (`#173e8f`): hover de acciones; 9.53:1 con Paper White.
-- **Active Cobalt** (`#102e6b`): estado presionado; 12.45:1 con Paper White.
+- **Petroleum Stamp** (`#235b55`): fondo de acciones primarias, enlace activo, borde de la ficha de dado seleccionada y texto de enlaces. Alcanza 6.26:1 con Workshop Paper.
+- **Deep Petroleum** (`#1c4b46`): hover de acciones; 9.22:1 con el texto claro.
+- **Active Petroleum** (`#173f3a`): estado presionado; 10.93:1 con el texto claro.
+- **Forest Approval** (`#14532d`): éxito; se oscureció para no confundirse con el acento. Alcanza 7.33:1 con Workshop Paper.
 
 ### Neutral
 - **Workshop Paper** (`#ece6da`): fondo global y superficie de tarjetas, formularios, diálogos y barras. Es el único material visible en reposo.
@@ -150,7 +151,7 @@ La paleta es un solo papel cálido con dos tintas: una casi negra para leer y un
 - **Faded Ink** (`#5b554b`): texto secundario, ayudas y metadatos; 5.94:1 sobre Workshop Paper y 5.31:1 sobre Pressed Paper.
 - **Pencil Edge** (`#807669`): borde de controles; 3.59:1 sobre Workshop Paper y 3.21:1 sobre Pressed Paper.
 - **Amber Registration** (`#b45309`): outline de foco; 4.04:1 sobre Workshop Paper.
-- **Red Correction** (`#a32121`) y **Green Approval** (`#1f6b47`): error y éxito; 6.04:1 y 5.20:1 sobre Workshop Paper.
+- **Red Correction** (`#a32121`) y **Forest Approval** (`#14532d`): error y éxito; 6.04:1 y 7.33:1 sobre Workshop Paper.
 - **Support:** `--color-scrim` para el velo de diálogos, `--color-action-soft` para fondos de apoyo y `--color-warning` para avisos; no son colores de texto ni de control en la interfaz actual.
 
 ### Contrast Table
@@ -161,23 +162,24 @@ Todos los pares se recalcularon con luminancia relativa WCAG sobre el nuevo mate
 |---|---|---:|---|
 | Rubber Ink `#221f1a` | Workshop Paper `#ece6da` | 13.21:1 | Texto principal |
 | Faded Ink `#5b554b` | Workshop Paper `#ece6da` | 5.94:1 | Texto secundario |
-| Cobalt Stamp `#1f4fb5` | Workshop Paper `#ece6da` | 5.94:1 | Enlaces y texto de acción |
+| Petroleum Stamp `#235b55` | Workshop Paper `#ece6da` | 6.26:1 | Enlaces y texto de acción |
+| Petroleum Stamp `#235b55` | Pressed Paper `#e2dacb` | 5.60:1 | Acción sobre superficie hundida |
 | Amber Registration `#b45309` | Workshop Paper `#ece6da` | 4.04:1 | Foco (no texto) |
 | Pencil Edge `#807669` | Workshop Paper `#ece6da` | 3.59:1 | Borde de control |
 | Red Correction `#a32121` | Workshop Paper `#ece6da` | 6.04:1 | Error |
-| Green Approval `#1f6b47` | Workshop Paper `#ece6da` | 5.20:1 | Éxito |
+| Forest Approval `#14532d` | Workshop Paper `#ece6da` | 7.33:1 | Éxito |
 | Faded Ink `#5b554b` | Pressed Paper `#e2dacb` | 5.31:1 | Deshabilitado |
 | Pencil Edge `#807669` | Pressed Paper `#e2dacb` | 3.21:1 | Borde de control hundido |
-| Paper White `#f8fbff` | Cobalt Stamp `#1f4fb5` | 7.11:1 | Texto de acción |
-| Paper White `#f8fbff` | Deep Cobalt `#173e8f` | 9.53:1 | Hover de acción |
-| Paper White `#f8fbff` | Active Cobalt `#102e6b` | 12.45:1 | Acción presionada |
-| Paper White `#f8fbff` | Red Correction `#a32121` | 7.23:1 | Acción destructiva |
-| Paper White `#f8fbff` | Red Strong `#7f1d1d` | 9.65:1 | Hover destructivo |
-| Paper White `#f8fbff` | Red Active `#5c1111` | 13.11:1 | Destructivo presionado |
-| Paper White `#f8fbff` | Green Approval `#1f6b47` | 6.22:1 | Confirmación |
+| Paper Light `#f5f9f7` | Petroleum Stamp `#235b55` | 7.33:1 | Texto de acción |
+| Paper Light `#f5f9f7` | Deep Petroleum `#1c4b46` | 9.22:1 | Hover de acción |
+| Paper Light `#f5f9f7` | Active Petroleum `#173f3a` | 10.93:1 | Acción presionada |
+| Paper Light `#f5f9f7` | Red Correction `#a32121` | 7.07:1 | Acción destructiva |
+| Paper Light `#f5f9f7` | Red Strong `#7f1d1d` | 9.44:1 | Hover destructivo |
+| Paper Light `#f5f9f7` | Red Active `#5c1111` | 12.81:1 | Destructivo presionado |
+| Paper Light `#f5f9f7` | Forest Approval `#14532d` | 8.58:1 | Confirmación |
 
 ### Named Rules
-**The One Cobalt Rule.** El cobalto aparece en acciones, en la ficha activa, en enlaces y en el sello de resultados. No se usa como fondo de secciones enteras ni como decoración de tarjetas.
+**The One Petroleum Rule.** El verde petróleo aparece en acciones, en la ficha activa, en enlaces y en el sello de resultados. No se usa como fondo de secciones enteras ni como decoración de tarjetas; el estado seleccionado se marca con texto, borde o punto, no con un relleno saturado.
 
 **The Ink-on-Paper Rule.** El texto corrido usa Rubber Ink. Faded Ink se reserva para ayudas, fechas y metadatos; nunca para párrafos completos.
 
@@ -233,7 +235,7 @@ El sistema es neumórfico de un solo material: la página y las tarjetas compart
 
 La forma es la de una pieza de goma recortada: esquinas generosas, bordes suaves y acciones en píldora. Las tarjetas usan 24 px; los controles, 14 px; los chips, 8 px; los sellos, 4 px; las acciones y los interruptores, píldora completa.
 
-Los contenedores (tarjetas, paneles, secciones e historial) no llevan borde en reposo. Los controles (inputs, selects, textareas, chips, botones fantasma, summary y fichas de dado) conservan borde de 1 px Pencil Edge o relleno cobalto. En alto contraste, `.panel` recupera un borde de 2 px.
+Los contenedores (tarjetas, paneles, secciones e historial) no llevan borde en reposo. Los controles (inputs, selects, textareas, chips, botones fantasma, summary y fichas de dado) conservan borde de 1 px Pencil Edge o relleno de acento. En alto contraste, `.panel` recupera un borde de 2 px.
 
 Los íconos son SVG inline de 24×24 px, trazo de 2 px, extremos rectos y un punto de tinta lleno. Cada módulo tiene su propio dibujo: dados con pips, tres líneas de ábaco, sector de ruleta con muesca, tres fichas de equipo y balanza de fiel.
 
@@ -241,10 +243,11 @@ Los íconos son SVG inline de 24×24 px, trazo de 2 px, extremos rectos y un pun
 
 ### Buttons
 - **Shape:** píldora, altura mínima 44 px.
-- **Primary:** Cobalt Stamp sobre Paper White; padding 8×16 px; sombra Raised; hover Deep Cobalt; activo Active Cobalt y Pressed.
-- **Ghost:** fondo transparente, borde Pencil Edge, texto Rubber Ink; sombra Low; hover Worn Paper y borde cobalto; activo Pressed.
-- **Danger:** Red Correction con Paper White; sombra Raised; hover Red Strong; activo Red Active y Pressed.
-- **Focus:** outline de 2 px Amber Registration, offset 2 px. Deshabilitado: Pressed Paper, Faded Ink, sin sombra y cursor `not-allowed`.
+- **Primary:** Petroleum Stamp con Paper Light; padding 8×16 px; borde de acento y sombra Raised (relieve, nunca plano); hover Deep Petroleum; activo Active Petroleum y Pressed.
+- **Secondary / Ghost:** superficie Workshop Paper con texto Rubber Ink, borde Pencil Edge y sombra Low; hover Worn Paper y borde de acento; activo Pressed y texto de acento.
+- **Selected / Accent:** superficie hundida Pressed Paper con texto y borde de acento; sombra Pressed. Marca el estado activo sin relleno saturado.
+- **Danger:** Red Correction con Paper Light; sombra Raised; hover Red Strong; activo Red Active y Pressed.
+- **Focus:** outline de 2 px Amber Registration, offset 2 px; el ámbar se distingue del verde petróleo y contrasta 4.04:1 con el papel. Deshabilitado: Pressed Paper, Faded Ink, sin sombra y cursor `not-allowed`.
 
 ### Chips
 - **Style:** Workshop Paper, borde Pencil Edge, radio 8 px, texto Rubber Ink, sombra Low.
@@ -260,11 +263,11 @@ Los íconos son SVG inline de 24×24 px, trazo de 2 px, extremos rectos y un pun
 ### Inputs / Fields
 - **Style:** Workshop Paper, borde Pencil Edge de 1 px, radio 14 px, altura mínima 44 px, sombra Pressed.
 - **Focus:** outline Amber Registration de 2 px con offset 2 px.
-- **Error / Disabled:** borde Red Correction y mensaje con `role="alert"`; deshabilitado con Pressed Paper, Faded Ink y sin sombra. Los controles nativos (checkbox, select, number, color) conservan su semántica y reciben `accent-color` cobalto.
+- **Error / Disabled:** borde Red Correction y mensaje con `role="alert"`; deshabilitado con Pressed Paper, Faded Ink y sin sombra. Los controles nativos (checkbox, select, number, color) conservan su semántica y reciben `accent-color` verde petróleo.
 
 ### Navigation
 - **Style:** header de 56 px sobre Workshop Paper, marca en Bricolage, enlaces de 44 px, sin borde inferior y con sombra Low.
-- **States:** enlace activo con Cobalt Stamp, Paper White y sombra Raised; inactivo Faded Ink; hover Worn Paper y Rubber Ink.
+- **States:** enlace activo hundido (Pressed Paper), con texto y borde de acento; inactivo Faded Ink sobre superficie con sombra Low; hover Worn Paper y Rubber Ink. El estado activo no depende solo del color: suma borde y relieve hundido.
 - **Mobile:** botón de 44×44 px en píldora, panel desplegable con sombra High, cierre con Escape y foco al primer enlace.
 
 ### Signature: Roulette

@@ -4,12 +4,12 @@
 export const PAPER_INK = '#221f1a';
 /** Superficie de papel. */
 export const PAPER_SURFACE = '#ece6da';
-/** Texto sobre el cobalto. */
-export const PAPER_ON_ACTION = '#f8fbff';
+/** Texto sobre el acento petróleo. */
+export const PAPER_ON_ACTION = '#f5f9f7';
 
 /** Paleta accesible para las opciones de la ruleta. */
 export const ROULETTE_PALETTE: readonly string[] = [
-  '#1f4fb5',
+  '#235b55',
   '#1f6b47',
   '#b23a2f',
   '#92400e',
@@ -21,7 +21,7 @@ export const ROULETTE_PALETTE: readonly string[] = [
 
 /** Paleta de bordes para las tarjetas de equipos. */
 export const TEAM_PALETTE: readonly string[] = [
-  '#1f4fb5',
+  '#235b55',
   '#1f6b47',
   '#b23a2f',
   '#92400e',

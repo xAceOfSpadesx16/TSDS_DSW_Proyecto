@@ -407,7 +407,7 @@ export function RoulettePage() {
 
           <PrimaryButton
             id="roulette-spin-btn"
-            variant="accent"
+            variant="primary"
             onClick={onSpin}
             disabled={spinning || options.length < 2}
             aria-describedby={error ? 'roulette-error' : undefined}

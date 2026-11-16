@@ -10,7 +10,7 @@ import { createUserEvent, fillByLabel } from '../helpers/pageUtils';
 import { installLocalStorage } from '../helpers/localStorageMock';
 import { mockCanvasContext, mockNativeDialog } from '../helpers/domMocks';
 
-const DEFAULT_COLOR = '#1f4fb5';
+const DEFAULT_COLOR = '#235b55';
 const resetHistory = () => useHistoryStore.setState({ entries: [] });
 
 function renderRoulette() {

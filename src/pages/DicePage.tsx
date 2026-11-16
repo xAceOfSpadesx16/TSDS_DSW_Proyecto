@@ -144,13 +144,14 @@ export function DicePage() {
                 <button
                   key={sides}
                   type="button"
-                  className={`dice-btn border-2 px-3 py-2 sm:px-4 sm:py-3 rounded-full text-lg font-bold transition-[transform,background-color,border-color,box-shadow] shadow-low active:shadow-pressed focus-visible:outline focus-visible:outline-focus ${
+                  className={`dice-btn rounded-full border-2 px-3 py-2 text-lg font-bold transition-[transform,background-color,border-color,box-shadow] focus-visible:outline focus-visible:outline-focus sm:px-4 sm:py-3 ${
                     lastSides === sides
-                      ? 'border-action bg-surface text-action shadow-pressed'
-                      : 'border-control bg-surface text-ink hover:-translate-y-0.5 hover:border-action'
+                      ? 'border-action bg-surface-sunken text-action shadow-pressed'
+                      : 'border-control bg-surface text-ink shadow-low hover:-translate-y-0.5 hover:border-action hover:bg-surface-hover active:translate-y-0 active:shadow-pressed'
                   }`}
                   data-sides={sides}
                   data-active={lastSides === sides}
+                  aria-pressed={lastSides === sides}
                   onClick={() => onRollDice(sides)}
                 >
                   d{sides}

@@ -20,12 +20,15 @@ describe('NavLinkButton', () => {
     expect(link.className).toContain('nav-link');
   });
 
-  it('resalta el enlace cuando la ruta es active', () => {
+  it('resalta el enlace activo con superficie hundida y borde de acento', () => {
     renderLink('/teams');
     const link = screen.getByRole('link', { name: 'Etiqueta' });
     // La ruta actual es /teams, así que el enlace está activo.
-    expect(link.className).toContain('bg-action');
-    expect(link.className).toContain('text-on-action');
+    expect(link.className).toContain('bg-surface-sunken');
+    expect(link.className).toContain('text-action');
+    expect(link.className).toContain('border-action');
+    expect(link.className).toContain('shadow-pressed');
+    expect(link.className).not.toContain('bg-action');
   });
 
   it('no resalta el enlace cuando la ruta no es active', () => {
@@ -34,5 +37,6 @@ describe('NavLinkButton', () => {
     // La ruta actual es /teams, no /roulette.
     expect(link.className).toContain('text-muted');
     expect(link.className).not.toContain('bg-action');
+    expect(link.className).toContain('shadow-low');
   });
 });

@@ -9,11 +9,11 @@ interface Props {
 }
 
 const BASE =
-  'inline-flex min-h-11 items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-focus';
+  'inline-flex min-h-11 items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold whitespace-nowrap transition-[background-color,color,box-shadow] focus-visible:outline focus-visible:outline-focus';
 const ACTIVE =
-  'text-on-action bg-action shadow-raised hover:text-on-action hover:bg-action-hover active:bg-action-active active:shadow-pressed';
+  'text-action bg-surface-sunken border-action shadow-pressed hover:text-action hover:bg-surface-hover active:shadow-pressed';
 const INACTIVE =
-  'text-muted hover:text-ink hover:bg-surface-hover active:bg-surface-sunken hover:no-underline';
+  'text-muted bg-surface border-transparent shadow-low hover:text-ink hover:bg-surface-hover hover:border-control active:text-action active:bg-surface-sunken active:shadow-pressed hover:no-underline';
 
 /** Enlace de la barra de navegación que resalta la ruta activa. */
 export function NavLinkButton({ to, children }: Props) {

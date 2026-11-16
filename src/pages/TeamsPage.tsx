@@ -199,7 +199,7 @@ export function TeamsPage() {
               <PrimaryButton
                 id="mode-group-count"
                 type="button"
-                variant={mode === 'count' ? 'primary' : 'ghost'}
+                variant={mode === 'count' ? 'accent' : 'ghost'}
                 aria-pressed={mode === 'count'}
                 onClick={() => onChangeMode('count')}
               >
@@ -208,7 +208,7 @@ export function TeamsPage() {
               <PrimaryButton
                 id="mode-group-size"
                 type="button"
-                variant={mode === 'size' ? 'primary' : 'ghost'}
+                variant={mode === 'size' ? 'accent' : 'ghost'}
                 aria-pressed={mode === 'size'}
                 onClick={() => onChangeMode('size')}
               >

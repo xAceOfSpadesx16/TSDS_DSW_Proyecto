@@ -63,7 +63,7 @@ export function LandingPage() {
         </p>
         <a
           href="#modulos"
-          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-action px-5 py-3 text-sm font-semibold text-on-action shadow-raised transition-[background-color,box-shadow] hover:bg-action-hover active:bg-action-active focus-visible:outline focus-visible:outline-focus active:shadow-pressed"
+          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full border border-action bg-action px-5 py-3 text-sm font-semibold text-on-action shadow-raised transition-[background-color,box-shadow] hover:bg-action-hover active:bg-action-active focus-visible:outline focus-visible:outline-focus active:shadow-pressed"
         >
           Empezar a sortear
         </a>

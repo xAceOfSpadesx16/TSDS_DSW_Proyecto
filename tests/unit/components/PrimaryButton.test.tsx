@@ -37,11 +37,31 @@ describe('PrimaryButton', () => {
           : variant === 'ghost'
             ? 'border-control'
             : variant === 'accent'
-              ? 'bg-action'
+              ? 'bg-surface-sunken'
               : 'bg-danger',
       );
     },
   );
+
+  it('el botón principal tiene relleno de acento y relieve neumórfico', () => {
+    const { container } = render(<PrimaryButton>Generar</PrimaryButton>);
+    const button = container.querySelector('button')!;
+    expect(button.className).toContain('bg-action');
+    expect(button.className).toContain('shadow-raised');
+    expect(button.className).toContain('active:shadow-pressed');
+  });
+
+  it('el estado seleccionado se hunde y no usa relleno de acento', () => {
+    const { container } = render(
+      <PrimaryButton variant="accent">Seleccionado</PrimaryButton>,
+    );
+    const button = container.querySelector('button')!;
+    expect(button.className).toContain('bg-surface-sunken');
+    expect(button.className).toContain('text-action');
+    expect(button.className).toContain('border-action');
+    expect(button.className).toContain('shadow-pressed');
+    expect(button.className).not.toContain('bg-action');
+  });
 
   it('combina la className personalizada con la base', () => {
     const { container } = render(
