@@ -7,33 +7,27 @@ export const PAPER_SURFACE = '#ece6da';
 /** Texto sobre el acento petróleo. */
 export const PAPER_ON_ACTION = '#f5f9f7';
 
-/** Paleta accesible para las opciones de la ruleta. */
-export const ROULETTE_PALETTE: readonly string[] = [
+/** Paleta de datos: familias alternadas para que los tonos vecinos se distingan. */
+const DATA_PALETTE: readonly string[] = [
   '#235b55',
-  '#1f6b47',
-  '#b23a2f',
-  '#92400e',
-  '#0f766e',
+  '#9a3412',
+  '#a16207',
+  '#701a45',
+  '#1e40af',
   '#3f6212',
-  '#7c2d12',
+  '#6b21a8',
   '#155e75',
+  '#166534',
+  '#854d0e',
+  '#312e81',
+  '#86198f',
 ];
 
+/** Paleta accesible para las opciones de la ruleta. */
+export const ROULETTE_PALETTE: readonly string[] = DATA_PALETTE.slice(0, 8);
+
 /** Paleta de bordes para las tarjetas de equipos. */
-export const TEAM_PALETTE: readonly string[] = [
-  '#235b55',
-  '#1f6b47',
-  '#b23a2f',
-  '#92400e',
-  '#0f766e',
-  '#3f6212',
-  '#7c2d12',
-  '#155e75',
-  '#9d174d',
-  '#374151',
-  '#a16207',
-  '#4d7c0f',
-];
+export const TEAM_PALETTE: readonly string[] = DATA_PALETTE;
 
 type Rgb = readonly [number, number, number];
 

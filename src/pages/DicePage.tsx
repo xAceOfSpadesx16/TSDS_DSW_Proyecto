@@ -175,7 +175,7 @@ export function DicePage() {
           <div className="flex items-center justify-center py-2">
             <output
               id="dice-result"
-              className={`dice-registration panel relative flex h-32 w-32 items-center justify-center rounded-xl bg-surface font-mono text-[2.75rem] font-bold leading-[3rem] text-action shadow-pressed ${
+              className={`dice-registration panel relative flex h-32 w-32 items-center justify-center rounded-xl bg-surface font-display text-[2.75rem] font-bold leading-[3rem] text-action shadow-pressed ${
                 shaking ? 'animate-dice-shake' : ''
               }`}
               aria-hidden="true"
