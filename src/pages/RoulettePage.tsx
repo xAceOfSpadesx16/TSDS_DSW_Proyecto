@@ -346,7 +346,12 @@ export function RoulettePage() {
                   />
                 </label>
               </fieldset>
-              <PrimaryButton type="submit" variant="primary" disabled={spinning}>
+              <PrimaryButton
+                type="submit"
+                variant="ghost"
+                disabled={spinning}
+                className="self-start"
+              >
                 Agregar opción
               </PrimaryButton>
             </form>

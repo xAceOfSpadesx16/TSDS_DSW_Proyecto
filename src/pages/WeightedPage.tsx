@@ -319,7 +319,7 @@ export function WeightedPage() {
           onSubmit={onAdd}
           className="panel bg-surface rounded-2xl shadow-raised p-4"
         >
-          <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+          <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,10rem)_auto] sm:items-end">
             <legend className="sr-only">Agregar participante</legend>
             <Field
               id="weighted-name"
@@ -345,7 +345,7 @@ export function WeightedPage() {
                 setAddWeightError(null);
               }}
             />
-            <PrimaryButton type="submit" variant="primary">
+            <PrimaryButton type="submit" variant="ghost">
               + Agregar
             </PrimaryButton>
           </fieldset>
@@ -449,7 +449,7 @@ export function WeightedPage() {
                 className="panel flex min-w-0 flex-col gap-2 rounded-2xl bg-surface p-3 shadow-low"
               >
                 {editingIndex === index ? (
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,10rem)_auto] sm:items-end">
                     <Field
                       id={`weighted-edit-name-${index}`}
                       label="Nombre del participante"

@@ -214,7 +214,7 @@ export function DicePage() {
             </p>
           ) : null}
 
-          <div className="flex w-full justify-start sm:justify-end">
+          <div className="flex w-full justify-start">
             <PrimaryButton
               id="dice-reset-btn"
               type="button"

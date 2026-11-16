@@ -82,9 +82,11 @@ export function LandingPage() {
             key={m.to}
             to={m.to}
             className={`panel flex flex-col rounded-2xl bg-surface p-6 text-ink shadow-raised transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-high focus-visible:outline focus-visible:outline-focus hover:no-underline hover:text-ink ${
-              index === MODULES.length - 1
-                ? 'sm:col-span-2 lg:col-span-1 min-[1800px]:col-span-2'
-                : ''
+              index === 0
+                ? 'min-[1800px]:col-span-2'
+                : index === MODULES.length - 1
+                  ? 'sm:col-span-2 lg:col-span-1 min-[1800px]:col-span-2'
+                  : ''
             }`}
           >
             <span className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-md bg-surface-sunken text-ink shadow-pressed">
@@ -99,7 +101,7 @@ export function LandingPage() {
         ))}
         <AdSlot
           variant="rectangle"
-          className="hidden self-center justify-self-center lg:block min-[1800px]:col-span-2"
+          className="hidden self-center justify-self-center lg:block"
         />
       </section>
     </main>

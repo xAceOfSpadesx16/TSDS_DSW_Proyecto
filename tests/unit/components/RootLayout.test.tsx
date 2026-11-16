@@ -25,7 +25,7 @@ vi.mock('../../../src/repositories/legalRepository', () => ({
 const { legalRepository } = await import('../../../src/repositories/legalRepository');
 
 const DISCLAIMER: LegalDisclaimer = {
-  title: 'Disclaimer - Thrive Randomizer',
+  title: 'Aviso legal - Thrive Randomizer',
   version: '1.0.0',
   sections: [
     { heading: 'Naturaleza del servicio', body: 'Herramienta recreativa.' },
@@ -195,7 +195,7 @@ describe('RootLayout — disclaimer', () => {
 
     const footer = await screen.findByRole('contentinfo');
     expect(footer).toBeInTheDocument();
-    expect(screen.getByText('Disclaimer - Thrive Randomizer')).toBeInTheDocument();
+    expect(screen.getByText('Aviso legal - Thrive Randomizer')).toBeInTheDocument();
     expect(screen.getByText(/v1\.0\.0/)).toBeInTheDocument();
   });
 
