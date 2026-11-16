@@ -105,7 +105,10 @@ describe('RootLayout — indicador de conexión', () => {
     renderLayout();
 
     const banner = await screen.findByRole('status');
-    expect(banner).toHaveTextContent('No se pudo conectar con el servidor');
+    expect(banner).toHaveTextContent(
+      'No se pudo conectar con el servidor. Podés seguir sorteando: tus sorteos se guardan en este navegador y se sincronizarán cuando vuelva la conexión.',
+    );
+    expect(banner).not.toHaveTextContent('Los sorteos no se guardarán');
     expect(screen.getByRole('button', { name: 'Reintentar' })).toBeInTheDocument();
   });
 
