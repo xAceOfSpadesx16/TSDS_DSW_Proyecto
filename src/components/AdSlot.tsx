@@ -4,6 +4,7 @@
 export type AdSlotVariant =
   | 'tower'
   | 'tower-wide'
+  | 'tower-large'
   | 'rectangle'
   | 'leaderboard'
   | 'mobile-banner';
@@ -17,6 +18,7 @@ interface AdSize {
 const AD_SIZES: Record<AdSlotVariant, AdSize> = {
   tower: { width: 120, height: 600, slot: '1234567890' },
   'tower-wide': { width: 160, height: 600, slot: '1234567891' },
+  'tower-large': { width: 300, height: 600, slot: '1234567895' },
   rectangle: { width: 300, height: 250, slot: '1234567892' },
   leaderboard: { width: 728, height: 90, slot: '1234567893' },
   'mobile-banner': { width: 320, height: 100, slot: '1234567894' },

@@ -19,7 +19,7 @@ export function Field({ label, hint, error, id, ...rest }: Props) {
     .join(' ');
 
   return (
-    <div className="flex flex-col gap-1 text-sm">
+    <div className="flex w-full max-w-[60ch] flex-col gap-1 text-sm">
       <label htmlFor={fieldId} className="text-muted font-medium">
         {label}
       </label>

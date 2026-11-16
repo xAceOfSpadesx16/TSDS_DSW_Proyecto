@@ -161,18 +161,20 @@ export function TeamsPage() {
   };
 
   return (
-    <main
-      className="workspace workspace-grid"
-    >
-      <section
-        id="section-teams"
-        aria-label="Generador de equipos"
-        className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
-      >
+    <main className="workspace">
+      <div className="page-head">
         <h1 tabIndex={-1} className="font-bold">
           Generador de Equipos
         </h1>
+        <HistoryAside />
+      </div>
 
+      <section
+        id="section-teams"
+        aria-label="Generador de equipos"
+        className="draw-grid animate-fade-in"
+      >
+        <div className="flex min-w-0 flex-col gap-4">
         <form
           id="team-form"
           onSubmit={onGenerate}
@@ -189,7 +191,7 @@ export function TeamsPage() {
               value={participantsText}
               onChange={(e) => onChangeParticipants(e.currentTarget.value)}
               placeholder={'Ana\nBruno\nCarla\nDiego'}
-              className="w-full min-w-0 px-3 py-2 rounded-md bg-surface border border-control text-ink placeholder:text-muted focus-visible:outline focus-visible:outline-focus"
+              className="w-full min-w-0 max-w-[60ch] rounded-md border border-control bg-surface px-3 py-2 text-ink placeholder:text-muted focus-visible:outline focus-visible:outline-focus"
             />
           </label>
 
@@ -348,12 +350,14 @@ export function TeamsPage() {
             {error}
           </p>
         ) : null}
+        </div>
 
+        <div className="flex min-w-0 flex-col gap-4">
         {result ? (
           <section
             id="team-results-section"
             aria-labelledby="team-results-heading"
-            className="flex flex-col gap-3"
+            className="flex scroll-mb-2 flex-col gap-3"
           >
             <h2 id="team-results-heading" className="sr-only">
               Resultados
@@ -375,12 +379,12 @@ export function TeamsPage() {
             </output>
             <div
               id="team-results"
-              className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3"
+              className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-2 sm:gap-3"
             >
               {result.teams.map((team, i) => (
                 <div
                   key={i}
-                  className="panel min-w-0 rounded-2xl bg-surface p-4 shadow-raised"
+                  className="panel min-w-0 rounded-2xl bg-surface p-3 shadow-raised sm:p-4"
                 >
                   <h3 className="mb-2 flex items-center gap-2 text-sm font-bold text-ink">
                     <span
@@ -406,10 +410,16 @@ export function TeamsPage() {
               ))}
             </div>
           </section>
-        ) : null}
+        ) : (
+          <div className="panel flex min-w-0 flex-col gap-3 rounded-2xl bg-surface p-4 shadow-raised sm:p-6">
+            <h2 className="text-sm font-semibold text-muted">Equipos</h2>
+            <p className="text-sm text-muted italic">
+              Los equipos aparecerán acá.
+            </p>
+          </div>
+        )}
+        </div>
       </section>
-
-      <HistoryAside />
     </main>
   );
 }

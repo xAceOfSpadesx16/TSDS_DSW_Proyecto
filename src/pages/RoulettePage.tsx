@@ -276,18 +276,20 @@ export function RoulettePage() {
   };
 
   return (
-    <main
-      className="workspace workspace-grid"
-    >
-      <section
-        id="section-roulette"
-        aria-label="Ruleta de decisiones"
-        className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
-      >
+    <main className="workspace">
+      <div className="page-head">
         <h1 tabIndex={-1} className="font-bold">
           Ruleta de Decisiones
         </h1>
+        <HistoryAside />
+      </div>
 
+      <section
+        id="section-roulette"
+        aria-label="Ruleta de decisiones"
+        className="draw-grid animate-fade-in"
+      >
+        <div className="flex min-w-0 flex-col gap-4">
         <details
           id="roulette-options-details"
           open={optionsOpen}
@@ -391,8 +393,9 @@ export function RoulettePage() {
             </div>
           </div>
         </details>
+        </div>
 
-        <div className="flex flex-col items-center gap-4 py-4">
+        <div className="flex min-w-0 flex-col items-center gap-4">
           <div className="roulette-wrapper relative w-full max-w-[250px] sm:max-w-[360px]">
             <canvas
               id="roulette-canvas"
@@ -401,7 +404,7 @@ export function RoulettePage() {
               height={CANVAS_SIZE}
               role="img"
               aria-label={`Ruleta de decisiones con ${options.length} opciones`}
-              className="panel h-auto w-full max-w-[250px] sm:max-w-[360px] rounded-full bg-surface shadow-high"
+              className="panel h-auto w-full max-w-[250px] rounded-full bg-surface shadow-high sm:max-w-[360px]"
             />
           </div>
 
@@ -414,46 +417,42 @@ export function RoulettePage() {
           >
             {spinning ? 'Girando…' : 'Girar ruleta'}
           </PrimaryButton>
+
+          {error ? (
+            <p id="roulette-error" className="text-sm text-danger" role="alert">
+              {error}
+            </p>
+          ) : null}
         </div>
-
-        {error ? (
-          <p id="roulette-error" className="text-sm text-danger" role="alert">
-            {error}
-          </p>
-        ) : null}
-
-        <dialog
-          id="roulette-result-overlay"
-          ref={dialogRef}
-          aria-labelledby="roulette-result-title"
-          aria-describedby="roulette-result-text"
-          className="panel rounded-2xl bg-surface text-ink p-6 max-w-sm shadow-high backdrop:bg-scrim"
-          onClose={() =>
-            document.getElementById('roulette-spin-btn')?.focus()
-          }
-        >
-          <h2 id="roulette-result-title" className="text-xl font-bold mb-2">
-            ¡Ganador!
-          </h2>
-          <p
-            id="roulette-result-text"
-            className="my-4 break-words text-center font-mono text-3xl font-bold text-ink"
-          >
-            {result?.winner.label}
-          </p>
-          <div className="flex justify-center">
-            <PrimaryButton
-              id="roulette-close-result"
-              variant="primary"
-              onClick={() => dialogRef.current?.close()}
-            >
-              Cerrar
-            </PrimaryButton>
-          </div>
-        </dialog>
       </section>
 
-      <HistoryAside />
+      <dialog
+        id="roulette-result-overlay"
+        ref={dialogRef}
+        aria-labelledby="roulette-result-title"
+        aria-describedby="roulette-result-text"
+        className="panel max-w-sm rounded-2xl bg-surface p-6 text-ink shadow-high backdrop:bg-scrim"
+        onClose={() => document.getElementById('roulette-spin-btn')?.focus()}
+      >
+        <h2 id="roulette-result-title" className="mb-2 text-xl font-bold">
+          ¡Ganador!
+        </h2>
+        <p
+          id="roulette-result-text"
+          className="my-4 break-words text-center font-mono text-3xl font-bold text-ink"
+        >
+          {result?.winner.label}
+        </p>
+        <div className="flex justify-center">
+          <PrimaryButton
+            id="roulette-close-result"
+            variant="primary"
+            onClick={() => dialogRef.current?.close()}
+          >
+            Cerrar
+          </PrimaryButton>
+        </div>
+      </dialog>
     </main>
   );
 }

@@ -171,7 +171,7 @@ test.describe('Responsive', () => {
 
       await page.locator('#history-toggle-btn').click();
       await expectNoOverflow(`/weighted + historial @ ${width}`);
-      await page.locator('#history-toggle-btn').click();
+      await page.locator('#history-close-btn').click();
     }
   });
 
@@ -222,7 +222,7 @@ test.describe('Responsive', () => {
     );
   });
 
-  test('el historial móvil se abre como panel inferior y se puede colapsar', async ({
+  test('el historial móvil se abre como hoja inferior y se cierra con su botón', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -230,19 +230,22 @@ test.describe('Responsive', () => {
 
     const toggle = page.locator('#history-toggle-btn');
     await expect(toggle).toBeVisible();
-    await expect(toggle).toHaveText('Historial');
+    await expect(toggle).toContainText('Historial');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await toggle.click();
 
     const aside = page.locator('#history-aside');
     await expect(aside).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Ocultar historial' })).toBeVisible();
+    await expect(page.locator('#history-panel-title')).toBeFocused();
 
-    const collapse = page.getByRole('button', { name: 'Ocultar historial' });
-    await collapse.focus();
-    await page.keyboard.press('Enter');
-    await expect(page.getByRole('button', { name: 'Mostrar historial' })).toHaveAttribute(
-      'aria-expanded',
-      'false',
-    );
+    const box = await aside.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x).toBeLessThanOrEqual(1);
+    expect(box!.width).toBeGreaterThanOrEqual(388);
+    expect(box!.y + box!.height).toBeGreaterThanOrEqual(843);
+
+    await page.locator('#history-close-btn').click();
+    await expect(aside).toHaveCount(0);
+    await expect(toggle).toBeFocused();
   });
 });

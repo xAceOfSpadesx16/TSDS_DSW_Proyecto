@@ -7,7 +7,7 @@ test.describe('Alto contraste', () => {
     await page.emulateMedia({ contrast: 'more' });
     await page.goto('/dice');
 
-    const card = page.locator('#section-dice > div').first();
+    const card = page.locator('#section-dice .panel').first();
     await expect(card).toBeVisible();
 
     const cardStyles = await card.evaluate((element) => {

@@ -1,6 +1,6 @@
-/** Panel de historial y su botón flotante en mobile. */
+/** Panel de historial superpuesto y su botón de apertura. */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useHistoryStore } from '../store/historyStore';
 import { useAuthStore, selectIsAuthenticated } from '../store/authStore';
@@ -24,27 +24,24 @@ function safeDateTime(iso: string): string | undefined {
   return Number.isNaN(new Date(iso).getTime()) ? undefined : iso;
 }
 
-function ChevronIcon({ open }: { open: boolean }) {
+function ClockIcon() {
   return (
     <svg
       viewBox="0 0 20 20"
-      className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`}
+      className="h-4 w-4 shrink-0"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
       aria-hidden="true"
     >
-      <path d="m5 7 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="10" cy="10" r="7" />
+      <path d="M10 6v4l3 2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-interface Props {
-  variant?: 'responsive' | 'sidebar' | 'mobile';
-}
-
-/** Lista los sorteos agrupados por día y permite limpiarlos. */
-export function HistoryAside({ variant = 'responsive' }: Props) {
+/** Lista los sorteos agrupados por día en un panel no modal. */
+export function HistoryAside() {
   const entries = useHistoryStore((s) => s.entries);
   const currentPage = useHistoryStore((s) => s.currentPage);
   const lastPage = useHistoryStore((s) => s.lastPage);
@@ -53,17 +50,46 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
   const loadMore = useHistoryStore((s) => s.loadMore);
   const remove = useHistoryStore((s) => s.remove);
   const clear = useHistoryStore((s) => s.clear);
-  const [openMobile, setOpenMobile] = useState(false);
   const [open, setOpen] = useState(() => loadHistoryOpen() ?? false);
 
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const previousOpenRef = useRef(open);
+  const mountedRef = useRef(false);
 
   useEffect(() => {
     saveHistoryOpen(open);
   }, [open]);
 
-  const groups = useMemo(() => formatHistoryGroups(entries), [entries]);
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      previousOpenRef.current = open;
+      return;
+    }
+    if (open && !previousOpenRef.current) {
+      titleRef.current?.focus();
+    } else if (!open && previousOpenRef.current) {
+      toggleRef.current?.focus();
+    }
+    previousOpenRef.current = open;
+  }, [open]);
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open]);
+
+  const groups = useMemo(() => formatHistoryGroups(entries), [entries]);
   const canLoadMore = isAuthenticated && currentPage < lastPage;
 
   const onClear = () => {
@@ -78,59 +104,49 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
     void clear();
   };
 
-  const isMobileSheet = variant === 'mobile';
-  const isResponsive = variant === 'responsive';
-  const showFloating = isMobileSheet || isResponsive;
-
-  const visibilityClass = isMobileSheet
-    ? openMobile
-      ? '!flex !fixed !bottom-0 !left-0 !right-0 !max-h-[60vh] z-40 overflow-y-auto'
-      : '!hidden'
-    : isResponsive
-      ? openMobile
-        ? '!flex !fixed !bottom-0 !left-0 !right-0 !max-h-[60vh] z-40 overflow-y-auto lg:!static lg:!max-h-none lg:!w-auto lg:overflow-visible lg:z-auto'
-        : '!hidden lg:!flex lg:!static lg:!w-auto'
-      : '';
-
-  const toggleButton = (
-    <button
-      id="history-toggle-btn"
-      type="button"
-      onClick={() => {
-        setOpenMobile((value) => {
-          const next = !value;
-          if (next) {
-            setOpen(true);
-          }
-          return next;
-        });
-      }}
-      aria-pressed={openMobile}
-      aria-controls="history-aside"
-      className={
-        openMobile
-          ? 'inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-low hover:bg-surface-hover active:bg-surface-sunken active:shadow-pressed focus-visible:outline focus-visible:outline-focus'
-          : 'lg:hidden fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-high hover:bg-surface-hover active:bg-surface-sunken active:shadow-pressed focus-visible:outline focus-visible:outline-focus'
-      }
-    >
-      {openMobile ? 'Cerrar' : 'Historial'}
-    </button>
-  );
-
   return (
     <>
-      {showFloating && !openMobile ? toggleButton : null}
+      <button
+        id="history-toggle-btn"
+        ref={toggleRef}
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-controls="history-aside"
+        aria-label="Historial"
+        className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-control bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-high transition-[background-color,color,box-shadow] hover:bg-surface-hover hover:text-action active:shadow-pressed focus-visible:outline focus-visible:outline-focus lg:static lg:shadow-low ${
+          open ? 'hidden' : 'fixed bottom-4 right-4 z-50 lg:z-auto'
+        }`}
+      >
+        <ClockIcon />
+        <span>Historial</span>
+        {entries.length > 0 ? (
+          <span
+            aria-hidden="true"
+            className="inline-flex min-w-5 items-center justify-center rounded-full bg-surface-sunken px-1.5 font-mono text-xs text-action"
+          >
+            {entries.length}
+          </span>
+        ) : null}
+      </button>
 
+      {open ? (
       <aside
         id="history-aside"
-        aria-label="Historial de operaciones"
-        className={`panel self-start bg-surface rounded-2xl p-4 flex flex-col gap-3 shadow-high lg:sticky lg:top-[4.5rem] lg:shadow-raised ${visibilityClass}`}
+        aria-labelledby="history-panel-title"
+        className="panel fixed bottom-0 left-0 right-0 z-40 flex max-h-[70dvh] flex-col gap-3 overflow-hidden rounded-t-2xl bg-surface p-4 shadow-high lg:bottom-0 lg:left-auto lg:right-0 lg:top-14 lg:max-h-none lg:w-[clamp(320px,22vw,380px)] lg:rounded-l-2xl"
       >
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-base font-bold text-ink">Historial</h2>
-          <div className="flex items-center gap-2">
-            {showFloating && openMobile ? toggleButton : null}
-            {open && entries.length > 0 ? (
+        <div className="flex items-start justify-between gap-2">
+          <h2
+            id="history-panel-title"
+            ref={titleRef}
+            tabIndex={-1}
+            className="text-base font-bold text-ink"
+          >
+            Historial
+          </h2>
+          <div className="flex shrink-0 items-center gap-2">
+            {entries.length > 0 ? (
               <button
                 id="clear-history-btn"
                 type="button"
@@ -141,19 +157,12 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
               </button>
             ) : null}
             <button
-              id="history-collapse-btn"
+              id="history-close-btn"
               type="button"
-              onClick={() => setOpen((value) => !value)}
-              aria-expanded={open}
-              aria-controls="history-panel"
-              aria-label={open ? 'Ocultar historial' : 'Mostrar historial'}
-              className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-full border border-control bg-surface px-3 text-xs font-semibold text-muted shadow-low transition-colors hover:bg-surface-hover hover:text-ink active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
+              onClick={() => setOpen(false)}
+              className="inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-3 text-xs font-semibold text-ink shadow-low transition-colors hover:bg-surface-hover active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
             >
-              <ChevronIcon open={open} />
-              <span>
-                {open ? 'Ocultar' : 'Mostrar'}
-                <span className="hidden sm:inline"> historial</span>
-              </span>
+              Cerrar
             </button>
           </div>
         </div>
@@ -164,15 +173,18 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
           </p>
         ) : null}
 
-        <div id="history-panel" className="flex flex-col gap-3">
-          {open && entries.length === 0 ? (
+        <div
+          id="history-panel"
+          className="flex min-h-0 flex-1 flex-col gap-3"
+        >
+          {entries.length === 0 ? (
             <p className="text-sm text-muted italic">
               Sin operaciones registradas.
             </p>
-          ) : open ? (
+          ) : (
             <div
               id="history-list"
-              className="flex min-w-0 flex-col gap-3 overflow-y-auto lg:max-h-[calc(100dvh-16rem)]"
+              className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1"
             >
               {groups.map((group) => (
                 <section
@@ -198,7 +210,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
                         <li
                           key={entry.id}
                           data-history-entry
-                          className="panel flex min-w-0 flex-col gap-1 break-words px-3 py-2 rounded-2xl bg-surface shadow-low"
+                          className="panel flex min-w-0 flex-col gap-1 rounded-2xl bg-surface px-3 py-2 break-words shadow-low"
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-xs font-semibold text-ink">
@@ -225,7 +237,10 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
                                   strokeWidth="2"
                                   aria-hidden="true"
                                 >
-                                  <path d="m5 5 10 10M15 5 5 15" strokeLinecap="round" />
+                                  <path
+                                    d="m5 5 10 10M15 5 5 15"
+                                    strokeLinecap="round"
+                                  />
                                 </svg>
                               </button>
                             </span>
@@ -274,10 +289,10 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
                 </section>
               ))}
             </div>
-          ) : null}
+          )}
 
-          {open && canLoadMore ? (
-            <div className="flex justify-center border-t border-control pt-3">
+          {canLoadMore ? (
+            <div className="flex shrink-0 justify-center border-t border-control pt-3">
               <button
                 id="history-load-more-btn"
                 type="button"
@@ -291,6 +306,7 @@ export function HistoryAside({ variant = 'responsive' }: Props) {
           ) : null}
         </div>
       </aside>
+      ) : null}
     </>
   );
 }

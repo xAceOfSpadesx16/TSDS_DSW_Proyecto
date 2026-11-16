@@ -103,103 +103,115 @@ export function NumbersPage() {
   };
 
   return (
-    <main
-      className="workspace workspace-grid"
-    >
-      <section
-        id="section-numbers"
-        aria-label="Generador de números"
-        className="w-full min-w-0 animate-fade-in flex flex-col gap-4"
-      >
+    <main className="workspace">
+      <div className="page-head">
         <h1 tabIndex={-1} className="font-bold">
           Números aleatorios
         </h1>
+        <HistoryAside />
+      </div>
 
-        <form
-          id="numbers-form"
-          onSubmit={onSubmit}
-          aria-describedby={error ? 'numbers-error' : undefined}
-          className="panel bg-surface rounded-2xl shadow-raised p-6 flex flex-col gap-4"
-        >
-          <Field
-            id="numbers-count"
-            label="Cantidad"
-            type="number"
-            min={1}
-            value={count}
-            onChange={(e) => setCount(readNumeric(e.currentTarget.value))}
-            onBlur={() => setCount(clampMin(count, 1))}
-          />
-
-          <fieldset className="grid grid-cols-2 gap-3">
-            <legend className="col-span-2 text-sm font-medium text-muted">
-              Rango
-            </legend>
-            <Field
-              id="numbers-min"
-              label="Mínimo"
-              type="number"
-              value={min}
-              onChange={(e) => setMin(readNumeric(e.currentTarget.value))}
-              onBlur={() => setMin(toNumberOr(min))}
-            />
-            <Field
-              id="numbers-max"
-              label="Máximo"
-              type="number"
-              value={max}
-              onChange={(e) => setMax(readNumeric(e.currentTarget.value))}
-              onBlur={() => setMax(toNumberOr(max))}
-            />
-          </fieldset>
-
-          <label className="inline-flex min-h-11 items-center gap-2 text-sm text-ink">
-            <input
-              id="numbers-unique"
-              type="checkbox"
-              checked={unique}
-              onChange={(e) => setUnique(e.currentTarget.checked)}
-              aria-describedby="numbers-unique-hint"
-              className="h-5 w-5 rounded-md border-control bg-surface text-action focus-visible:outline focus-visible:outline-focus"
-            />
-            Sin repetición
-          </label>
-          <p id="numbers-unique-hint" className="text-xs text-muted">
-            Los números no se repiten dentro del mismo sorteo.
-          </p>
-
-          <div className="flex flex-wrap gap-2">
-            <PrimaryButton id="generate-numbers-btn" type="submit" variant="primary">
-              Generar
-            </PrimaryButton>
-            <PrimaryButton
-              id="numbers-reset-btn"
-              type="button"
-              variant="ghost"
-              onClick={onReset}
-            >
-              Restablecer
-            </PrimaryButton>
-          </div>
-        </form>
-
-        {error ? (
-          <p id="numbers-error" className="text-sm text-danger" role="alert">
-            {error}
-          </p>
-        ) : null}
-
-        {result ? (
-          <output
-            id="numbers-result"
-            className="panel bg-surface rounded-2xl p-4 font-mono text-ink text-center shadow-pressed"
+      <section
+        id="section-numbers"
+        aria-label="Generador de números"
+        className="draw-grid animate-fade-in"
+      >
+        <div className="flex min-w-0 flex-col gap-4">
+          <form
+            id="numbers-form"
+            onSubmit={onSubmit}
+            aria-describedby={error ? 'numbers-error' : undefined}
+            className="panel flex flex-col gap-4 rounded-2xl bg-surface p-4 shadow-raised sm:p-6"
           >
-            {result.numbers.join(', ')}
-          </output>
-        ) : null}
-      </section>
+            <Field
+              id="numbers-count"
+              label="Cantidad"
+              type="number"
+              min={1}
+              value={count}
+              onChange={(e) => setCount(readNumeric(e.currentTarget.value))}
+              onBlur={() => setCount(clampMin(count, 1))}
+            />
 
-      <HistoryAside />
+            <fieldset className="grid max-w-[60ch] grid-cols-2 gap-3">
+              <legend className="col-span-2 text-sm font-medium text-muted">
+                Rango
+              </legend>
+              <Field
+                id="numbers-min"
+                label="Mínimo"
+                type="number"
+                value={min}
+                onChange={(e) => setMin(readNumeric(e.currentTarget.value))}
+                onBlur={() => setMin(toNumberOr(min))}
+              />
+              <Field
+                id="numbers-max"
+                label="Máximo"
+                type="number"
+                value={max}
+                onChange={(e) => setMax(readNumeric(e.currentTarget.value))}
+                onBlur={() => setMax(toNumberOr(max))}
+              />
+            </fieldset>
+
+            <label className="inline-flex min-h-11 items-center gap-2 text-sm text-ink">
+              <input
+                id="numbers-unique"
+                type="checkbox"
+                checked={unique}
+                onChange={(e) => setUnique(e.currentTarget.checked)}
+                aria-describedby="numbers-unique-hint"
+                className="h-5 w-5 rounded-md border-control bg-surface text-action focus-visible:outline focus-visible:outline-focus"
+              />
+              Sin repetición
+            </label>
+            <p id="numbers-unique-hint" className="text-xs text-muted">
+              Los números no se repiten dentro del mismo sorteo.
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              <PrimaryButton
+                id="generate-numbers-btn"
+                type="submit"
+                variant="primary"
+              >
+                Generar
+              </PrimaryButton>
+              <PrimaryButton
+                id="numbers-reset-btn"
+                type="button"
+                variant="ghost"
+                onClick={onReset}
+              >
+                Restablecer
+              </PrimaryButton>
+            </div>
+          </form>
+
+          {error ? (
+            <p id="numbers-error" className="text-sm text-danger" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="panel flex min-w-0 flex-col gap-3 rounded-2xl bg-surface p-4 shadow-raised sm:p-6">
+          <h2 className="text-sm font-semibold text-muted">Resultado</h2>
+          {result ? (
+            <output
+              id="numbers-result"
+              className="rounded-2xl bg-surface p-4 text-center font-mono text-ink shadow-pressed"
+            >
+              {result.numbers.join(', ')}
+            </output>
+          ) : (
+            <p className="text-sm text-muted italic">
+              El resultado aparecerá acá.
+            </p>
+          )}
+        </div>
+      </section>
     </main>
   );
 }

@@ -42,6 +42,21 @@
 
   --font-size-registration: 0.75rem;
 
+  --text-display: clamp(2rem, 1.55rem + 1.6vw, 2.75rem);
+  --text-headline: clamp(1.375rem, 1.2rem + 0.55vw, 1.625rem);
+  --text-body: clamp(1rem, 0.97rem + 0.14vw, 1.0625rem);
+  --space-section: clamp(0.875rem, 0.75rem + 0.6vw, 2rem);
+  --space-workspace: clamp(1rem, 0.75rem + 0.8vw, 1.5rem);
+
+  /* Un único token de ancho: el contenido crece hasta 1440 px y deja lugar
+     a los laterales publicitarios cuando la ventana lo permite. */
+  --workspace-inset: 0px;
+  --workspace-width: clamp(
+    320px,
+    calc(100vw - 2 * var(--workspace-inset)),
+    1440px
+  );
+
   --radius-card: 24px;
   --radius-control: 14px;
   --radius-chip: 8px;
@@ -64,6 +79,24 @@
   --shadow-arrow: 0 3px 6px rgba(34, 31, 26, 0.28);
 }
 
+@media (min-width: 1440px) {
+  :root {
+    --workspace-inset: 152px;
+  }
+}
+
+@media (min-width: 1536px) {
+  :root {
+    --workspace-inset: 192px;
+  }
+}
+
+@media (min-width: 2104px) {
+  :root {
+    --workspace-inset: 332px;
+  }
+}
+
 html {
   background-color: var(--color-canvas);
   color-scheme: light;
@@ -73,6 +106,7 @@ body {
   background-color: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-body);
+  font-size: var(--text-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -84,20 +118,13 @@ h3 {
 }
 
 h1 {
-  font-size: 2rem;
-  line-height: 2.25rem;
+  font-size: var(--text-display);
+  line-height: 1.1;
 }
 
 h2 {
-  font-size: 1.5rem;
-  line-height: 1.75rem;
-}
-
-@media (min-width: 768px) {
-  h1 {
-    font-size: 2.625rem;
-    line-height: 2.875rem;
-  }
+  font-size: var(--text-headline);
+  line-height: 1.2;
 }
 
 p {
@@ -184,36 +211,41 @@ input[type="color"] {
   }
 }
 
-/* Ancho único del área de trabajo y su grilla con el historial. */
+/* Ancho fluido del área de trabajo y composición en una o dos columnas. */
 @layer components {
   .workspace {
-    width: 100%;
-    max-width: 1120px;
+    width: var(--workspace-width);
+    max-width: 100%;
     margin-inline: auto;
-    padding: 1rem;
+    padding: var(--space-workspace);
   }
 
-  @media (min-width: 640px) {
-    .workspace {
-      padding: 1.5rem;
-    }
+  .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: var(--space-section);
   }
 
-  .workspace-grid {
+  .draw-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.5rem;
+    align-items: start;
+    gap: var(--space-section);
   }
 
-  @media (max-width: 1023px) {
-    .workspace-grid {
-      padding-bottom: 5.5rem;
+  /* Deja aire para el botón flotante de historial en pantallas angostas. */
+  @media (max-width: 1279px) {
+    .draw-grid {
+      padding-bottom: 5rem;
     }
   }
 
-  @media (min-width: 1024px) {
-    .workspace-grid {
-      grid-template-columns: minmax(0, 1fr) 280px;
+  @media (min-width: 1280px) {
+    .draw-grid {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
     }
   }
 }

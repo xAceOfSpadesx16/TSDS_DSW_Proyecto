@@ -121,19 +121,20 @@ export function DicePage() {
   };
 
   return (
-    <main
-      className="workspace workspace-grid"
-    >
-      <section
-        id="section-dice"
-        aria-label="Dados RPG"
-        className="w-full min-w-0 animate-fade-in flex flex-col gap-3 sm:gap-4"
-      >
+    <main className="workspace">
+      <div className="page-head">
         <h1 tabIndex={-1} className="font-bold">
           Dados RPG
         </h1>
+        <HistoryAside />
+      </div>
 
-        <div className="panel bg-surface rounded-2xl shadow-raised p-4 sm:p-6 flex flex-col gap-3 sm:gap-4">
+      <section
+        id="section-dice"
+        aria-label="Dados RPG"
+        className="draw-grid animate-fade-in"
+      >
+        <div className="panel flex min-w-0 flex-col gap-4 rounded-2xl bg-surface p-4 shadow-raised sm:p-6">
           <fieldset
             className="flex min-w-0 flex-col gap-2"
             aria-describedby={diceError ? 'dice-error' : undefined}
@@ -168,11 +169,13 @@ export function DicePage() {
             value={modifier}
             onChange={(e) => setModifier(Number(e.currentTarget.value))}
           />
+        </div>
 
-          <div className="flex items-center justify-center gap-4 py-4 sm:py-6">
+        <div className="panel flex min-w-0 flex-col items-center gap-4 rounded-2xl bg-surface p-4 text-center shadow-raised sm:p-6">
+          <div className="flex items-center justify-center py-2">
             <output
               id="dice-result"
-              className={`dice-registration panel relative w-32 h-32 flex items-center justify-center font-mono text-[2.75rem] leading-[3rem] font-bold rounded-xl bg-surface text-action shadow-pressed ${
+              className={`dice-registration panel relative flex h-32 w-32 items-center justify-center rounded-xl bg-surface font-mono text-[2.75rem] font-bold leading-[3rem] text-action shadow-pressed ${
                 shaking ? 'animate-dice-shake' : ''
               }`}
               aria-hidden="true"
@@ -192,7 +195,7 @@ export function DicePage() {
           </p>
 
           {diceResult ? (
-            <div className="text-center text-lg">
+            <div className="text-lg">
               <output id="dice-total" className="font-mono font-bold text-ink">
                 {diceResult.rolls.length === 1
                   ? `Total: ${diceResult.total}${
@@ -211,7 +214,7 @@ export function DicePage() {
             </p>
           ) : null}
 
-          <div className="flex justify-start sm:justify-end">
+          <div className="flex w-full justify-start sm:justify-end">
             <PrimaryButton
               id="dice-reset-btn"
               type="button"
@@ -223,8 +226,6 @@ export function DicePage() {
           </div>
         </div>
       </section>
-
-      <HistoryAside />
     </main>
   );
 }

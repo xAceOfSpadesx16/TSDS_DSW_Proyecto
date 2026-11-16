@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { LocalHistoryEntry } from '../../../src/store/historyStore';
@@ -68,7 +68,7 @@ function entryWithRecord(
 async function renderOpen() {
   const user = userEvent.setup();
   render(<HistoryAside />);
-  await user.click(screen.getByRole('button', { name: 'Mostrar historial' }));
+  await user.click(screen.getByRole('button', { name: 'Historial' }));
   return user;
 }
 
@@ -94,40 +94,76 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('HistoryAside — disclosure', () => {
-  it('arranca colapsado y alterna aria-expanded y visibilidad', async () => {
+describe('HistoryAside — disclosure superpuesto', () => {
+  it('arranca cerrado y alterna aria-expanded y la presencia del panel', async () => {
     const user = userEvent.setup();
     render(<HistoryAside />);
 
-    const toggle = screen.getByRole('button', { name: 'Mostrar historial' });
+    const toggle = screen.getByRole('button', { name: 'Historial' });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(toggle).toHaveClass('min-h-11', 'min-w-11');
-    expect(screen.queryByText('Sin operaciones registradas.')).not.toBeInTheDocument();
+    expect(toggle).toHaveAttribute('aria-controls', 'history-aside');
+    expect(document.querySelector('#history-aside')).toBeNull();
+    expect(toggle).toHaveClass('min-h-11');
+    expect(toggle).toHaveClass('fixed', 'bottom-4', 'right-4');
 
     await user.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getByRole('complementary', { name: 'Historial' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Sin operaciones registradas.')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Historial' })).toHaveFocus();
 
-    await user.click(toggle);
+    await user.keyboard('{Escape}');
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByText('Sin operaciones registradas.')).not.toBeInTheDocument();
+    expect(document.querySelector('#history-aside')).toBeNull();
+    expect(toggle).toHaveFocus();
   });
 
   it('recuerda el estado abierto después de remontar', async () => {
     const user = userEvent.setup();
     const first = render(<HistoryAside />);
-    await user.click(screen.getByRole('button', { name: 'Mostrar historial' }));
+    await user.click(screen.getByRole('button', { name: 'Historial' }));
     first.unmount();
 
     render(<HistoryAside />);
-    expect(
-      screen.getByRole('button', { name: 'Ocultar historial' }),
-    ).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'Historial' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
     expect(screen.getByText('Sin operaciones registradas.')).toBeInTheDocument();
+  });
+
+  it('Escape cierra el panel y devuelve el foco al botón', async () => {
+    const user = userEvent.setup();
+    await renderOpen();
+
+    await user.keyboard('{Escape}');
+    expect(document.querySelector('#history-aside')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Historial' })).toHaveFocus();
+  });
+
+  it('el botón Cerrar del panel lo cierra y devuelve el foco', async () => {
+    const user = userEvent.setup();
+    await renderOpen();
+
+    const aside = screen.getByRole('complementary', { name: 'Historial' });
+    await user.click(within(aside).getByRole('button', { name: 'Cerrar' }));
+
+    expect(document.querySelector('#history-aside')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Historial' })).toHaveFocus();
+  });
+
+  it('muestra el contador de operaciones en el botón', async () => {
+    useHistoryStore.setState({ entries });
+    render(<HistoryAside />);
+    expect(screen.getByRole('button', { name: 'Historial' })).toHaveTextContent(
+      '2',
+    );
   });
 });
 
-describe('HistoryAside (sidebar)', () => {
+describe('HistoryAside (panel)', () => {
   it('muestra el estado vacío al abrir cuando no hay operaciones', async () => {
     await renderOpen();
     expect(screen.getByText('Sin operaciones registradas.')).toBeInTheDocument();
@@ -276,9 +312,9 @@ describe('HistoryAside (sidebar)', () => {
 });
 
 describe('HistoryAside — errores', () => {
-  it('muestra el mensaje del store con role="alert"', () => {
+  it('muestra el mensaje del store con role="alert"', async () => {
     useHistoryStore.setState({ error: 'No se pudo cargar el historial.' });
-    render(<HistoryAside />);
+    await renderOpen();
 
     const alert = screen.getByRole('alert');
     expect(alert).toHaveTextContent('No se pudo cargar el historial.');
@@ -338,21 +374,5 @@ describe('HistoryAside — errores', () => {
 
     expect(useHistoryStore.getState().error).toBeNull();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-  });
-});
-
-describe('HistoryAside (mobile)', () => {
-  it('alterna la visibilidad del panel mediante el botón toggle', async () => {
-    const user = userEvent.setup();
-    render(<HistoryAside variant="mobile" />);
-
-    const toggle = screen.getByRole('button', { name: 'Historial' });
-    expect(toggle).toHaveAttribute('aria-pressed', 'false');
-
-    await user.click(toggle);
-    expect(screen.getByRole('button', { name: 'Cerrar' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
   });
 });

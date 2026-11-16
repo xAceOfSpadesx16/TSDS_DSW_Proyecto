@@ -200,12 +200,14 @@ function AdRail({ side }: { side: 'left' | 'right' }) {
   return (
     <div
       data-ad-rail={side}
-      className={`sticky top-[4.5rem] mt-4 hidden shrink-0 self-start min-[1440px]:flex ${
-        side === 'left' ? 'pl-4' : 'pr-4'
-      }`}
+      className="sticky top-[4.5rem] mt-4 hidden shrink-0 self-start px-4 min-[1440px]:flex"
     >
       <AdSlot variant="tower" className="min-[1536px]:hidden" />
-      <AdSlot variant="tower-wide" className="hidden min-[1536px]:flex" />
+      <AdSlot
+        variant="tower-wide"
+        className="hidden min-[1536px]:flex min-[2104px]:hidden"
+      />
+      <AdSlot variant="tower-large" className="hidden min-[2104px]:flex" />
     </div>
   );
 }

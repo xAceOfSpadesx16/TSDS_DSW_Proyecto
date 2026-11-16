@@ -4,6 +4,8 @@ import AxeBuilder from '@axe-core/playwright';
 type Box = { x: number; y: number; width: number; height: number };
 
 const VIEWPORTS = [
+  { width: 2560, height: 1440, variant: 'tower-large', banners: 0 },
+  { width: 1920, height: 1080, variant: 'tower-wide', banners: 0 },
   { width: 1600, height: 900, variant: 'tower-wide', banners: 0 },
   { width: 1440, height: 900, variant: 'tower', banners: 0 },
   { width: 1366, height: 768, variant: null, banners: 1 },
@@ -107,13 +109,16 @@ test.describe('Espacios publicitarios', () => {
 
       if (viewport.variant) {
         expect(variants.filter((v) => v === viewport.variant)).toHaveLength(2);
-        expect(variants).not.toContain(
-          viewport.variant === 'tower' ? 'tower-wide' : 'tower',
-        );
+        for (const other of ['tower', 'tower-wide', 'tower-large']) {
+          if (other !== viewport.variant) {
+            expect(variants).not.toContain(other);
+          }
+        }
       } else if (viewport.width >= 1024) {
         expect(variants).toContain('leaderboard');
         expect(variants).not.toContain('tower');
         expect(variants).not.toContain('tower-wide');
+        expect(variants).not.toContain('tower-large');
       } else {
         expect(variants).toContain('mobile-banner');
         expect(variants).not.toContain('leaderboard');
@@ -121,7 +126,10 @@ test.describe('Espacios publicitarios', () => {
 
       // El banner no convive con los laterales.
       const hasLateral = variants.some(
-        (variant) => variant === 'tower' || variant === 'tower-wide',
+        (variant) =>
+          variant === 'tower' ||
+          variant === 'tower-wide' ||
+          variant === 'tower-large',
       );
       const banner = page.locator(
         'aside[data-ad-variant="leaderboard"]:visible, aside[data-ad-variant="mobile-banner"]:visible',
@@ -142,20 +150,24 @@ test.describe('Espacios publicitarios', () => {
     });
   }
 
-  test('los laterales dejan 16 px al borde y no reducen el área de trabajo', async ({
-    page,
-  }) => {
-    for (const width of [1600, 1440]) {
-      await page.setViewportSize({ width, height: 900 });
+  test('los laterales dejan 16 px al borde y al contenido', async ({ page }) => {
+    const expectedWidths: Record<number, number> = {
+      1440: 1136,
+      1600: 1216,
+      1920: 1440,
+      2560: 1440,
+    };
+    for (const width of [1440, 1600, 1920, 2560]) {
+      await page.setViewportSize({ width, height: 1080 });
       await page.goto('/');
       await expect(page.locator('main')).toBeVisible();
       await settle(page);
 
       const main = await box(page.locator('main'));
-      expect(main.width).toBe(1120);
+      expect(Math.abs(main.width - expectedWidths[width]!)).toBeLessThanOrEqual(1);
 
       const ads = page.locator(
-        'aside[data-ad-variant="tower"]:visible, aside[data-ad-variant="tower-wide"]:visible',
+        'aside[data-ad-variant="tower"]:visible, aside[data-ad-variant="tower-wide"]:visible, aside[data-ad-variant="tower-large"]:visible',
       );
       await expect(ads).toHaveCount(2);
 
@@ -229,7 +241,7 @@ test.describe('Espacios publicitarios', () => {
   test('el rectángulo de la landing queda alineado con las tarjetas', async ({
     page,
   }) => {
-    for (const width of [1600, 1440, 1366, 1024]) {
+    for (const width of [2560, 1920, 1600, 1440, 1366, 1024]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/');
       await settle(page);

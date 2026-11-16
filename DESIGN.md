@@ -206,9 +206,13 @@ Todos los pares se recalcularon con luminancia relativa WCAG sobre el nuevo mate
 
 ## Layout
 
-El área de trabajo tiene un ancho máximo de 1120 px (`workspace`) y se centra con padding de 16 px (24 px desde 640 px). En desktop desde 1024 px se divide en una columna principal flexible y una columna de historial de 280 px; en mobile el historial se convierte en una hoja inferior con un botón flotante de 44 px.
+El área de trabajo usa un único token fluido, `--workspace-width: clamp(320px, 100vw - 2 × inset, 1440px)`. El `inset` reserva el espacio de los laterales publicitarios: 152 px desde 1440, 192 px desde 1536 y 332 px desde 2104. Así el contenido crece hasta 1440 px y, cuando ya alcanzó su máximo, el espacio sobrante se reparte entre publicidades y márgenes. El padding interno también es fluido (`clamp(16px, ..., 24px)`).
 
-Desde 1440 px el área de trabajo queda flanqueada por dos columnares publicitarios `sticky` (120×600 entre 1440 y 1535 px, 160×600 desde 1536 px) que no reducen su ancho: el workspace sigue midiendo 1120 px y se mantiene centrado. Debajo de 1440 px, en lugar de los laterales, aparece un banner centrado después del contenido y antes del pie (728×90 desde 820 px, 320×100 en pantallas más angostas). La landing suma un rectángulo de 300×250 en la celda libre de la grilla desde `lg`.
+La composición cambia por ancho: debajo de 1280 px hay una sola columna (formulario y, debajo, resultado); desde 1280 px hay dos columnas en las pantallas de sorteo (formulario a la izquierda, resultado a la derecha). Los campos se limitan a 60 caracteres (`60ch`) dentro de su columna. Títulos, texto base y espaciados principales usan `clamp()`. La landing usa 1 columna, 2 desde `sm`, 3 desde `lg` y 4 desde 1800 px; en 4 columnas la última tarjeta y el rectángulo ocupan dos celdas para no dejar huecos huérfanos.
+
+El historial es un panel superpuesto no modal: el botón "Historial" vive en el encabezado de cada pantalla de sorteo (fijo abajo a la derecha en mobile) y abre un panel fijo a la derecha, de 320 a 380 px, desde abajo del header hasta el pie, con scroll interno; en mobile es una hoja inferior de hasta 70dvh. No desplaza el contenido y se cierra con "Cerrar", con Escape o con el mismo botón cuando está visible.
+
+Desde 1440 px el área de trabajo queda flanqueada por dos columnares publicitarios `sticky` (120×600 entre 1440 y 1535 px, 160×600 entre 1536 y 2103 px, 300×600 desde 2104 px). Debajo de 1440 px, en lugar de los laterales, aparece un banner centrado después del contenido y antes del pie (728×90 desde 820 px, 320×100 en pantallas más angostas). La landing suma un rectángulo de 300×250 en la celda libre de la grilla desde `lg`.
 
 Las pantallas de sorteo comparten el mismo `workspace-grid` y el mismo ritmo vertical: 12–16 px entre bloques, 24 px entre secciones. Las tarjetas usan 16–24 px de padding. El header mide 56 px, flota con sombra Low y la navegación se colapsa debajo de 1024 px en un panel con botón de 44×44 px.
 
@@ -221,8 +225,8 @@ El sistema es neumórfico de un solo material: la página y las tarjetas compart
 ### Shadow Vocabulary
 - **Flat** (`none`): superficies que no deben competir, como el fondo de página.
 - **Low** (`-4px -4px 10px rgba(255, 255, 255, 0.85), 4px 4px 10px rgba(84, 72, 55, 0.18)`): header, footer, chips, botones secundarios y fichas de dado en reposo.
-- **Raised** (`-8px -8px 18px rgba(255, 255, 255, 0.9), 8px 8px 18px rgba(84, 72, 55, 0.22)`): tarjetas, formularios, hero de landing, historial, resultados en tarjeta y acciones primarias.
-- **High** (`-14px -14px 28px rgba(255, 255, 255, 0.95), 14px 14px 30px rgba(84, 72, 55, 0.26)`): diálogos, menú móvil, botón flotante, ruleta y hoja móvil del historial.
+- **Raised** (`-8px -8px 18px rgba(255, 255, 255, 0.9), 8px 8px 18px rgba(84, 72, 55, 0.22)`): tarjetas, formularios, hero de landing, resultados en tarjeta y acciones primarias.
+- **High** (`-14px -14px 28px rgba(255, 255, 255, 0.95), 14px 14px 30px rgba(84, 72, 55, 0.26)`): diálogos, menú móvil, botón flotante, ruleta, panel de historial y hoja móvil.
 - **Pressed** (`inset 6px 6px 12px rgba(84, 72, 55, 0.22), inset -6px -6px 12px rgba(255, 255, 255, 0.9)`): inputs, selects, pistas de progreso, resultado de dados y ficha activa.
 - **Arrow** (`0 3px 6px rgba(34, 31, 26, 0.28)`): sombra corta del puntero triangular de la ruleta.
 
@@ -270,14 +274,20 @@ Los íconos son SVG inline de 24×24 px, trazo de 2 px, extremos rectos y un pun
 - **States:** enlace activo hundido (Pressed Paper), con texto y borde de acento; inactivo Faded Ink sobre superficie con sombra Low; hover Worn Paper y Rubber Ink. El estado activo no depende solo del color: suma borde y relieve hundido.
 - **Mobile:** botón de 44×44 px en píldora, panel desplegable con sombra High, cierre con Escape y foco al primer enlace.
 
+### History Panel
+- **Patrón:** Disclosure de WAI-ARIA APG. El botón "Historial" lleva `aria-expanded` y `aria-controls`; el panel es un `aside` con encabezado propio y no es modal.
+- **Escritorio:** fijo a la derecha, de 320 a 380 px, desde abajo del header hasta el borde inferior, con sombra High y scroll interno. Puede quedar por encima del lateral publicitario derecho, nunca al revés.
+- **Mobile:** hoja inferior superpuesta de hasta 70dvh, con el mismo encabezado y cierre.
+- **Interacción:** el foco entra al encabezado al abrir y vuelve al botón al cerrar; Escape y el botón "Cerrar" cierran. Abrir o cerrar no mueve el contenido.
+
 ### Signature: Roulette
 La ruleta usa un color de datos distinto por opción y calcula el color de etiqueta con contraste ≥4.5:1; si un color intermedio no alcanza con tinta ni con papel, lo oscurece hasta lograrlo. Las etiquetas se dibujan siempre horizontales, fuera de la rotación del disco, para que nunca queden invertidas. El disco y el puntero viven sobre el mismo material; el centro es Rubber Ink. En mobile, el alta de opciones es un `details` plegable y la acción “Girar ruleta” queda en el primer viewport.
 
 ### Ad Slots
 - **Componente:** `src/components/AdSlot.tsx`. Cada espacio es un `aside` con `aria-label="Publicidad"`, sin elementos enfocables ni contenido interactivo.
-- **Formatos:** 120×600 y 160×600 (laterales), 300×250 (rectángulo de la landing), 728×90 y 320×100 (banner). El tamaño se reserva con ancho y alto fijos para que la carga de un anuncio no mueva el diseño.
+- **Formatos:** 120×600, 160×600 y 300×600 (laterales), 300×250 (rectángulo de la landing), 728×90 y 320×100 (banner). El tamaño se reserva con ancho y alto fijos para que la carga de un anuncio no mueva el diseño.
 - **Superficie:** mismo material que el resto (Workshop Paper), recuadro hundido con `--shadow-pressed`, borde de 2 px `--color-ad-border` (`#8a4b12`, 5.46:1 sobre Workshop Paper) y etiqueta “Publicidad” en Faded Ink (5.94:1).
-- **Ubicación:** laterales `sticky` con 16 px al borde de la ventana y al menos 16 px al contenido desde 1440 px; rectángulo en la grilla de la landing desde `lg`; banner debajo del contenido y antes del pie cuando no hay laterales. Nunca en `/login`, `/register` ni en el 404.
+- **Ubicación:** laterales `sticky` con 16 px al borde de la ventana y al menos 16 px al contenido desde 1440 px (120×600), 1536 px (160×600) y 2104 px (300×600); rectángulo en la grilla de la landing desde `lg`; banner debajo del contenido y antes del pie cuando no hay laterales. Nunca en `/login`, `/register` ni en el 404.
 - **Alto contraste:** `prefers-contrast: more` conserva el borde sólido de 2 px en Rubber Ink aunque las sombras desaparezcan.
 - **Sin script:** no se carga AdSense. El marcado `ins.adsbygoogle` queda preparado y `data-ad-client` sale de `VITE_ADSENSE_CLIENT`; sin cliente configurado el espacio se muestra como recuadro de reserva.
 

@@ -8,11 +8,22 @@ import type { Page } from '@playwright/test';
 export class HistoryAside {
   constructor(private readonly page: Page) {}
 
-  /** Abre el disclosure del historial si está colapsado. */
+  /** Abre el panel del historial si está cerrado. */
   async open(): Promise<void> {
-    const trigger = this.page.getByRole('button', { name: 'Mostrar historial' });
-    if ((await trigger.count()) > 0) {
-      await trigger.click();
+    const toggle = this.page.locator('#history-toggle-btn');
+    if ((await toggle.count()) === 0) {
+      return;
+    }
+    if ((await toggle.getAttribute('aria-expanded')) === 'false') {
+      await toggle.click();
+    }
+  }
+
+  /** Cierra el panel si está abierto. */
+  async close(): Promise<void> {
+    const close = this.page.locator('#history-close-btn');
+    if ((await close.count()) > 0) {
+      await close.click();
     }
   }
 

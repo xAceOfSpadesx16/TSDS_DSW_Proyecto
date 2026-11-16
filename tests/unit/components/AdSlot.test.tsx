@@ -12,6 +12,7 @@ afterEach(() => {
 const SIZES: Record<AdSlotVariant, { width: number; height: number }> = {
   tower: { width: 120, height: 600 },
   'tower-wide': { width: 160, height: 600 },
+  'tower-large': { width: 300, height: 600 },
   rectangle: { width: 300, height: 250 },
   leaderboard: { width: 728, height: 90 },
   'mobile-banner': { width: 320, height: 100 },

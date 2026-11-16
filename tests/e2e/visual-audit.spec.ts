@@ -17,6 +17,8 @@ const ROUTES = [
 ] as const;
 
 const VIEWPORTS = [
+  { width: 2560, height: 1440 },
+  { width: 1920, height: 1080 },
   { width: 1600, height: 900 },
   { width: 1440, height: 900 },
   { width: 1366, height: 768 },
@@ -46,17 +48,19 @@ async function loginAsDemo(page: Page) {
 }
 
 async function openHistory(page: Page) {
-  const floating = page.locator('#history-toggle-btn');
-  if (await floating.isVisible()) {
-    const label = (await floating.textContent())?.trim();
-    if (label === 'Historial') {
-      await floating.click();
-    }
-  } else {
-    const collapse = page.locator('#history-collapse-btn');
-    if ((await collapse.getAttribute('aria-expanded')) === 'false') {
-      await collapse.click();
-    }
+  const toggle = page.locator('#history-toggle-btn');
+  if ((await toggle.count()) === 0) {
+    return;
+  }
+  if ((await toggle.getAttribute('aria-expanded')) === 'false') {
+    await toggle.click();
+  }
+}
+
+async function closeHistory(page: Page) {
+  const close = page.locator('#history-close-btn');
+  if ((await close.count()) > 0) {
+    await close.click();
   }
 }
 
@@ -116,6 +120,10 @@ async function visit(
   await page.waitForLoadState('networkidle');
 
   if (['/dice', '/numbers', '/teams', '/weighted', '/roulette'].includes(route)) {
+    // El panel superpuesto se recuerda entre rutas: se cierra para operar
+    // sobre el formulario y se vuelve a abrir para la captura.
+    await closeHistory(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
     await generateResult(page, route);
     await openHistory(page);
     if (state === 'logueado') {

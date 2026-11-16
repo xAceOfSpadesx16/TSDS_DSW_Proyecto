@@ -71,7 +71,7 @@ export function LandingPage() {
 
       <section
         id="modulos"
-        className="mt-6 grid w-full scroll-mt-24 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in"
+        className="mt-6 grid w-full scroll-mt-24 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 min-[1800px]:grid-cols-4 animate-fade-in"
         aria-labelledby="modulos-heading"
       >
         <h2 id="modulos-heading" className="sr-only">
@@ -83,7 +83,7 @@ export function LandingPage() {
             to={m.to}
             className={`panel flex flex-col rounded-2xl bg-surface p-6 text-ink shadow-raised transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-high focus-visible:outline focus-visible:outline-focus hover:no-underline hover:text-ink ${
               index === MODULES.length - 1
-                ? 'sm:col-span-2 lg:col-span-1'
+                ? 'sm:col-span-2 lg:col-span-1 min-[1800px]:col-span-2'
                 : ''
             }`}
           >
@@ -99,7 +99,7 @@ export function LandingPage() {
         ))}
         <AdSlot
           variant="rectangle"
-          className="hidden self-center justify-self-center lg:block"
+          className="hidden self-center justify-self-center lg:block min-[1800px]:col-span-2"
         />
       </section>
     </main>

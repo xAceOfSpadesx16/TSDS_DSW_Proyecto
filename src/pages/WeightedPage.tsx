@@ -300,16 +300,20 @@ export function WeightedPage() {
   };
 
   return (
-    <main className="workspace workspace-grid">
-      <section
-        id="section-weighted"
-        aria-label="Sorteo con pesos"
-        className="w-full min-w-0 animate-fade-in flex flex-col gap-3 sm:gap-4"
-      >
+    <main className="workspace">
+      <div className="page-head">
         <h1 tabIndex={-1} className="font-bold">
           Sorteo con Pesos
         </h1>
+        <HistoryAside />
+      </div>
 
+      <section
+        id="section-weighted"
+        aria-label="Sorteo con pesos"
+        className="draw-grid animate-fade-in"
+      >
+        <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
         <form
           id="weighted-form"
           onSubmit={onAdd}
@@ -386,7 +390,7 @@ export function WeightedPage() {
                   : 'weighted-bulk-hint'
               }
               placeholder={'Ana, 3\nBruno, 5\nCarla'}
-              className="w-full min-w-0 rounded-md border border-control bg-surface px-3 py-2 text-ink placeholder:text-muted focus-visible:outline focus-visible:outline-focus"
+              className="w-full min-w-0 max-w-[60ch] rounded-md border border-control bg-surface px-3 py-2 text-ink placeholder:text-muted focus-visible:outline focus-visible:outline-focus"
             />
             <p id="weighted-bulk-hint" className="text-xs text-muted">
               Formato: <code>Ana</code> o <code>Ana, 3</code>. El peso es
@@ -610,12 +614,14 @@ export function WeightedPage() {
             {error}
           </p>
         ) : null}
+        </div>
 
+        <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20">
         {result ? (
           <section
             id="weighted-result"
             aria-labelledby="weighted-result-heading"
-            className="panel min-w-0 break-words rounded-2xl bg-surface p-4 text-center shadow-pressed"
+            className="panel min-w-0 scroll-mb-2 break-words rounded-2xl bg-surface p-4 text-center shadow-pressed"
           >
             <h2
               id="weighted-result-heading"
@@ -642,10 +648,18 @@ export function WeightedPage() {
               {`Ganador: ${result.winner.name}. Probabilidad: ${result.probability}%.`}
             </output>
           </section>
-        ) : null}
+        ) : (
+          <div className="panel flex min-w-0 flex-col gap-3 rounded-2xl bg-surface p-4 text-center shadow-raised sm:p-6">
+            <h2 className="font-sans text-sm font-semibold text-muted">
+              Ganador
+            </h2>
+            <p className="text-sm text-muted italic">
+              El ganador aparecerá acá.
+            </p>
+          </div>
+        )}
+        </div>
       </section>
-
-      <HistoryAside />
     </main>
   );
 }
