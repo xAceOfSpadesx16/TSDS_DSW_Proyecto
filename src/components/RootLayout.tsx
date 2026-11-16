@@ -296,6 +296,7 @@ function AdBanner() {
   return (
     <div
       ref={bannerRef}
+      data-ad-banner
       className="flex w-full justify-center px-0 py-6 min-[360px]:px-4 min-[1440px]:hidden"
     >
       <AdSlot variant="mobile-banner" className="min-[820px]:hidden" />
@@ -361,8 +362,18 @@ function DisclaimerFooter({
           </span>
         </h2>
         <details className="text-xs">
-          <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-full border border-control bg-surface px-3 font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
+          <summary className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-control bg-surface px-3 font-semibold text-ink shadow-low focus-visible:outline focus-visible:outline-focus">
             Ver el aviso completo ({disclaimer.sections.length} secciones)
+            <svg
+              viewBox="0 0 20 20"
+              className="summary-chevron h-4 w-4 shrink-0 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="m5 7 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </summary>
           <dl className="mt-3 flex flex-col gap-3">
             {disclaimer.sections.map((section) => (

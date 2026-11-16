@@ -58,9 +58,12 @@ async function openHistory(page: Page) {
 }
 
 async function closeHistory(page: Page) {
-  const close = page.locator('#history-close-btn');
-  if ((await close.count()) > 0) {
-    await close.click();
+  const toggle = page.locator('#history-toggle-btn');
+  if (
+    (await toggle.count()) > 0 &&
+    (await toggle.getAttribute('aria-expanded')) === 'true'
+  ) {
+    await toggle.click();
   }
 }
 

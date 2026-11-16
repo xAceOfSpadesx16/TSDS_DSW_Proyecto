@@ -107,17 +107,20 @@ describe('HistoryAside — disclosure superpuesto', () => {
     expect(toggle).toHaveClass('fixed', 'bottom-4', 'right-4');
 
     await user.click(toggle);
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    const openToggle = screen.getByRole('button', { name: 'Cerrar' });
+    expect(openToggle).toHaveAttribute('aria-expanded', 'true');
+    expect(openToggle).toHaveAttribute('aria-controls', 'history-aside');
     expect(
       screen.getByRole('complementary', { name: 'Historial' }),
     ).toBeInTheDocument();
     expect(screen.getByText('Sin operaciones registradas.')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Historial' })).toHaveFocus();
 
-    await user.keyboard('{Escape}');
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await user.click(openToggle);
+    const closedToggle = screen.getByRole('button', { name: 'Historial' });
+    expect(closedToggle).toHaveAttribute('aria-expanded', 'false');
     expect(document.querySelector('#history-aside')).toBeNull();
-    expect(toggle).toHaveFocus();
+    expect(closedToggle).toHaveFocus();
   });
 
   it('recuerda el estado abierto después de remontar', async () => {
@@ -127,7 +130,7 @@ describe('HistoryAside — disclosure superpuesto', () => {
     first.unmount();
 
     render(<HistoryAside />);
-    expect(screen.getByRole('button', { name: 'Historial' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: 'Cerrar' })).toHaveAttribute(
       'aria-expanded',
       'true',
     );

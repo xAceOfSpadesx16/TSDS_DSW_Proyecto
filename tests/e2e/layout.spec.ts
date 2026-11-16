@@ -66,7 +66,7 @@ test.describe('Layout fluido', () => {
       expectSameBox(before, after);
       expectSameBox(beforeMain, afterMain);
 
-      await page.locator('#history-close-btn').click();
+      await page.locator('#history-toggle-btn').click();
       await expect(page.locator('#history-aside')).toHaveCount(0);
       await resetScroll();
       const afterClose = await box(section);
@@ -95,19 +95,40 @@ test.describe('Layout fluido', () => {
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/weighted');
     await page.locator('#weighted-name').fill('Ana');
     await page.locator('#weighted-form button[type="submit"]').click();
     await page.locator('#weighted-draw-btn').click();
     await page.locator('#weighted-result').waitFor();
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-
-    const button = await box(page.locator('#history-toggle-btn'));
-    const summary = await box(
+    await expect(
       page.locator('#legal-disclaimer summary'),
+    ).toBeVisible();
+
+    const layout = await page.evaluate(() => {
+      const button = document
+        .querySelector('#history-toggle-btn')!
+        .getBoundingClientRect();
+      const summary = document
+        .querySelector('#legal-disclaimer summary')!
+        .getBoundingClientRect();
+      const maxScroll =
+        document.documentElement.scrollHeight - window.innerHeight;
+      return {
+        buttonTop: button.top,
+        buttonBottom: button.bottom,
+        summaryBottomAtBottom:
+          summary.bottom + window.scrollY - maxScroll,
+        maxScroll,
+        viewport: window.innerHeight,
+      };
+    });
+
+    expect(layout.maxScroll).toBeGreaterThan(0);
+    expect(layout.buttonTop).toBeGreaterThanOrEqual(
+      layout.summaryBottomAtBottom + 8,
     );
-    expect(button.y).toBeGreaterThanOrEqual(summary.y + summary.height + 8);
-    expect(button.y + button.height).toBeLessThanOrEqual(844 - 8);
+    expect(layout.buttonBottom).toBeLessThanOrEqual(layout.viewport - 8);
   });
 
   test('una columna debajo de 1280 px y dos columnas desde 1280 px', async ({

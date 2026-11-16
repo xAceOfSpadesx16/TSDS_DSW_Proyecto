@@ -21,9 +21,12 @@ export class HistoryAside {
 
   /** Cierra el panel si está abierto. */
   async close(): Promise<void> {
-    const close = this.page.locator('#history-close-btn');
-    if ((await close.count()) > 0) {
-      await close.click();
+    const toggle = this.page.locator('#history-toggle-btn');
+    if (
+      (await toggle.count()) > 0 &&
+      (await toggle.getAttribute('aria-expanded')) === 'true'
+    ) {
+      await toggle.click();
     }
   }
 

@@ -277,6 +277,11 @@ details[open] > summary .summary-chevron {
   border: 2px solid var(--color-ad-border);
 }
 
+/* El panel superpuesto no compite con el banner: se oculta mientras está abierto. */
+body.history-open [data-ad-banner] {
+  display: none;
+}
+
 /* El botón flotante de historial se aparta cuando el banner entra en su franja. */
 @media (max-width: 1023px) {
   #history-toggle-btn {

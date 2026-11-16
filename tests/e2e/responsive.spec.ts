@@ -171,7 +171,7 @@ test.describe('Responsive', () => {
 
       await page.locator('#history-toggle-btn').click();
       await expectNoOverflow(`/weighted + historial @ ${width}`);
-      await page.locator('#history-close-btn').click();
+      await page.locator('#history-toggle-btn').click();
     }
   });
 
@@ -244,7 +244,7 @@ test.describe('Responsive', () => {
     expect(box!.width).toBeGreaterThanOrEqual(388);
     expect(box!.y + box!.height).toBeGreaterThanOrEqual(843);
 
-    await page.locator('#history-close-btn').click();
+    await page.locator('#history-toggle-btn').click();
     await expect(aside).toHaveCount(0);
     await expect(toggle).toBeFocused();
   });

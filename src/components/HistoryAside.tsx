@@ -40,6 +40,21 @@ function ClockIcon() {
   );
 }
 
+function CloseIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className="h-4 w-4 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
+      <path d="m5 5 10 10M15 5 5 15" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /** Lista los sorteos agrupados por día en un panel no modal. */
 export function HistoryAside() {
   const entries = useHistoryStore((s) => s.entries);
@@ -60,6 +75,11 @@ export function HistoryAside() {
 
   useEffect(() => {
     saveHistoryOpen(open);
+  }, [open]);
+
+  useEffect(() => {
+    document.body.classList.toggle('history-open', open);
+    return () => document.body.classList.remove('history-open');
   }, [open]);
 
   useEffect(() => {
@@ -106,29 +126,29 @@ export function HistoryAside() {
 
   return (
     <>
-      <button
-        id="history-toggle-btn"
-        ref={toggleRef}
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        aria-expanded={open}
-        aria-controls="history-aside"
-        aria-label="Historial"
-        className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-control bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-high transition-[background-color,color,box-shadow] hover:bg-surface-hover hover:text-action active:shadow-pressed focus-visible:outline focus-visible:outline-focus lg:static lg:shadow-low ${
-          open ? 'hidden' : 'fixed bottom-4 right-4 z-50 lg:z-auto'
-        }`}
-      >
-        <ClockIcon />
-        <span>Historial</span>
-        {entries.length > 0 ? (
-          <span
-            aria-hidden="true"
-            className="inline-flex min-w-5 items-center justify-center rounded-full bg-surface-sunken px-1.5 font-mono text-xs text-action"
-          >
-            {entries.length}
-          </span>
-        ) : null}
-      </button>
+      {!open ? (
+        <button
+          id="history-toggle-btn"
+          ref={toggleRef}
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-expanded={false}
+          aria-controls="history-aside"
+          aria-label="Historial"
+          className="fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center gap-2 rounded-full border border-control bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-high transition-[background-color,color,box-shadow] hover:bg-surface-hover hover:text-action active:shadow-pressed focus-visible:outline focus-visible:outline-focus lg:static lg:z-auto lg:shadow-low"
+        >
+          <ClockIcon />
+          <span>Historial</span>
+          {entries.length > 0 ? (
+            <span
+              aria-hidden="true"
+              className="inline-flex min-w-5 items-center justify-center rounded-full bg-surface-sunken px-1.5 font-mono text-xs text-action"
+            >
+              {entries.length}
+            </span>
+          ) : null}
+        </button>
+      ) : null}
 
       {open ? (
       <aside
@@ -157,12 +177,16 @@ export function HistoryAside() {
               </button>
             ) : null}
             <button
-              id="history-close-btn"
+              id="history-toggle-btn"
+              ref={toggleRef}
               type="button"
               onClick={() => setOpen(false)}
-              className="inline-flex min-h-11 items-center rounded-full border border-control bg-surface px-3 text-xs font-semibold text-ink shadow-low transition-colors hover:bg-surface-hover active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
+              aria-expanded
+              aria-controls="history-aside"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-control bg-surface px-3 text-xs font-semibold text-ink shadow-low transition-colors hover:bg-surface-hover active:shadow-pressed focus-visible:outline focus-visible:outline-focus"
             >
-              Cerrar
+              <CloseIcon />
+              <span>Cerrar</span>
             </button>
           </div>
         </div>
@@ -255,8 +279,22 @@ export function HistoryAside() {
 
                           {result.teams ? (
                             <details className="text-xs text-muted">
-                              <summary className="flex min-h-11 cursor-pointer select-none items-center rounded-full border border-control bg-surface px-2 shadow-low focus-visible:outline focus-visible:outline-focus">
+                              <summary className="flex min-h-11 cursor-pointer select-none items-center gap-2 rounded-full border border-control bg-surface px-2 shadow-low focus-visible:outline focus-visible:outline-focus">
                                 Ver integrantes
+                                <svg
+                                  viewBox="0 0 20 20"
+                                  className="summary-chevron h-4 w-4 shrink-0 transition-transform"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  aria-hidden="true"
+                                >
+                                  <path
+                                    d="m5 7 5 5 5-5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
                               </summary>
                               <ul className="mt-1 flex flex-col gap-1">
                                 {result.teams.map((team) => (

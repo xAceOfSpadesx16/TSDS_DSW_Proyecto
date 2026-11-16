@@ -238,6 +238,27 @@ test.describe('Espacios publicitarios', () => {
     }
   });
 
+  test('con el panel del historial abierto no se superpone el banner', async ({
+    page,
+  }) => {
+    for (const width of [1024, 1280, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/dice');
+      const toggle = page.locator('#history-toggle-btn');
+      if ((await toggle.getAttribute('aria-expanded')) === 'false') {
+        await toggle.click();
+      }
+      await expect(page.locator('#history-aside')).toBeVisible();
+      await expect(page.locator('[data-ad-banner]:visible')).toHaveCount(0);
+
+      const visibleAds = page.locator('aside[aria-label="Publicidad"]:visible');
+      expect(
+        await visibleAds.count(),
+        `sin publicidades visibles con el panel abierto a ${width}px`,
+      ).toBe(0);
+    }
+  });
+
   test('el rectángulo de la landing queda alineado con las tarjetas', async ({
     page,
   }) => {
