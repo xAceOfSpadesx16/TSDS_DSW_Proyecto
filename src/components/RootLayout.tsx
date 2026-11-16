@@ -11,6 +11,14 @@ import { healthRepository } from '../repositories/healthRepository';
 import { retryPendingDraws, useHistoryStore } from '../store/historyStore';
 import type { LegalDisclaimer } from '../domain/types';
 
+const DRAW_PATHS = new Set([
+  '/dice',
+  '/numbers',
+  '/teams',
+  '/weighted',
+  '/roulette',
+]);
+
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Thrive Randomizer',
   '/dice': 'Dados RPG · Thrive Randomizer',
@@ -32,6 +40,7 @@ export function RootLayout() {
     ROUTE_TITLES[normalizedPath] !== undefined &&
     normalizedPath !== '/login' &&
     normalizedPath !== '/register';
+  const showHistory = DRAW_PATHS.has(normalizedPath);
 
   useEffect(() => {
     document.title =
@@ -143,7 +152,12 @@ export function RootLayout() {
             {showAds ? <AdRail side="right" /> : null}
           </div>
           {showAds ? <AdBanner /> : null}
-          {disclaimer ? <DisclaimerFooter disclaimer={disclaimer} /> : null}
+          {disclaimer ? (
+            <DisclaimerFooter
+              disclaimer={disclaimer}
+              reserveHistorySlot={showHistory}
+            />
+          ) : null}
         </div>
 
       <dialog
@@ -323,13 +337,21 @@ function ApiDownBanner({
 }
 
 /** Pie con el disclaimer. Solo se monta cuando hay contenido. */
-function DisclaimerFooter({ disclaimer }: { disclaimer: LegalDisclaimer }) {
+function DisclaimerFooter({
+  disclaimer,
+  reserveHistorySlot,
+}: {
+  disclaimer: LegalDisclaimer;
+  reserveHistorySlot: boolean;
+}) {
   return (
     <footer
       id="legal-disclaimer"
       role="contentinfo"
       aria-label="Aviso legal"
-      className="panel mt-auto bg-surface shadow-low px-4 py-6 text-sm text-muted sm:px-6"
+      className={`panel mt-auto bg-surface px-4 pt-6 text-sm text-muted shadow-low sm:px-6 ${
+        reserveHistorySlot ? 'pb-20 lg:pb-6' : 'pb-6'
+      }`}
     >
       <div className="max-w-3xl mx-auto flex flex-col gap-2">
         <h2 className="text-sm font-bold text-ink">

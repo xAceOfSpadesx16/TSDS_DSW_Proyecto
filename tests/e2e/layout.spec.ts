@@ -91,6 +91,25 @@ test.describe('Layout fluido', () => {
     await expect(toggle).toBeFocused();
   });
 
+  test('en mobile el botón Historial no tapa el texto del pie', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/weighted');
+    await page.locator('#weighted-name').fill('Ana');
+    await page.locator('#weighted-form button[type="submit"]').click();
+    await page.locator('#weighted-draw-btn').click();
+    await page.locator('#weighted-result').waitFor();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+
+    const button = await box(page.locator('#history-toggle-btn'));
+    const summary = await box(
+      page.locator('#legal-disclaimer summary'),
+    );
+    expect(button.y).toBeGreaterThanOrEqual(summary.y + summary.height + 8);
+    expect(button.y + button.height).toBeLessThanOrEqual(844 - 8);
+  });
+
   test('una columna debajo de 1280 px y dos columnas desde 1280 px', async ({
     page,
   }) => {
