@@ -32,8 +32,14 @@ export function RegisterPage() {
       navigate('/');
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.message);
-        if (err.errors) setFieldErrors(err.errors);
+        // Los 422 se muestran solo junto a cada campo: el resumen del backend
+        // agrega sufijos en inglés que no aportan.
+        if (err.errors && Object.keys(err.errors).length > 0) {
+          setFieldErrors(err.errors);
+          setError(null);
+        } else {
+          setError(err.message);
+        }
       } else {
         setError('Ocurrió un error inesperado. Probá de nuevo.');
       }

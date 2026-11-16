@@ -131,10 +131,14 @@ select:focus-visible,
 textarea:focus-visible,
 button:focus-visible,
 a:focus-visible,
-summary:focus-visible,
-main h1:focus {
+summary:focus-visible {
   outline: var(--focus-width) solid var(--color-focus);
   outline-offset: var(--focus-offset);
+}
+
+/* El foco programático mueve el cursor del lector, no dibuja un control. */
+[tabindex="-1"]:focus {
+  outline: none;
 }
 
 input:disabled,

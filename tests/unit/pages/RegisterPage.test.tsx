@@ -91,8 +91,11 @@ describe('RegisterPage', () => {
     const user = createUserEvent();
     vi.spyOn(authRepository, 'register').mockRejectedValue(
       new ApiError(422, {
-        message: 'Email ya registrado',
-        errors: { email: ['Email ya registrado'] },
+        message: 'Email ya registrado (and 1 more error)',
+        errors: {
+          email: ['Email ya registrado'],
+          password: ['La contraseña es demasiado corta'],
+        },
       }),
     );
     resetAuthForTests();
@@ -104,8 +107,10 @@ describe('RegisterPage', () => {
 
     await user.click(screen.getByText('Crear cuenta'));
 
-    // El mensaje aparece tanto en el alert general como en el error del campo.
-    expect(await screen.findAllByText('Email ya registrado')).toHaveLength(2);
+    // Solo se muestran los errores por campo; el resumen en inglés no aparece.
+    expect(await screen.findByText('Email ya registrado')).toBeInTheDocument();
+    expect(screen.getByText('La contraseña es demasiado corta')).toBeInTheDocument();
+    expect(screen.queryByText(/and 1 more error/)).not.toBeInTheDocument();
   });
 
   it('muestra el error genérico cuando el registro falla sin ser ApiError', async () => {

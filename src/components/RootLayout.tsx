@@ -302,7 +302,11 @@ function ApiDownBanner({
       role="status"
       className="panel flex items-center justify-center gap-3 px-4 py-2 bg-surface shadow-low text-sm text-muted"
     >
-      <span>No se pudo conectar con el servidor. Los sorteos no se guardarán.</span>
+      <span>
+        No se pudo conectar con el servidor. Podés seguir sorteando: tus sorteos
+        se guardan en este navegador y se sincronizarán cuando vuelva la
+        conexión.
+      </span>
       <button
         id="api-retry-btn"
         type="button"
