@@ -91,11 +91,55 @@ test.describe('Layout fluido', () => {
     await expect(toggle).toBeFocused();
   });
 
+  test('el número del dado usa la misma familia tipográfica en todos los anchos', async ({
+    page,
+  }) => {
+    const families: string[] = [];
+    for (const width of [320, 390, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/dice');
+      const family = await page.locator('#dice-result').evaluate(
+        (element) => getComputedStyle(element).fontFamily,
+      );
+      expect(family.toLowerCase()).toContain('bricolage');
+      expect(family.toLowerCase()).not.toContain('mono');
+      families.push(family);
+
+      await page.locator('[data-sides="6"]').click();
+      await expect(page.locator('#dice-total')).toBeVisible();
+      const familyAfterRoll = await page.locator('#dice-result').evaluate(
+        (element) => getComputedStyle(element).fontFamily,
+      );
+      expect(familyAfterRoll).toBe(family);
+      families.push(familyAfterRoll);
+    }
+    expect(new Set(families).size).toBe(1);
+  });
+
   test('en mobile el botón Historial no tapa el texto del pie', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.route('**/api/legal/disclaimer', (route) =>
+      route.fulfill({
+        json: {
+          title: 'Aviso legal',
+          version: '1.0.0',
+          sections: [{ heading: 'Uso', body: 'Herramienta recreativa.' }],
+        },
+      }),
+    );
+    await page.route('**/api/health', (route) =>
+      route.fulfill({
+        json: {
+          status: 'ok',
+          service: 'Thrive Randomizer',
+          version: '1.0.0',
+          timestamp: new Date().toISOString(),
+        },
+      }),
+    );
     await page.goto('/weighted');
     await page.locator('#weighted-name').fill('Ana');
     await page.locator('#weighted-form button[type="submit"]').click();
@@ -230,6 +274,40 @@ test.describe('Layout fluido', () => {
         `participantes a ${width}px`,
       ).toBeLessThanOrEqual(640);
     }
+  });
+
+  test('en Dados las fichas de tirada usan el relleno de acento primario', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/dice');
+    const die = page.locator('[data-sides="20"]');
+
+    await expect(die).toHaveClass(/bg-action/);
+    await expect(die).not.toHaveClass(/bg-surface-sunken/);
+
+    await die.click();
+    await expect(page.locator('#dice-total')).toBeVisible();
+    await expect(die).toHaveClass(/bg-action-active/);
+    await expect(die).not.toHaveClass(/bg-surface-sunken/);
+  });
+
+  test('en Ponderado los inputs Nombre y Peso comparten la línea superior a 1440 px', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/weighted');
+    await page.evaluate(() => document.fonts.ready);
+
+    const name = await box(page.locator('#weighted-name'));
+    const weight = await box(page.locator('#weighted-weight'));
+    const nameLabel = await box(page.locator('label[for="weighted-name"]'));
+    const weightLabel = await box(page.locator('label[for="weighted-weight"]'));
+    const add = await box(page.getByRole('button', { name: '+ Agregar' }));
+
+    expect(Math.abs(name.y - weight.y)).toBeLessThanOrEqual(2);
+    expect(Math.abs(nameLabel.y - weightLabel.y)).toBeLessThanOrEqual(2);
+    expect(Math.abs(add.y - name.y)).toBeLessThanOrEqual(2);
   });
 
   test('abrir las reglas avanzadas de equipos no cambia el ancho', async ({

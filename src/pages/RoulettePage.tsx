@@ -322,7 +322,7 @@ export function RoulettePage() {
               onSubmit={onAddOption}
               className="flex flex-col gap-3"
             >
-              <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+              <fieldset className="inline-form grid grid-cols-1 gap-3 min-[641px]:grid-cols-[minmax(0,1fr)_auto_auto]">
                 <legend className="sr-only">Nueva opción</legend>
                 <Field
                   id="roulette-label"
@@ -334,7 +334,7 @@ export function RoulettePage() {
                   onChange={(e) => setLabel(e.currentTarget.value)}
                   placeholder="Ej: Opción A"
                 />
-                <label className="flex flex-col gap-1 text-sm">
+                <label className="form-field flex flex-col gap-1 text-sm">
                   <span className="text-muted font-medium">Color</span>
                   <input
                     id="roulette-color"
@@ -345,15 +345,15 @@ export function RoulettePage() {
                     className="h-11 w-12 rounded-md border border-control bg-surface disabled:bg-surface-sunken disabled:cursor-not-allowed"
                   />
                 </label>
+                <PrimaryButton
+                  type="submit"
+                  variant="ghost"
+                  disabled={spinning}
+                  className="inline-form-action"
+                >
+                  Agregar opción
+                </PrimaryButton>
               </fieldset>
-              <PrimaryButton
-                type="submit"
-                variant="ghost"
-                disabled={spinning}
-                className="self-start"
-              >
-                Agregar opción
-              </PrimaryButton>
             </form>
 
             <ul

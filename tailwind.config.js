@@ -82,6 +82,9 @@ export default {
         high: 'var(--shadow-high)',
         pressed: 'var(--shadow-pressed)',
       },
+      opacity: {
+        disabled: 'var(--opacity-disabled)',
+      },
     },
   },
   plugins: [],

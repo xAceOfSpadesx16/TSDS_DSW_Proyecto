@@ -41,7 +41,7 @@ export function AdSlot({ variant, className = '' }: AdSlotProps) {
 
   return (
     <aside
-      aria-label="Publicidad"
+      aria-label="Espacio publicitario"
       data-ad-variant={variant}
       className={`ad-slot shrink-0 ${className}`.trim()}
     >
@@ -59,9 +59,8 @@ export function AdSlot({ variant, className = '' }: AdSlotProps) {
             aria-hidden="true"
           />
         ) : null}
-        <span className="px-2 text-sm font-semibold text-muted">Publicidad</span>
-        <span className="px-2 text-xs text-muted" aria-hidden="true">
-          {size.width} × {size.height}
+        <span className="px-2 text-sm font-semibold text-muted">
+          Espacio publicitario · {size.width}×{size.height}
         </span>
       </div>
     </aside>

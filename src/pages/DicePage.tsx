@@ -147,8 +147,8 @@ export function DicePage() {
                   type="button"
                   className={`dice-btn rounded-full border-2 px-3 py-2 text-lg font-bold transition-[transform,background-color,border-color,box-shadow] focus-visible:outline focus-visible:outline-focus sm:px-4 sm:py-3 ${
                     lastSides === sides
-                      ? 'border-action bg-surface-sunken text-action shadow-pressed'
-                      : 'border-control bg-surface text-ink shadow-low hover:-translate-y-0.5 hover:border-action hover:bg-surface-hover active:translate-y-0 active:shadow-pressed'
+                      ? 'border-action-active bg-action-active text-on-action shadow-pressed'
+                      : 'border-action bg-action text-on-action shadow-raised hover:-translate-y-0.5 hover:border-action-hover hover:bg-action-hover active:translate-y-0 active:bg-action-active active:shadow-pressed'
                   }`}
                   data-sides={sides}
                   data-active={lastSides === sides}

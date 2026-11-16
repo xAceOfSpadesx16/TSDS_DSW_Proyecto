@@ -80,6 +80,43 @@ describe('PrimaryButton', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
+  it('la primaria deshabilitada conserva el acento y las secundarias no', () => {
+    const primary = render(
+      <PrimaryButton disabled>Sortear</PrimaryButton>,
+    ).container.querySelector('button')!;
+    expect(primary).toBeDisabled();
+    expect(primary.className).toContain('bg-action-soft');
+    expect(primary.className).toContain('text-action');
+    expect(primary.className).toContain('disabled:opacity-disabled');
+    expect(primary.className).toContain('disabled:shadow-none');
+
+    const secondary = render(
+      <PrimaryButton variant="ghost" disabled>
+        Reiniciar
+      </PrimaryButton>,
+    ).container.querySelector('button')!;
+    expect(secondary).toBeDisabled();
+    expect(secondary.className).not.toContain('bg-action-soft');
+    expect(secondary.className).toContain('bg-surface-sunken');
+    expect(secondary.className).toContain('disabled:opacity-disabled');
+    expect(secondary.className).toContain('disabled:shadow-none');
+  });
+
+  it.each(['primary', 'ghost', 'accent', 'danger'] as const)(
+    'la variante %s deshabilitada pierde relieve y usa la opacidad común',
+    (variant) => {
+      const button = render(
+        <PrimaryButton variant={variant} disabled>
+          Acción
+        </PrimaryButton>,
+      ).container.querySelector('button')!;
+      expect(button).toBeDisabled();
+      expect(button.className).toContain('disabled:cursor-not-allowed');
+      expect(button.className).toContain('disabled:opacity-disabled');
+      expect(button.className).toContain('disabled:shadow-none');
+    },
+  );
+
   it('propaga el atributo disabled al botón', () => {
     render(<PrimaryButton disabled>Guardar</PrimaryButton>);
     expect(screen.getByRole('button', { name: 'Guardar' })).toBeDisabled();

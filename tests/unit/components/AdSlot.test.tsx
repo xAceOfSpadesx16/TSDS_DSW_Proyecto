@@ -19,13 +19,13 @@ const SIZES: Record<AdSlotVariant, { width: number; height: number }> = {
 };
 
 describe('AdSlot — recuadro de reserva', () => {
-  it('muestra un aside con nombre accesible y la etiqueta Publicidad', () => {
+  it('muestra un aside con nombre accesible y la leyenda del formato', () => {
     render(<AdSlot variant="rectangle" />);
 
-    const aside = screen.getByRole('complementary', { name: 'Publicidad' });
+    const aside = screen.getByRole('complementary', { name: 'Espacio publicitario' });
     expect(aside).toBeInTheDocument();
     expect(aside).toHaveAttribute('data-ad-variant', 'rectangle');
-    expect(screen.getByText('Publicidad')).toBeVisible();
+    expect(screen.getByText('Espacio publicitario · 300×250')).toBeVisible();
   });
 
   it('sin cliente configurado no renderiza el marcado de AdSense', () => {
@@ -35,6 +35,19 @@ describe('AdSlot — recuadro de reserva', () => {
     expect(
       container.querySelector('[data-ad-reserved]'),
     ).toHaveAttribute('data-ad-reserved', 'true');
+  });
+
+  it('sin cliente renderiza la leyenda con el formato de cada variante', () => {
+    for (const [variant, size] of Object.entries(SIZES) as Array<
+      [AdSlotVariant, { width: number; height: number }]
+    >) {
+      const { container, unmount } = render(<AdSlot variant={variant} />);
+
+      expect(container.textContent).toContain(
+        `Espacio publicitario · ${size.width}×${size.height}`,
+      );
+      unmount();
+    }
   });
 
   it('reserva el tamaño exacto de cada variante', () => {
@@ -94,7 +107,7 @@ describe('AdSlot — con cliente configurado', () => {
     expect(
       container.querySelector('[data-ad-reserved]'),
     ).toHaveAttribute('data-ad-reserved', 'false');
-    expect(screen.getByText('Publicidad')).toBeVisible();
+    expect(screen.getByText('Espacio publicitario · 728×90')).toBeVisible();
   });
 
   it('ignora un cliente en blanco y vuelve al recuadro de reserva', () => {

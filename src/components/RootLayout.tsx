@@ -36,10 +36,8 @@ export function RootLayout() {
   const normalizedPath =
     location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
   const lastPathRef = useRef(normalizedPath);
-  const showAds =
-    ROUTE_TITLES[normalizedPath] !== undefined &&
-    normalizedPath !== '/login' &&
-    normalizedPath !== '/register';
+  // La reserva publicitaria acompaña todas las rutas, incluidas auth y 404.
+  const showAds = true;
   const showHistory = DRAW_PATHS.has(normalizedPath);
 
   useEffect(() => {

@@ -30,6 +30,9 @@
   --color-warning: #92400e;
   --color-scrim: rgba(34, 31, 26, 0.45);
 
+  /* Botones deshabilitados: acento apagado y opacidad uniforme. */
+  --opacity-disabled: 0.65;
+
   /* Recuadro de los espacios publicitarios: visible sin competir con la acción. */
   --color-ad-border: #8a4b12;
 
@@ -191,6 +194,18 @@ input[type="color"] {
   padding: 0.25rem;
 }
 
+/* El teclado y los botones propios manejan el número; sin spinners nativos. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* Keyframes y reglas globales de la app. */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -243,10 +258,37 @@ input[type="color"] {
     }
   }
 
+  /* Dos columnas de trabajo desde 1280 px. */
   @media (min-width: 1280px) {
     .draw-grid {
       grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
     }
+  }
+}
+
+/* Fuera de @layer para que el subgrid gane a las utilidades flex del campo. */
+.inline-form > .inline-form-action {
+  justify-self: start;
+}
+
+@media (min-width: 641px) {
+  .inline-form {
+    grid-template-rows: auto auto auto;
+    align-items: start;
+  }
+
+  .inline-form > .form-field {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    gap: inherit;
+    align-content: start;
+  }
+
+  .inline-form > .inline-form-action {
+    grid-column: -2 / -1;
+    grid-row: 2;
+    align-self: start;
   }
 }
 
@@ -272,9 +314,9 @@ details[open] > summary .summary-chevron {
   border-radius: var(--radius-pill);
 }
 
-/* Espacios publicitarios: recuadro de reserva sobre superficie hundida. */
+/* Espacios publicitarios: recuadro reservado sobre superficie hundida. */
 .ad-slot-frame {
-  border: 2px solid var(--color-ad-border);
+  border: 2px dashed var(--color-ad-border);
 }
 
 /* El panel superpuesto no compite con el banner: se oculta mientras está abierto. */

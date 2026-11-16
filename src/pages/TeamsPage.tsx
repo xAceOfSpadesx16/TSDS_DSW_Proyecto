@@ -252,11 +252,11 @@ export function TeamsPage() {
               </p>
             ) : (
               <fieldset
-                className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+                className="mt-3 inline-form grid grid-cols-1 gap-2 min-[641px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
                 aria-describedby="teams-exclusion-hint"
               >
                 <legend className="sr-only">Agregar exclusión</legend>
-                <label className="flex flex-col gap-1 text-sm">
+                <label className="form-field flex flex-col gap-1 text-sm">
                   <span className="text-muted font-medium">Persona A</span>
                   <select
                     id="exclusion-a"
@@ -272,7 +272,7 @@ export function TeamsPage() {
                     ))}
                   </select>
                 </label>
-                <label className="flex flex-col gap-1 text-sm">
+                <label className="form-field flex flex-col gap-1 text-sm">
                   <span className="text-muted font-medium">Persona B</span>
                   <select
                     id="exclusion-b"
@@ -294,7 +294,7 @@ export function TeamsPage() {
                   variant="ghost"
                   onClick={onAddExclusion}
                   disabled={!canAddExclusion}
-                  className="min-h-[44px]"
+                  className="inline-form-action min-h-[44px]"
                 >
                   Agregar
                 </PrimaryButton>

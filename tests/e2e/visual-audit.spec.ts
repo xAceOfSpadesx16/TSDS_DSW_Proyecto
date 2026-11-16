@@ -346,7 +346,7 @@ async function auditPage(page: Page): Promise<AuditIssue[]> {
       const rect = el.getBoundingClientRect();
       if (rect.width < 4 || rect.height < 4) return false;
       const interactive = el.matches(
-        'button, a[href], input, select, textarea, summary, [role="button"], aside[aria-label="Publicidad"]',
+        'button, a[href], input, select, textarea, summary, [role="button"], aside[aria-label="Espacio publicitario"]',
       );
       return interactive || directText(el).length > 0;
     });

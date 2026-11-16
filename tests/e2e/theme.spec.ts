@@ -1,6 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 
 const ACCENT = 'rgb(35, 91, 85)';
+const ACCENT_ACTIVE = 'rgb(23, 63, 58)';
+const ON_ACTION = 'rgb(245, 249, 247)';
 const OLD_COBALT = ['rgb(31, 79, 181)', 'rgb(23, 62, 143)', 'rgb(16, 46, 107)'];
 
 async function expectNoCobalt(page: Page) {
@@ -92,10 +94,12 @@ test.describe('Acento y botones neumórficos', () => {
           pressed: element.getAttribute('aria-pressed'),
         };
       });
-    await expect.poll(async () => (await diceStyles()).border).toBe(ACCENT);
+    await expect
+      .poll(async () => (await diceStyles()).border)
+      .toBe(ACCENT_ACTIVE);
     const settled = await diceStyles();
     expect(settled.pressed).toBe('true');
-    expect(settled.color).toBe(ACCENT);
+    expect(settled.color).toBe(ON_ACTION);
     expect(settled.shadow).toContain('inset');
   });
 

@@ -61,6 +61,10 @@ describe('WeightedPage — participantes y barras', () => {
       screen.getByText('Agregá al menos un participante para poder sortear.'),
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sortear' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Sortear' })).toHaveAttribute(
+      'aria-describedby',
+      'weighted-draw-hint',
+    );
     expect(screen.getByRole('button', { name: 'Reiniciar' })).toBeDisabled();
     expect(
       screen.queryByRole('checkbox', { name: 'Auto-eliminar ganadores' }),

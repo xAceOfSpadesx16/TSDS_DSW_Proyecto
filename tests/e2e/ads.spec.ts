@@ -10,6 +10,7 @@ const VIEWPORTS = [
   { width: 1440, height: 900, variant: 'tower', banners: 0 },
   { width: 1366, height: 768, variant: null, banners: 1 },
   { width: 1024, height: 768, variant: null, banners: 1 },
+  { width: 785, height: 900, variant: null, banners: 1 },
   { width: 390, height: 844, variant: null, banners: 1 },
   { width: 320, height: 667, variant: null, banners: 1 },
 ] as const;
@@ -30,7 +31,7 @@ async function box(locator: Locator): Promise<Box> {
 }
 
 function visibleAds(page: Page) {
-  return page.locator('aside[aria-label="Publicidad"]:visible');
+  return page.locator('aside[aria-label="Espacio publicitario"]:visible');
 }
 
 async function expectNoHorizontalScroll(page: Page) {
@@ -67,6 +68,10 @@ async function expectAxeClean(page: Page) {
 
 test.describe('Espacios publicitarios', () => {
   test.beforeEach(async ({ page }) => {
+    // La suite completa compite con la auditoría visual; damos margen a los
+    // goto y al loop de nueve viewports sin alargar la corrida normal.
+    test.setTimeout(120_000);
+    page.setDefaultNavigationTimeout(60_000);
     await page.emulateMedia({ reducedMotion: 'reduce' });
     // La API se mockea para que el pie y el aviso no dependan del backend real.
     await page.route('**/api/legal/disclaimer', (route) =>
@@ -144,11 +149,25 @@ test.describe('Espacios publicitarios', () => {
 
       // Los avisos no reciben foco.
       const focusable = page.locator(
-        'aside[aria-label="Publicidad"] a, aside[aria-label="Publicidad"] button, aside[aria-label="Publicidad"] input, aside[aria-label="Publicidad"] select, aside[aria-label="Publicidad"] textarea, aside[aria-label="Publicidad"] [tabindex]',
+        'aside[aria-label="Espacio publicitario"] a, aside[aria-label="Espacio publicitario"] button, aside[aria-label="Espacio publicitario"] input, aside[aria-label="Espacio publicitario"] select, aside[aria-label="Espacio publicitario"] textarea, aside[aria-label="Espacio publicitario"] [tabindex]',
       );
       await expect(focusable).toHaveCount(0);
     });
   }
+
+  test('en cada ancho hay al menos un espacio visible y no hay scroll horizontal', async ({
+    page,
+  }) => {
+    for (const width of [1440, 1024, 785, 390]) {
+      for (const route of ['/', '/weighted']) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(route);
+        await expect(page.locator('main')).toBeVisible();
+        await expect(visibleAds(page).first()).toBeVisible();
+        await expectNoHorizontalScroll(page);
+      }
+    }
+  });
 
   test('los laterales dejan 16 px al borde y al contenido', async ({ page }) => {
     const expectedWidths: Record<number, number> = {
@@ -251,7 +270,7 @@ test.describe('Espacios publicitarios', () => {
       await expect(page.locator('#history-aside')).toBeVisible();
       await expect(page.locator('[data-ad-banner]:visible')).toHaveCount(0);
 
-      const visibleAds = page.locator('aside[aria-label="Publicidad"]:visible');
+      const visibleAds = page.locator('aside[aria-label="Espacio publicitario"]:visible');
       expect(
         await visibleAds.count(),
         `sin publicidades visibles con el panel abierto a ${width}px`,
@@ -307,15 +326,14 @@ test.describe('Espacios publicitarios', () => {
     }
   });
 
-  test('no se muestran en login, registro ni 404', async ({ page }) => {
+  test('se muestran también en login, registro y 404', async ({ page }) => {
     for (const width of [1600, 1440, 390]) {
       await page.setViewportSize({ width, height: 900 });
       for (const route of ['/login', '/register', '/ruta-inexistente']) {
         await page.goto(route);
         await expect(page.locator('main')).toBeVisible();
-        await expect(page.locator('aside[aria-label="Publicidad"]')).toHaveCount(
-          0,
-        );
+        await expect(visibleAds(page).first()).toBeVisible();
+        await expectNoHorizontalScroll(page);
       }
     }
   });

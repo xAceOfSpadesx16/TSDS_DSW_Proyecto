@@ -9,13 +9,13 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANTS: Record<NonNullable<Props['variant']>, string> = {
   primary:
-    'bg-action text-on-action border border-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:border-control disabled:shadow-none',
+    'bg-action text-on-action border border-action shadow-raised hover:bg-action-hover hover:text-on-action active:bg-action-active active:shadow-pressed disabled:bg-action-soft disabled:text-action disabled:border-action-soft',
   ghost:
-    'bg-surface text-ink border border-control shadow-low hover:bg-surface-hover hover:text-ink hover:border-action active:bg-surface-sunken active:text-action active:shadow-pressed disabled:text-muted disabled:bg-surface-sunken disabled:shadow-none',
+    'bg-surface text-ink border border-control shadow-low hover:bg-surface-hover hover:text-ink hover:border-action active:bg-surface-sunken active:text-action active:shadow-pressed disabled:text-muted disabled:bg-surface-sunken disabled:border-control',
   accent:
-    'bg-surface-sunken text-action border border-action shadow-pressed hover:bg-surface-hover active:bg-surface-sunken active:text-action active:shadow-pressed disabled:text-muted disabled:bg-surface-sunken disabled:border-control disabled:shadow-none',
+    'bg-surface-sunken text-action border border-action shadow-pressed hover:bg-surface-hover active:bg-surface-sunken active:text-action active:shadow-pressed disabled:text-action disabled:bg-surface-sunken disabled:border-control',
   danger:
-    'bg-danger text-on-action border border-danger shadow-raised hover:bg-danger-dark active:bg-danger-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:border-control disabled:shadow-none',
+    'bg-danger text-on-action border border-danger shadow-raised hover:bg-danger-dark active:bg-danger-active active:shadow-pressed disabled:bg-surface-sunken disabled:text-muted disabled:border-control',
 };
 
 /** Botón con las variantes primary, ghost, accent y danger. */
@@ -28,7 +28,7 @@ export function PrimaryButton({
   return (
     <button
       {...rest}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-[background-color,color,box-shadow] focus-visible:outline focus-visible:outline-focus disabled:cursor-not-allowed disabled:border disabled:border-control ${
+      className={`inline-flex min-h-11 items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-[background-color,color,box-shadow] focus-visible:outline focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-disabled disabled:shadow-none ${
         VARIANTS[variant]
       } ${className}`}
     >

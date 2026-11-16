@@ -47,6 +47,24 @@ describe('DicePage — dados', () => {
     expect(screen.getByRole('group', { name: 'Dado' })).toBeInTheDocument();
   });
 
+  it('las fichas de tirada usan el relleno de acento y conservan el estado activo', () => {
+    mockRequestAnimationFrame();
+    renderDice();
+
+    const die = screen.getByRole('button', { name: 'd6' });
+    const classes = die.className.split(/\s+/);
+    expect(classes).toContain('bg-action');
+    expect(classes).toContain('border-action');
+    expect(classes).toContain('shadow-raised');
+    expect(classes).not.toContain('bg-surface-sunken');
+
+    fireEvent.click(die);
+    const activeClasses = die.className.split(/\s+/);
+    expect(activeClasses).toContain('bg-action-active');
+    expect(activeClasses).toContain('shadow-pressed');
+    expect(activeClasses).not.toContain('bg-surface-sunken');
+  });
+
   it('no renderiza la pestaña Números ni un tablist', () => {
     renderDice();
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument();

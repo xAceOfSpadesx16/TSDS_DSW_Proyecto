@@ -319,7 +319,7 @@ export function WeightedPage() {
           onSubmit={onAdd}
           className="panel bg-surface rounded-2xl shadow-raised p-4"
         >
-          <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,10rem)_auto] sm:items-end">
+          <fieldset className="inline-form grid grid-cols-1 gap-3 min-[641px]:grid-cols-[minmax(0,1fr)_minmax(0,10rem)_auto]">
             <legend className="sr-only">Agregar participante</legend>
             <Field
               id="weighted-name"
@@ -345,7 +345,11 @@ export function WeightedPage() {
                 setAddWeightError(null);
               }}
             />
-            <PrimaryButton type="submit" variant="ghost">
+            <PrimaryButton
+              type="submit"
+              variant="ghost"
+              className="inline-form-action"
+            >
               + Agregar
             </PrimaryButton>
           </fieldset>
@@ -449,7 +453,7 @@ export function WeightedPage() {
                 className="panel flex min-w-0 flex-col gap-2 rounded-2xl bg-surface p-3 shadow-low"
               >
                 {editingIndex === index ? (
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,10rem)_auto] sm:items-end">
+                  <div className="inline-form grid grid-cols-1 gap-2 min-[641px]:grid-cols-[minmax(0,1fr)_minmax(0,10rem)_auto]">
                     <Field
                       id={`weighted-edit-name-${index}`}
                       label="Nombre del participante"
@@ -472,7 +476,7 @@ export function WeightedPage() {
                         setEditWeightError(null);
                       }}
                     />
-                    <div className="flex flex-wrap gap-2">
+                    <div className="inline-form-action flex flex-wrap gap-2">
                       <PrimaryButton type="button" onClick={onSaveEdit}>
                         Guardar
                       </PrimaryButton>
